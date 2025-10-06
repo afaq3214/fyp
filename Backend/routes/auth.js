@@ -4,26 +4,13 @@ import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import auth from "../middleware/auth.js";
 import multer from "multer";
-import path from "path";
-import fs from "fs";
+import { put } from "@vercel/blob";  // For uploading to Vercel Blob
 import { OAuth2Client } from "google-auth-library";
 
 const router = express.Router();
 
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadDir = "uploads/";
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, `${Date.now()}-${file.originalname.replace(ext, "")}${ext}`);
-  }
-});
+// Configure multer for in-memory storage (no disk writes for serverless)
+const storage = multer.memoryStorage();
 const upload = multer({
   storage,
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
@@ -38,9 +25,6 @@ const upload = multer({
 // Increase JSON payload limit
 router.use(express.json({ limit: "10mb" }));
 router.use(express.urlencoded({ limit: "10mb", extended: true }));
-
-// In-memory store for OTPs (use a database in production)
-const otpStore = new Map();
 
 // Generate 6-digit OTP
 const generateOTP = () => {
@@ -116,7 +100,7 @@ router.put("/profile", auth, async (req, res) => {
 });
 
 /**
- * 📌 Upload Profile Picture
+ * 📌 Upload Profile Picture (Vercel Blob for serverless)
  */
 router.post("/profile/picture", auth, upload.single("profilePicture"), async (req, res) => {
   try {
@@ -129,12 +113,20 @@ router.post("/profile/picture", auth, upload.single("profilePicture"), async (re
       return res.status(404).json({ error: "User not found" });
     }
 
-    const imageUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+    // Upload to Vercel Blob (public URL)
+    const blob = await put(`profile-pics/${req.user._id}-${Date.now()}-${req.file.originalname}`, 
+      req.file.buffer, 
+      { 
+        access: 'public',
+        token: process.env.BLOB_READ_WRITE_TOKEN  // Optional: for private blobs
+      }
+    );
+
+    const imageUrl = blob.url;  // Permanent public URL
     user.profilePicture = imageUrl;
     await user.save();
 
     console.log("Uploaded image URL:", imageUrl);
-    console.log("Saved file path:", path.join("uploads", req.file.filename));
 
     res.json({
       message: "✅ Profile picture updated successfully",
@@ -159,7 +151,7 @@ router.post("/login", async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ error: "❌ Invalid password" });
 
-    const token = jwt.sign({ id: user._id }, "fyp", { expiresIn: "1d" });
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || "fyp", { expiresIn: "1d" });
 
     res.json({
       message: "✅ Login successful",
@@ -173,7 +165,7 @@ router.post("/login", async (req, res) => {
 });
 
 /**
- * 📌 Forgot Password
+ * 📌 Forgot Password (Store OTP in DB for persistence)
  */
 router.post("/forgot-password", async (req, res) => {
   try {
@@ -184,10 +176,14 @@ router.post("/forgot-password", async (req, res) => {
     }
 
     const otp = generateOTP();
-    const expiresAt = Date.now() + 10 * 60 * 1000; // OTP expires in 10 minutes
-    otpStore.set(email, { otp, expiresAt });
+    const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes
 
-    // In production, send OTP via email (mocked here)
+    // Store OTP in User model (add otp/otpExpires fields if not present)
+    user.otp = otp;
+    user.otpExpires = new Date(expiresAt);
+    await user.save();
+
+    // In production, send OTP via email/SMS (e.g., Nodemailer, Twilio)
     console.log(`OTP for ${email}: ${otp} (expires at ${new Date(expiresAt).toISOString()})`);
 
     res.json({ message: "OTP sent to your email" });
@@ -198,26 +194,21 @@ router.post("/forgot-password", async (req, res) => {
 });
 
 /**
- * 📌 Reset Password
+ * 📌 Reset Password (Check OTP from DB)
  */
 router.post("/reset-password", async (req, res) => {
   try {
     const { email, otp, newPassword } = req.body;
-    const stored = otpStore.get(email);
+    const user = await User.findOne({ email });
 
-    if (!stored || stored.otp !== otp || stored.expiresAt < Date.now()) {
+    if (!user || user.otp !== otp || user.otpExpires < new Date()) {
       return res.status(400).json({ error: "Invalid or expired OTP" });
     }
 
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
     user.password = await bcrypt.hash(newPassword, 10);
+    user.otp = undefined;  // Clear OTP
+    user.otpExpires = undefined;
     await user.save();
-
-    otpStore.delete(email); // Clear OTP after use
 
     res.json({ message: "Password reset successfully" });
   } catch (error) {
@@ -227,7 +218,7 @@ router.post("/reset-password", async (req, res) => {
 });
 
 /**
- * 📌 Get all users (for testing in Postman)
+ * 📌 Get all users (for testing)
  */
 router.get("/", async (req, res) => {
   try {
@@ -254,8 +245,8 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// Replace with your Google Client ID from Google Cloud Console
-const GOOGLE_CLIENT_ID = "770104627723-hf0muapqiuktipev3kv9c8ct78q3m146.apps.googleusercontent.com";
+// Google OAuth (use env var for Client ID)
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 /**
@@ -294,7 +285,7 @@ router.post("/google", async (req, res) => {
     }
 
     // Create JWT for your app
-    const token = jwt.sign({ id: user._id }, "fyp", { expiresIn: "1d" });
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || "fyp", { expiresIn: "1d" });
 
     res.json({
       message: "✅ Google sign-in successful",
