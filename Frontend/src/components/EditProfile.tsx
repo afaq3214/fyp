@@ -51,7 +51,7 @@ export function EditProfile() {
           throw new Error('No authentication token found');
         }
 
-        const response = await fetch(`http://localhost:5000/api/auth/${userId}`, {
+        const response = await fetch(`https://fyp-1ejm.vercel.app//api/auth/${userId}`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`
@@ -154,7 +154,7 @@ export function EditProfile() {
         const formDataImage = new FormData();
         formDataImage.append('profilePicture', selectedFile);
 
-        const imageResponse = await fetch(`http://localhost:5000/api/auth/profile/picture`, {
+        const imageResponse = await fetch(`https://fyp-1ejm.vercel.app//api/auth/profile/picture`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`
@@ -173,7 +173,7 @@ export function EditProfile() {
       }
 
       // Update profile with the rest of the data
-      const response = await fetch(`http://localhost:5000/api/auth/profile`, {
+      const response = await fetch(`https://fyp-1ejm.vercel.app//api/auth/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

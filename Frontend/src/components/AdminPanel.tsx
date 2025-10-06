@@ -105,8 +105,8 @@ export function AdminPanel() {
         setIsLoading(true);
         // Fetch users and products data
         const [usersRes, productsRes] = await Promise.all([
-          fetch('http://localhost:5000/api/users'),
-          fetch('http://localhost:5000/api/products')
+          fetch('https://fyp-1ejm.vercel.app//api/users'),
+          fetch('https://fyp-1ejm.vercel.app//api/products')
         ]);
 
         if (!usersRes.ok || !productsRes.ok) {

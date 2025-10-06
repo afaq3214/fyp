@@ -139,7 +139,7 @@ export default function App() {
           return;
         }
 
-        const response = await fetch(`http://localhost:5000/api/auth/${userId}`, {
+        const response = await fetch(`https://fyp-1ejm.vercel.app//api/auth/${userId}`, {
           method: 'GET',
           headers: {
             Authorization: `Bearer ${token}`,
