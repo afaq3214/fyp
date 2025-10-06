@@ -45,7 +45,7 @@ export function AuthModal({ isOpen, onClose, mode, onToggleMode, onAuth }: AuthM
           callback: async (response: any) => {
             setIsLoading(true);
             try {
-              const res = await fetch("https://fyp-1ejm.vercel.app//api/auth/google", {
+              const res = await fetch("https://fyp-1ejm.vercel.app/api/auth/google", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ idToken: response.credential }),
@@ -104,7 +104,7 @@ export function AuthModal({ isOpen, onClose, mode, onToggleMode, onAuth }: AuthM
     try {
       if (mode === 'forgot-password') {
         if (forgotPasswordStep === 'email') {
-          const response = await fetch('https://fyp-1ejm.vercel.app//api/auth/forgot-password', {
+          const response = await fetch('https://fyp-1ejm.vercel.app/api/auth/forgot-password', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email }),
@@ -116,7 +116,7 @@ export function AuthModal({ isOpen, onClose, mode, onToggleMode, onAuth }: AuthM
           toast.success('OTP sent to your email!');
           setForgotPasswordStep('otp');
         } else {
-          const response = await fetch('https://fyp-1ejm.vercel.app//api/auth/reset-password', {
+          const response = await fetch('https://fyp-1ejm.vercel.app/api/auth/reset-password', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, otp, newPassword }),
@@ -131,7 +131,7 @@ export function AuthModal({ isOpen, onClose, mode, onToggleMode, onAuth }: AuthM
         }
       } else {
         const endpoint = mode === 'login' ? '/api/auth/login' : '/api/auth/register';
-        const response = await fetch(`https://fyp-1ejm.vercel.app/${endpoint}`, {
+        const response = await fetch(`https://fyp-1ejm.vercel.app${endpoint}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

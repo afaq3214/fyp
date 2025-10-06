@@ -131,7 +131,7 @@ export function DiscoveryHub() {
     const fetchProducts = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch('https://fyp-1ejm.vercel.app//api/products');
+        const response = await fetch('https://fyp-1ejm.vercel.app/api/products');
         if (!response.ok) throw new Error('Failed to fetch products');
         const data = await response.json();
         setProducts(data);
