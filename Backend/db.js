@@ -1,14 +1,7 @@
 import mongoose from 'mongoose';
 
 // Serverless-friendly options (no buffering, pooling)
-const connectOptions = {
-  maxPoolSize: 10,  // Limit connections for Vercel
-  serverSelectionTimeoutMS: 5000,  // Faster timeout
-  socketTimeoutMS: 45000,
-  bufferMaxEntries: 0,  // Fail fast if offline (no queuing)
-  retryWrites: true,
-  w: 'majority'
-};
+
 
 const connectDB = async () => {
   // Avoid reconnect if already connected
@@ -18,9 +11,10 @@ const connectDB = async () => {
   }
 
   try {
-    // Use env var; fallback for local dev (add to .env)
-    const uri  = "mongodb+srv://qmafaq:%40afaq123@cluster0.8yvta.mongodb.net/fyp?retryWrites=true&w=majority"|| 'mongodb://127.0.0.1:27017/FYP';
-    await mongoose.connect(uri, connectOptions);
+    // Hardcoded Atlas URI (always used)
+    const uri = "mongodb+srv://qmafaq:%40afaq123@cluster0.8yvta.mongodb.net/fyp?retryWrites=true&w=majority";
+    console.log('🔗 Connecting to Atlas');  // Debug log
+    await mongoose.connect(uri);
     console.log('✅ MongoDB Connected');
   } catch (error) {
     console.error('❌ MongoDB Error:', error.message);
