@@ -16,7 +16,7 @@ interface APIUser {
     title: string;
     demoUrl: string;
     media: string[];
-    _id: string;
+    
   }[];
   achievements: {
     title: string;
@@ -41,6 +41,7 @@ export function EditProfile() {
   const [error, setError] = useState<string | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [portfolioMediaFiles, setPortfolioMediaFiles] = useState<{ [key: number]: File[] }>({});
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -51,7 +52,7 @@ export function EditProfile() {
           throw new Error('No authentication token found');
         }
 
-        const response = await fetch(`https://fyp-1ejm.vercel.app/api/auth/${userId}`, {
+        const response = await fetch(`http://localhost:5000/api/auth/${userId}`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`
@@ -102,10 +103,22 @@ export function EditProfile() {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Check file size (5MB max)
+      const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+      if (file.size > maxSize) {
+        setError('File is too large. Maximum size is 5MB.');
+        e.target.value = ''; // Reset the file input
+        return;
+      }
+      
       setSelectedFile(file);
+      setError(null); // Clear any previous errors
       const reader = new FileReader();
       reader.onload = () => {
         setImagePreview(reader.result as string);
+      };
+      reader.onerror = () => {
+        setError('Failed to read the file.');
       };
       reader.readAsDataURL(file);
     }
@@ -132,77 +145,123 @@ export function EditProfile() {
     });
   };
 
+  const handlePortfolioMediaFileChange = (portfolioIndex: number, mediaIndex: number, file: File) => {
+    setPortfolioMediaFiles(prev => {
+      const files = prev[portfolioIndex] ? [...prev[portfolioIndex]] : [];
+      files[mediaIndex] = file;
+      return { ...prev, [portfolioIndex]: files };
+    });
+
+    // Optionally, show a preview or upload immediately
+  };
+
   const addPortfolioItem = () => {
     setFormData(prev => ({
       ...prev,
       portfolio: [
         ...(prev.portfolio || []),
-        { title: '', demoUrl: '', media: [''], _id: '' }
+        { title: '', demoUrl: '', media: [''] }
       ]
     }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) throw new Error('No authentication token found');
+  e.preventDefault();
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) throw new Error('No authentication token found');
 
-      // Upload profile picture if a new file was selected
-      let profilePictureUrl = formData.profilePicture;
-      if (selectedFile) {
+    // Upload profile picture if a new file was selected
+    let profilePictureUrl = formData.profilePicture;
+    if (selectedFile) {
+      try {
         const formDataImage = new FormData();
         formDataImage.append('profilePicture', selectedFile);
 
-        const imageResponse = await fetch(`https://fyp-1ejm.vercel.app/api/auth/profile/picture`, {
+        const imageResponse = await fetch(`http://localhost:5000/api/auth/profile/picture`, {
           method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          },
+          headers: { 'Authorization': `Bearer ${token}` },
           body: formDataImage
         });
 
         if (!imageResponse.ok) {
-          const errorData = await imageResponse.json();
+          const errorData = await imageResponse.json().catch(() => ({}));
           throw new Error(errorData.error || 'Failed to upload profile picture');
         }
 
         const imageData = await imageResponse.json();
         profilePictureUrl = imageData.profilePicture;
-        console.log("Frontend received image URL:", profilePictureUrl); // Debug log
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to upload profile picture');
+        return;
       }
-
-      // Update profile with the rest of the data
-      const response = await fetch(`https://fyp-1ejm.vercel.app/api/auth/profile`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          ...formData,
-          profilePicture: profilePictureUrl
-        })
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to update profile');
-      }
-
-      navigate(`/profile/${userId}`);
-    } catch (err) {
-      console.error("Frontend error:", err); // Debug log
-      setError(err instanceof Error ? err.message : 'Failed to update profile');
     }
-  };
 
+    // Rest of the code remains the same...
+    const updatedPortfolio = await Promise.all(
+      (formData.portfolio || []).map(async (project, pIdx) => {
+        try {
+          const updatedMedia = await Promise.all(
+            (project.media || []).map(async (media, mIdx) => {
+              const file = portfolioMediaFiles[pIdx]?.[mIdx];
+              if (file) {
+                try {
+                  const formDataImage = new FormData();
+                  formDataImage.append('media', file);
+                  const response = await fetch(`http://localhost:5000/api/auth/profile/media`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formDataImage
+                  });
+                  const data = await response.json();
+                  return data.mediaUrl;
+                } catch (err) {
+                  console.error('Error uploading media:', err);
+                  return media; // Return existing media URL if upload fails
+                }
+              }
+              return media;
+            })
+          );
+          return { ...project, media: updatedMedia };
+        } catch (err) {
+          console.error('Error processing portfolio item:', err);
+          return project; // Return original project if processing fails
+        }
+      })
+    );
+
+    // Update profile with the rest of the data
+    const response = await fetch(`http://localhost:5000/api/auth/profile`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        ...formData,
+        profilePicture: profilePictureUrl,
+        portfolio: updatedPortfolio
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || 'Failed to update profile');
+    }
+
+    navigate(`/profile/${userId}`);
+  } catch (err) {
+    console.error("Error in handleSubmit:", err);
+    setError(err instanceof Error ? err.message : 'An error occurred while updating your profile');
+  }
+};
   const handleCancel = () => {
     navigate(`/profile/${userId}`);
   };
 
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
+  // if (isLoading) return <div>Loading...</div>;
+  // if (error) return <div>Error: {error}</div>;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900">
@@ -222,25 +281,30 @@ export function EditProfile() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Profile Picture</label>
-                <div className="mt-1 flex items-center space-x-4">
-                  {imagePreview && (
-                    <img 
-                      src={imagePreview} 
-                      alt="Profile Preview" 
-                      className="w-24 h-24 rounded-full object-cover border-2 border-gray-200 dark:border-gray-700"
-                      onError={() => console.error("Failed to load preview image:", imagePreview)}
-                    />
-                  )}
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    className="mt-1"
-                  />
-                </div>
-              </div>
+           <div>
+  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Profile Picture</label>
+  <div className="mt-1 flex items-center space-x-4">
+    {imagePreview && (
+      <img 
+        src={imagePreview} 
+        alt="Profile Preview" 
+        className="w-24 h-24 rounded-full object-cover border-2 border-gray-200 dark:border-gray-700"
+        onError={() => console.error("Failed to load preview image:", imagePreview)}
+      />
+    )}
+    <div className="flex flex-col">
+      <Input
+        type="file"
+        accept="image/*"
+        onChange={handleImageChange}
+        className="mt-1"
+      />
+      {error && error.includes('File is too large') && (
+        <p className="mt-1 text-sm text-red-600 dark:text-red-400">{error}</p>
+      )}
+    </div>
+  </div>
+</div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Bio</label>
@@ -325,13 +389,25 @@ export function EditProfile() {
                       onChange={(e) => handlePortfolioChange(index, 'demoUrl', e.target.value)}
                     />
                     {project.media.map((media, mediaIndex) => (
-                      <Input
-                        key={mediaIndex}
-                        placeholder={`Media URL ${mediaIndex + 1}`}
-                        value={media}
-                        onChange={(e) => handlePortfolioMediaChange(index, mediaIndex, e.target.value)}
-                        className="mt-1"
-                      />
+                      <div key={mediaIndex} className="mt-1 flex items-center space-x-2">
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          onChange={e => {
+                            const file = e.target.files?.[0];
+                            if (file) handlePortfolioMediaFileChange(index, mediaIndex, file);
+                          }}
+                          className="mt-1"
+                        />
+                        {/* Optional: Show preview if file selected */}
+                        {portfolioMediaFiles[index]?.[mediaIndex] && (
+                          <img
+                            src={URL.createObjectURL(portfolioMediaFiles[index][mediaIndex])}
+                            alt="Preview"
+                            className="w-16 h-16 rounded object-cover"
+                          />
+                        )}
+                      </div>
                     ))}
                   </div>
                 ))}

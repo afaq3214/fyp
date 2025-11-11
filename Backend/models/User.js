@@ -8,7 +8,9 @@ const userSchema = new mongoose.Schema(
     password: { type: String }, // optional if using OAuth
     googleId: { type: String }, // for Google login
     githubId: { type: String }, // for GitHub login
-
+    emailVerified: { type: Boolean, default: false },
+    emailVerificationCode: String,
+    emailVerificationExpires: Date,
     // Profile Info
     bio: String,
     profilePicture: String,
@@ -41,34 +43,27 @@ const userSchema = new mongoose.Schema(
     website: String,
 
     // Engagement Metrics (Added)
-    profileViews: { type: Number, default: 0 },
+   
     totalUpvotes: { type: Number, default: 0 },
     followers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     following: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-
+    otp: { type: Number, default: 0 }, // count of OTPs sent for rate limiting
     // Achievements
     badges: [String],
     achievements: [{ title: String, earnedAt: Date }],
 
     // Projects & Collaborations Metrics (Added)
     projectsCount: { type: Number, default: 0 },
-    collaborationsCount: { type: Number, default: 0 },
+   
 
     // Collaboration
-    collaborators: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-    collaborationInvites: [
-      {
-        from: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-        status: { type: String, enum: ["pending", "accepted", "rejected"], default: "pending" },
-        createdAt: { type: Date, default: Date.now },
-      },
-    ],
+   
 
     // System fields
     role: { type: String, enum: ["user", "admin", "moderator"], default: "user" }, // Added moderator role
     lastActive: { type: Date }, // Added: Track user activity
   },
-  { timestamps: true }
+ 
 );
 
 // Add indexes for better query performance

@@ -7,6 +7,7 @@ import { AIChatbot } from './components/AIChatbot';
 import { Toaster } from './components/ui/sonner';
 import {jwtDecode} from 'jwt-decode';
 
+import "./index.css";
 export type Page = 'discovery' | 'profile' | 'product-detail' | 'admin';
 
 export interface User {
@@ -26,22 +27,26 @@ export interface User {
 }
 
 export interface Product {
-  id: string;
+  _id: string;
   title: string;
   description: string;
   pitch: string;
   category: string;
-  image: string;
+  media: string[]; // ← change from image to media
   author: User;
   upvotes: number;
   reviews: number;
-  tags: string[];
+  autoTags: string[];
   trending: boolean;
   fresh: boolean;
   createdAt: string;
   demoUrl?: string;
   githubUrl?: string;
+  author_id: string;
+  author_name: string;
+  author_profile: string;
 }
+
 
 interface DecodedToken {
   id: string;
@@ -64,55 +69,7 @@ const mockUser: User = {
   joinDate: '2021-01-01'
 };
 
-const mockProducts: Product[] = [
-  {
-    id: '1',
-    title: 'AI Writing Assistant',
-    description: 'Transform your writing with AI-powered suggestions and grammar corrections',
-    pitch: 'Revolutionizing content creation with smart AI that understands context and tone, helping writers produce better content faster.',
-    category: 'AI Tools',
-    image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&h=250&fit=crop',
-    author: mockUser,
-    upvotes: 124,
-    reviews: 32,
-    tags: ['AI', 'Writing', 'Productivity'],
-    trending: true,
-    fresh: false,
-    createdAt: '2 hours ago',
-    demoUrl: 'https://demo.example.com',
-    githubUrl: 'https://github.com/example/ai-writer'
-  },
-  {
-    id: '2',
-    title: 'TaskFlow Pro',
-    description: 'Visual project management tool designed for creative teams',
-    pitch: 'Streamline your team\'s workflow with intuitive boards, smart automation, and real-time collaboration features.',
-    category: 'Productivity',
-    image: 'https://images.unsplash.com/photo-1700561570982-5f845601c505?w=400&h=250&fit=crop',
-    author: mockUser,
-    upvotes: 89,
-    reviews: 18,
-    tags: ['Project Management', 'Teams', 'Collaboration'],
-    trending: false,
-    fresh: true,
-    createdAt: '1 day ago'
-  },
-  {
-    id: '3',
-    title: 'CodeSnap',
-    description: 'Beautiful code screenshots with syntax highlighting and themes',
-    pitch: 'Create stunning code snippets for social media, documentation, and presentations with customizable themes.',
-    category: 'Developer Tools',
-    image: 'https://images.unsplash.com/photo-1555949963-ff9fe382dcfd?w=400&h=250&fit=crop',
-    author: mockUser,
-    upvotes: 156,
-    reviews: 45,
-    tags: ['Developer Tools', 'Design', 'Code'],
-    trending: true,
-    fresh: false,
-    createdAt: '3 days ago'
-  }
-];
+
 
 export default function App() {
   const navigate = useNavigate();
@@ -139,7 +96,7 @@ export default function App() {
           return;
         }
 
-        const response = await fetch(`https://fyp-1ejm.vercel.app/api/auth/${userId}`, {
+        const response = await fetch(`http://localhost:5000/api/auth/${userId}`, {
           method: 'GET',
           headers: {
             Authorization: `Bearer ${token}`,
@@ -197,7 +154,7 @@ export default function App() {
 
   const handleSubmitProduct = () => {
     if (currentUser) {
-      setShowSubmissionModal(true);
+      navigate('/SubmitProduct');
     } else {
       setAuthMode('signup');
       setShowAuthModal(true);

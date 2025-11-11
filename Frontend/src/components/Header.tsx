@@ -64,14 +64,17 @@ export function Header({
               <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
                 <Zap className="w-5 h-5 text-white" />
               </div>
-              <span className="font-bold text-3xl bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              {/* <span className="font-bold text-3xl bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                PRS
+              </span> */}
+               <span className="font-bold text-3xl text-black ">
                 PRS
               </span>
             </button>
           </div>
 
           {/* Search Bar - Hidden on mobile */}
-          <div className="hidden md:flex flex-1 max-w-2xl mx-8">
+          {/* <div className="hidden md:flex flex-1 max-w-2xl mx-8">
             <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
               <Input
@@ -89,13 +92,14 @@ export function Header({
                 </button>
               )}
             </div>
-          </div>
+          </div> */}
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-4">
             <Button 
               onClick={onSubmitProduct}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              className=""
+              style={{backgroundColor: 'black'}}
             >
               <Plus className="w-4 h-4 mr-2" />
               Submit Product
@@ -103,7 +107,7 @@ export function Header({
 
             {currentUser ? (
               <div className="flex items-center space-x-3">
-                <Button 
+                {/* <Button 
                   variant="ghost" 
                   size="sm"
                   className="relative"
@@ -112,7 +116,7 @@ export function Header({
                   <Badge className="absolute -top-2 -right-2 w-5 h-5 p-0 flex items-center justify-center text-xs bg-red-500">
                     3
                   </Badge>
-                </Button>
+                </Button> */}
 
                 <div className="relative" ref={userMenuRef}>
                   <Button 
@@ -120,11 +124,16 @@ export function Header({
                     className="relative rounded-full"
                     onClick={() => setIsUserMenuOpen(!isUserMenuOpen)} style={{ height: '50px', width: '50px' }}
                   >
-                    <Avatar  style={{ height: '50px', width: '50px' }}>
-                      <AvatarImage src={currentUser.profilePicture} alt={currentUser.name} />
-                      
-                      <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
+                    <Avatar style={{ height: '50px', width: '50px' }}>
+  <AvatarImage
+    src={currentUser.profilePicture}
+    alt={currentUser.name}
+    referrerPolicy="no-referrer"
+    loading="lazy"
+  />
+  <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
+</Avatar>
+
                   </Button>
                   
                   {isUserMenuOpen && (
@@ -196,7 +205,7 @@ export function Header({
         </div>
 
         {/* Mobile Search */}
-        <div className="md:hidden pb-3">
+        {/* <div className="md:hidden pb-3">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
             <Input
@@ -206,7 +215,7 @@ export function Header({
               className="pl-10 bg-gray-50 dark:bg-gray-800 border-0"
             />
           </div>
-        </div>
+        </div> */}
 
         {/* Mobile Menu */}
         {isMenuOpen && (
@@ -214,7 +223,7 @@ export function Header({
             <div className="flex flex-col space-y-3">
               <Button 
                 onClick={onSubmitProduct}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 w-full"
+                className="bg-black  w-full"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Submit Product

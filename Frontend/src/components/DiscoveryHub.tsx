@@ -35,88 +35,10 @@ export interface User {
   status: string;
   joinDate: string;
 }
-const categories = [
-  'All Categories',
-  'AI Tools',
-  'Productivity',
-  'Developer Tools',
-  'Design',
-  'SaaS',
-  'Mobile Apps',
-  'Web Apps'
-];
-const mockUser: User = {
-  id: '1',
-  name: 'Alex Chen',
-  email: 'alex@example.com',
-  profilePicture: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
-  bio: 'Full-stack developer and indie maker building AI-powered tools',
-  badges: ['Early Adopter', 'Top Reviewer', 'AI Enthusiast'],
-  projects: 12,
-  products: 5,
-  collaborations: 8,
-  isAdmin: true,
-  role: 'admin',
-  status: 'active',
-  joinDate: '2021-01-01'
-};
- const mockProducts: Product[] = [
-  {
-    id: '1',
-    title: 'AI Writing Assistant',
-    description: 'Transform your writing with AI-powered suggestions and grammar corrections',
-    pitch: 'Revolutionizing content creation with smart AI that understands context and tone, helping writers produce better content faster.',
-    category: 'AI Tools',
-    image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&h=250&fit=crop',
-    author: mockUser,
-    upvotes: 124,
-    reviews: 32,
-    tags: ['AI', 'Writing', 'Productivity'],
-    trending: true,
-    fresh: false,
-    createdAt: '2 hours ago',
-    demoUrl: 'https://demo.example.com',
-    githubUrl: 'https://github.com/example/ai-writer'
-  },
-  {
-    id: '2',
-    title: 'TaskFlow Pro',
-    description: 'Visual project management tool designed for creative teams',
-    pitch: 'Streamline your team\'s workflow with intuitive boards, smart automation, and real-time collaboration features.',
-    category: 'Productivity',
-    image: 'https://images.unsplash.com/photo-1700561570982-5f845601c505?w=400&h=250&fit=crop',
-    author: mockUser,
-    upvotes: 89,
-    reviews: 18,
-    tags: ['Project Management', 'Teams', 'Collaboration'],
-    trending: false,
-    fresh: true,
-    createdAt: '1 day ago'
-  },
-  {
-    id: '3',
-    title: 'CodeSnap',
-    description: 'Beautiful code screenshots with syntax highlighting and themes',
-    pitch: 'Create stunning code snippets for social media, documentation, and presentations with customizable themes.',
-    category: 'Developer Tools',
-    image: 'https://images.unsplash.com/photo-1555949963-ff9fe382dcfd?w=400&h=250&fit=crop',
-    author: mockUser,
-    upvotes: 156,
-    reviews: 45,
-    tags: ['Developer Tools', 'Design', 'Code'],
-    trending: true,
-    fresh: false,
-    createdAt: '3 days ago'
-  }
-];
 
-const trendingTopics = [
-  { name: 'AI & Machine Learning', growth: '+24%', color: 'bg-blue-500' },
-  { name: 'No-Code Tools', growth: '+18%', color: 'bg-purple-500' },
-  { name: 'Remote Work', growth: '+15%', color: 'bg-green-500' },
-  { name: 'Blockchain', growth: '+12%', color: 'bg-orange-500' },
-  { name: 'Health Tech', growth: '+10%', color: 'bg-pink-500' }
-];
+
+
+
 
 export function DiscoveryHub() {
   const navigate = useNavigate();
@@ -131,7 +53,7 @@ export function DiscoveryHub() {
     const fetchProducts = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch('https://fyp-1ejm.vercel.app/api/products');
+        const response = await fetch('http://localhost:5000/api/products');
         if (!response.ok) throw new Error('Failed to fetch products');
         const data = await response.json();
         setProducts(data);
@@ -146,7 +68,7 @@ export function DiscoveryHub() {
   }, []);
 
   const handleProductClick = (product: Product) => {
-    navigate(`/product/${product.id}`);
+    navigate(`/product/${product._id}`);
   };
 
   const filteredProducts = products.filter(product => 
@@ -173,7 +95,7 @@ export function DiscoveryHub() {
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Hero Section */}
       <div className="text-center mb-12">
-        <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r  from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
+        <h1 className="text-4xl md:text-6xl font-bold  mb-4">
           Discover the Next Big Thing
         </h1>
         <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto mb-8">
@@ -202,7 +124,7 @@ export function DiscoveryHub() {
       {/* Filters and Controls */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 space-y-4 md:space-y-0">
         <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
-          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+          {/* <Select value={selectedCategory} onValueChange={setSelectedCategory}>
             <SelectTrigger className="w-[200px]">
               <Filter className="w-4 h-4 mr-2" />
               <SelectValue />
@@ -214,8 +136,8 @@ export function DiscoveryHub() {
                 </SelectItem>
               ))}
             </SelectContent>
-          </Select>
-
+          </Select> */}
+{/* 
           <Select value={sortBy} onValueChange={setSortBy}>
             <SelectTrigger className="w-[150px]">
               <SelectValue />
@@ -240,7 +162,7 @@ export function DiscoveryHub() {
                 </div>
               </SelectItem>
             </SelectContent>
-          </Select>
+          </Select> */}
         </div>
 
         <div className="flex items-center space-x-2">
@@ -263,7 +185,7 @@ export function DiscoveryHub() {
 
       {/* Product Grid/List */}
       <Tabs defaultValue="all" className="w-full">
-        <TabsList className="grid w-full max-w-md mx-auto grid-cols-3 mb-8">
+        {/* <TabsList className="grid w-full max-w-md mx-auto grid-cols-3 mb-8">
           <TabsTrigger value="all">All Products</TabsTrigger>
           <TabsTrigger value="trending">
             <Flame className="w-4 h-4 mr-2" />
@@ -273,7 +195,7 @@ export function DiscoveryHub() {
             <Clock className="w-4 h-4 mr-2" />
             Fresh
           </TabsTrigger>
-        </TabsList>
+        </TabsList> */}
 
         <TabsContent value="all">
           <ProductGrid 
@@ -346,17 +268,17 @@ function ProductGrid({ products, viewMode, onProductClick }: ProductGridProps) {
   if (viewMode === 'list') {
     return (
       <div className="space-y-4">
-        {mockProducts.map(product => (
+        {products.map(product => (
           <Card 
-            key={product.id}
+            key={product._id}
             className="group cursor-pointer hover:shadow-md transition-all duration-200"
             onClick={() => onProductClick(product)}
           >
             <CardContent className="p-6">
               <div className="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-6">
-                <div className="w-full md:w-32 h-20 md:h-20 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 flex-shrink-0">
+                <div className="w-full md:w-32 h-20 md:h-44 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 flex-shrink-0" style={{width:'300px',height:'150px'}}>
                   <ImageWithFallback
-                    src={product.image}
+                    src={product.media[0]}
                     alt={product.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
                   />
@@ -387,12 +309,27 @@ function ProductGrid({ products, viewMode, onProductClick }: ProductGridProps) {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
                       <div className="flex items-center space-x-2">
-                        <Avatar className="w-6 h-6">
-                          <AvatarImage src={product.author.profilePicture} />
-                          <AvatarFallback>{product.author.name.charAt(0)}</AvatarFallback>
-                        </Avatar>
+                           {product.author_profile ? (
+                   <img 
+                     src={product.author_profile} 
+                     alt={product.author_name} 
+                     className="w-6 h-6 rounded-full object-cover"
+                     referrerPolicy="no-referrer"
+                     loading="lazy"
+                   />
+                 ) : (
+                   <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                     <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                       {product.author_name ? product.author_name.charAt(0).toUpperCase() : 'U'}
+                     </span>
+                   </div>
+                 )}
+                        {/* <Avatar className="w-6 h-6">
+                          <AvatarImage src={product.author_profile} />
+                          <AvatarFallback>{product.author_name.charAt(0)}</AvatarFallback>
+                        </Avatar> */}
                         <span className="text-sm text-gray-600 dark:text-gray-400">
-                          {product.author.name}
+                          {product.author_name}
                         </span>
                       </div>
                       <span className="text-sm text-gray-500">•</span>
@@ -414,16 +351,16 @@ function ProductGrid({ products, viewMode, onProductClick }: ProductGridProps) {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {mockProducts.map(product => (
+      {products.map(product => (
         <Card 
-          key={product.id}
+          key={product._id}
           className="group cursor-pointer hover:shadow-lg transition-all duration-200 overflow-hidden"
           onClick={() => onProductClick(product)}
         >
           <div className="relative">
             <div className="w-full h-48 bg-gray-100 dark:bg-gray-800 overflow-hidden">
               <ImageWithFallback
-                src={product.image}
+               src={product.media[0]}
                 alt={product.title}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
               />
@@ -465,7 +402,7 @@ function ProductGrid({ products, viewMode, onProductClick }: ProductGridProps) {
               {product.description}
             </p>
             <div className="flex flex-wrap gap-1 mb-4">
-              {product.tags.slice(0, 3).map(tag => (
+              {product.autoTags.slice(0, 3).map(tag => (
                 <Badge key={tag} variant="secondary" className="text-xs">
                   {tag}
                 </Badge>
@@ -475,15 +412,26 @@ function ProductGrid({ products, viewMode, onProductClick }: ProductGridProps) {
 
           <CardFooter className="pt-0">
             <div className="flex items-center justify-between w-full">
-              <div className="flex items-center space-x-2">
-                <Avatar className="w-6 h-6">
-                  <AvatarImage src={product.author.profilePicture} />
-                  <AvatarFallback>{product.author.name.charAt(0)}</AvatarFallback>
-                </Avatar>
+               <div className="flex items-center space-x-2">
+                 {product.author_profile ? (
+                   <img 
+                     src={product.author_profile} 
+                     alt={product.author_name} 
+                     className="w-6 h-6 rounded-full object-cover"
+                     referrerPolicy="no-referrer"
+                     loading="lazy"
+                   />
+                 ) : (
+                   <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                     <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                       {product.author_name ? product.author_name.charAt(0).toUpperCase() : 'U'}
+                     </span>
+                   </div>
+                 )}
                 <span className="text-sm text-gray-600 dark:text-gray-400">
-                  {product.author.name}
+                  {product.author_name}
                 </span>
-              </div>
+              </div> 
               <div className="flex items-center space-x-3 text-sm text-gray-600 dark:text-gray-400">
                 <span>💬 {product.reviews}</span>
                 <span>{product.createdAt}</span>

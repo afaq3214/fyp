@@ -5,6 +5,10 @@ import { ProductDetail } from '../components/ProductDetail';
 import { AdminPanel } from '../components/AdminPanel';
 import App from '../App';
 import { EditProfile } from '../components/EditProfile';
+import { AuthPage } from '../components/AuthPage';
+import  SubmitProduct   from  '../components/Pages/SubmitProduct'
+import  EditProduct   from  '../components/Pages/EditProduct'
+import  ProductOwner   from  '../components/Pages/ProductOwner'
 
 export const router = createBrowserRouter([
   {
@@ -29,7 +33,17 @@ export const router = createBrowserRouter([
       },{
         path: '/edit-profile/:userId',
         element: <EditProfile />   // Already correct
+      },{
+        path: '/SubmitProduct',
+        element: <SubmitProduct />   // Already correct
+      },{
+        path: '/edit-product/:productId',
+        element: <EditProduct />   // Edit product page
+      },{
+        path: '/product-owner/:ownerId',
+        element: <ProductOwner />   // Product owner profile page
       }
+     
     ]
   }
 ]);

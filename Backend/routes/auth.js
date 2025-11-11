@@ -6,11 +6,30 @@ import auth from "../middleware/auth.js";
 import multer from "multer";
 import { put } from "@vercel/blob";  // For uploading to Vercel Blob
 import { OAuth2Client } from "google-auth-library";
+import nodemailer from "nodemailer";
+import path from "path";
+import fs from "fs";
+
+function generateOTP() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
 
 const router = express.Router();
 
-// Configure multer for in-memory storage (no disk writes for serverless)
-const storage = multer.memoryStorage();
+// Configure multer for disk storage
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadDir = path.join(process.cwd(), "uploads");
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, `${req.user._id}-${Date.now()}${ext}`);
+  }
+});
 const upload = multer({
   storage,
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
@@ -26,11 +45,31 @@ const upload = multer({
 router.use(express.json({ limit: "10mb" }));
 router.use(express.urlencoded({ limit: "10mb", extended: true }));
 
-// Generate 6-digit OTP
-const generateOTP = () => {
-  return Math.floor(100000 + Math.random() * 900000).toString();
-};
+// Email transporter
+const transporter = nodemailer.createTransport({
+  service: "gmail", // or your email provider
+  auth: {
+    user: "qmafaq@gmail.com",
+    pass: 'bvuj uspi ucqp axky',
+  },
+});
 
+const sendVerificationEmail = async (email, code) => {
+  await transporter.sendMail({
+    from:  "qmafaq@gmail.com",
+    to:  email,
+    subject: "Your Verification Code",
+    text: `Your verification code is: ${code}`,
+  });
+};
+const ResetPasswordEmail = async (email, code) => {
+  await transporter.sendMail({
+    from:  "qmafaq@gmail.com",
+    to:  email,
+    subject: "Your Password Reset OTP",
+    text: `Your Password Reset OTP : ${code}`,
+  });
+};
 /**
  * 📌 Register
  */
@@ -42,13 +81,50 @@ router.post("/register", async (req, res) => {
     const user = new User({ name, email, password: hashedPassword });
     await user.save();
 
+    // Generate and store email verification code
+    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    user.emailVerificationCode = verificationCode;
+    user.emailVerificationExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 min
+    user.emailVerified = false;
+    await user.save();
+
+    // Send verification email
+    await sendVerificationEmail(user.email, verificationCode);
+
     res.status(201).json({
-      message: "✅ User registered successfully",
-      user: { id: user._id, name: user.name, email: user.email }
+      message: "User registered. Verification code sent to email.",
+      user: { id: user._id, name: user.name, email: user.email },
     });
   } catch (error) {
     console.error("Register error:", error);
     res.status(400).json({ error: error.message });
+  }
+});
+
+/**
+ * 📌 Verify Email
+ */
+router.post("/verify-email", async (req, res) => {
+  try {
+    const { email, code } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    if (
+      user.emailVerificationCode !== code ||
+      user.emailVerificationExpires < new Date()
+    ) {
+      return res.status(400).json({ error: "Invalid or expired code" });
+    }
+
+    user.emailVerified = true;
+    user.emailVerificationCode = undefined;
+    user.emailVerificationExpires = undefined;
+    await user.save();
+
+    res.json({ message: "Email verified successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -103,6 +179,7 @@ router.put("/profile", auth, async (req, res) => {
  * 📌 Upload Profile Picture (Vercel Blob for serverless)
  */
 router.post("/profile/picture", auth, upload.single("profilePicture"), async (req, res) => {
+  console.log("Received file:", req.file);
   try {
     if (!req.file) {
       return res.status(400).json({ error: "No image file provided" });
@@ -113,16 +190,8 @@ router.post("/profile/picture", auth, upload.single("profilePicture"), async (re
       return res.status(404).json({ error: "User not found" });
     }
 
-    // Upload to Vercel Blob (public URL)
-    const blob = await put(`profile-pics/${req.user._id}-${Date.now()}-${req.file.originalname}`, 
-      req.file.buffer, 
-      { 
-        access: 'public',
-        token: process.env.BLOB_READ_WRITE_TOKEN  // Optional: for private blobs
-      }
-    );
-
-    const imageUrl = blob.url;  // Permanent public URL
+    // Save image locally
+    const imageUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
     user.profilePicture = imageUrl;
     await user.save();
 
@@ -139,24 +208,54 @@ router.post("/profile/picture", auth, upload.single("profilePicture"), async (re
 });
 
 /**
+ * 📌 Upload Media (e.g., posts, stories)
+ */
+router.post("/profile/media", auth, upload.single("media"), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: "No media file provided" });
+    const mediaUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+    res.json({ mediaUrl });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
  * 📌 Login
  */
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
-
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ error: "❌ User not found" });
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ error: "❌ Invalid password" });
 
+    // If not verified, send code and block login
+    if (!user.emailVerified) {
+      // Generate and store verification code
+      const verificationCode = generateOTP();
+      user.emailVerificationCode = verificationCode;
+      user.emailVerificationExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 min
+      await user.save();
+
+      // Send verification email
+      await sendVerificationEmail(user.email, verificationCode);
+
+      return res.status(403).json({
+        error: "Email not verified. Verification code sent to your email.",
+        requireVerification: true
+      });
+    }
+
+    // If verified, proceed with login
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || "fyp", { expiresIn: "1d" });
 
     res.json({
       message: "✅ Login successful",
       token,
-      user: { id: user._id, name: user.name, email: user.email }
+      user: { id: user._id, name: user.name, email: user.email, profilePicture: user.profilePicture }
     });
   } catch (error) {
     console.error("Login error:", error);
@@ -185,6 +284,7 @@ router.post("/forgot-password", async (req, res) => {
 
     // In production, send OTP via email/SMS (e.g., Nodemailer, Twilio)
     console.log(`OTP for ${email}: ${otp} (expires at ${new Date(expiresAt).toISOString()})`);
+    await ResetPasswordEmail(email, otp);  // Send OTP email
 
     res.json({ message: "OTP sent to your email" });
   } catch (error) {
@@ -303,6 +403,9 @@ router.post("/google", async (req, res) => {
   }
 });
 
+// Serve uploaded files statically
+router.use('/uploads', express.static('uploads'));
+
 // Global error handler
 router.use((err, req, res, next) => {
   if (err.type === "entity.too.large") {
@@ -311,5 +414,7 @@ router.use((err, req, res, next) => {
   console.error("Global error:", err);
   res.status(500).json({ error: err.message });
 });
+
+// Generate a 6-digit OTP code
 
 export default router;

@@ -14,7 +14,9 @@ import {
   Calendar,
   Eye,
   Sparkles,
-  Send
+  Send,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -113,6 +115,7 @@ export function ProductDetail() {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [reviewText, setReviewText] = useState('');
   const [selectedEmoji, setSelectedEmoji] = useState('');
+  const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
 
   const emojiOptions = ['🚀', '💎', '👍', '🔥', '💡', '⭐', '🎯', '💯'];
 
@@ -121,7 +124,7 @@ export function ProductDetail() {
       try {
         setIsLoading(true);
         // Fetch product details
-        const productRes = await fetch(`https://fyp-1ejm.vercel.app/api/products/${productId}`);
+        const productRes = await fetch(`http://localhost:5000/api/products/${productId}`);
         if (!productRes.ok) throw new Error('Failed to fetch product');
         const productData = await productRes.json();
         setProduct(productData);
@@ -201,14 +204,122 @@ export function ProductDetail() {
             {/* Product Header */}
             <Card>
               <CardContent className="p-8">
-                {/* Product Image */}
-                <div className="w-full h-64 bg-gray-100 dark:bg-gray-800 rounded-xl overflow-hidden mb-6">
-                  <ImageWithFallback
-                    src={product.image}
-                    alt={product.title}
-                    className="w-full h-full object-cover"
-                  />
+                {/* Product Media Carousel */}
+                <div className="relative w-full h-96 bg-gray-100 dark:bg-gray-800 rounded-xl overflow-hidden mb-6 group">
+                  {product.media && product.media.length > 0 ? (
+                    <>
+                      {/* Current Media Display */}
+                      <div className="w-full h-full">
+                        {product.media[currentMediaIndex]?.endsWith('.mp4') || 
+                         product.media[currentMediaIndex]?.endsWith('.webm') || 
+                         product.media[currentMediaIndex]?.endsWith('.mov') ? (
+                          <video
+                            src={product.media[currentMediaIndex]}
+                            className="w-full h-full object-cover"
+                            controls
+                            key={currentMediaIndex}
+                          />
+                        ) : (
+                          <ImageWithFallback
+                            src={product.media[currentMediaIndex]}
+                            alt={`${product.title} - ${currentMediaIndex + 1}`}
+                            className="w-full h-full object-contain bg-white"
+                          />
+                        )}
+                      </div>
+
+                      {/* Navigation Arrows */}
+                      {product.media.length > 1 && (
+                        <>
+                          <button
+                            onClick={() => setCurrentMediaIndex(prev => 
+                              prev === 0 ? product.media.length - 1 : prev - 1
+                            )}
+                            className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <ChevronLeft className="w-6 h-6" />
+                          </button>
+                          <button
+                            onClick={() => setCurrentMediaIndex(prev => 
+                              prev === product.media.length - 1 ? 0 : prev + 1
+                            )}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <ChevronRight className="w-6 h-6" />
+                          </button>
+
+                          {/* Dots Indicator */}
+                          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                            {product.media.map((_, index) => (
+                              <button
+                                key={index}
+                                onClick={() => setCurrentMediaIndex(index)}
+                                className={`w-2 h-2 rounded-full transition-all ${
+                                  index === currentMediaIndex 
+                                    ? 'bg-white w-8' 
+                                    : 'bg-white/50 hover:bg-white/75'
+                                }`}
+                              />
+                            ))}
+                          </div>
+
+                          {/* Counter */}
+                          <div className="absolute top-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
+                            {currentMediaIndex + 1} / {product.media.length}
+                          </div>
+                        </>
+                      )}
+                    </>
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                      No media available
+                    </div>
+                  )}
                 </div>
+
+                {/* Thumbnail Gallery */}
+                {product.media && product.media.length > 1 && (
+                  <div className="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-hide">
+                    {product.media.map((mediaUrl, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setCurrentMediaIndex(index)}
+                        className={`relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
+                          index === currentMediaIndex
+                            ? 'border-blue-500 ring-2 ring-blue-200'
+                            : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                      >
+                        {mediaUrl.endsWith('.mp4') || 
+                         mediaUrl.endsWith('.webm') || 
+                         mediaUrl.endsWith('.mov') ? (
+                          <div className="relative w-full h-full bg-gray-900">
+                            <video
+                              src={mediaUrl}
+                              className="w-full h-full object-cover"
+                            />
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                              <div className="w-8 h-8 bg-white/90 rounded-full flex items-center justify-center">
+                                <svg className="w-4 h-4 text-gray-900" fill="currentColor" viewBox="0 0 20 20">
+                                  <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
+                                </svg>
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <ImageWithFallback
+                            src={mediaUrl}
+                            alt={`Thumbnail ${index + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                        )}
+                        {index === currentMediaIndex && (
+                          <div className="absolute inset-0 bg-blue-500/10"></div>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
 
                 {/* Title and Badges */}
                 <div className="flex flex-wrap items-start justify-between mb-4">
@@ -251,7 +362,7 @@ export function ProductDetail() {
                 <div className="mb-6">
                   <h3 className="font-semibold mb-3">Tags</h3>
                   <div className="flex flex-wrap gap-2">
-                    {product.tags.map(tag => (
+                    {product.autoTags.map(tag => (
                       <Badge key={tag} variant="secondary">
                         {tag}
                       </Badge>
@@ -261,7 +372,7 @@ export function ProductDetail() {
 
                 {/* Action Buttons */}
                 <div className="flex flex-wrap gap-3">
-                  <Button
+                  {/* <Button
                     onClick={handleUpvote}
                     variant={isUpvoted ? "default" : "outline"}
                     className={isUpvoted ? "bg-red-500 hover:bg-red-600" : ""}
@@ -269,11 +380,11 @@ export function ProductDetail() {
                     <Heart className={`w-4 h-4 mr-2 ${isUpvoted ? 'fill-current' : ''}`} />
                     {isUpvoted ? 'Upvoted' : 'Upvote'} ({product.upvotes + (isUpvoted ? 1 : 0)})
                   </Button>
-                  
-                  <Button variant="outline" onClick={handleBookmark}>
+                   */}
+                  {/* <Button variant="outline" onClick={handleBookmark}>
                     <Bookmark className={`w-4 h-4 mr-2 ${isBookmarked ? 'fill-current' : ''}`} />
                     {isBookmarked ? 'Bookmarked' : 'Bookmark'}
-                  </Button>
+                  </Button> */}
                   
                   <Button variant="outline" onClick={handleShare}>
                     <Share2 className="w-4 h-4 mr-2" />
@@ -302,7 +413,7 @@ export function ProductDetail() {
             </Card>
 
             {/* Reviews Section */}
-            <Card>
+            {/* <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <MessageCircle className="w-5 h-5 mr-2" />
@@ -362,7 +473,7 @@ export function ProductDetail() {
                       <div className="space-y-4">
                         <div className="flex items-center space-x-4 mb-4">
                           <Avatar>
-                            <AvatarImage src={currentUser.avatar} />
+                            <AvatarImage src={currentUser.profilePicture} />
                             <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
                           </Avatar>
                           <div>
@@ -416,7 +527,7 @@ export function ProductDetail() {
                   </TabsContent>
                 </Tabs>
               </CardContent>
-            </Card>
+            </Card> */}
           </div>
 
           {/* Sidebar */}
@@ -427,15 +538,25 @@ export function ProductDetail() {
                 <CardTitle>Made by</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center space-x-3 mb-4">
-                  <Avatar>
-                    <AvatarImage src={product.author.avatar} />
-                    <AvatarFallback>{product.author.name.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <h4 className="font-medium">{product.author.name}</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">{product.author.projects} projects</p>
-                  </div>
+                <div 
+                  className="flex items-center space-x-3 mb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 p-2 rounded-lg transition-colors"
+                  onClick={() => navigate(`/product-owner/${product.author_id}`)}
+                >
+                                    <Avatar style={{ height: '50px', width: '50px' }}>
+                 {product.author_profile &&
+
+                   <img
+                   src={product.author_profile}
+                   alt={product.author_name}
+                   referrerPolicy="no-referrer"
+                   loading="lazy"
+                   />
+                  }<AvatarFallback>{product.author_name.charAt(0)}</AvatarFallback>
+                </Avatar>
+                   <div>
+                    <h4 className="font-medium hover:text-blue-600 transition-colors">{product.author_name}</h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">View Profile</p>
+                  </div> 
                 </div>
                 <Button variant="outline" className="w-full">
                   <Users className="w-4 h-4 mr-2" />
@@ -445,7 +566,7 @@ export function ProductDetail() {
             </Card>
 
             {/* Product Stats */}
-            <Card>
+            {/* <Card>
               <CardHeader>
                 <CardTitle>Product Stats</CardTitle>
               </CardHeader>
@@ -475,10 +596,10 @@ export function ProductDetail() {
                   <Progress value={87} />
                 </div>
               </CardContent>
-            </Card>
+            </Card> */}
 
             {/* Related Products */}
-            <Card>
+            {/* <Card>
               <CardHeader>
                 <CardTitle>Related Products</CardTitle>
               </CardHeader>
@@ -496,17 +617,17 @@ export function ProductDetail() {
                   </div>
                 ))}
               </CardContent>
-            </Card>
+            </Card> */}
 
             {/* Report */}
-            <Card>
+            {/* <Card>
               <CardContent className="p-4">
                 <Button variant="ghost" className="w-full text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20">
                   <Flag className="w-4 h-4 mr-2" />
                   Report Product
                 </Button>
               </CardContent>
-            </Card>
+            </Card> */}
           </div>
         </div>
       </div>
