@@ -116,7 +116,7 @@ export function ProductDetail() {
   const [reviewText, setReviewText] = useState('');
   const [selectedEmoji, setSelectedEmoji] = useState('');
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
-
+const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
   const emojiOptions = ['🚀', '💎', '👍', '🔥', '💡', '⭐', '🎯', '💯'];
 
   useEffect(() => {
@@ -124,7 +124,7 @@ export function ProductDetail() {
       try {
         setIsLoading(true);
         // Fetch product details
-        const productRes = await fetch(`http://localhost:5000/api/products/${productId}`);
+        const productRes = await fetch(`${url}/api/products/${productId}`);
         if (!productRes.ok) throw new Error('Failed to fetch product');
         const productData = await productRes.json();
         setProduct(productData);

@@ -78,7 +78,7 @@ export default function ProductOwner() {
   const [isLoading, setIsLoading] = useState(true);
   const { ownerId } = useParams<{ ownerId: string }>();
   const navigate = useNavigate();
-
+ const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
   useEffect(() => {
     const fetchOwnerProfile = async () => {
       const token = localStorage.getItem('token');
@@ -89,7 +89,7 @@ export default function ProductOwner() {
 
       try {
         setIsLoading(true);
-        const response = await fetch(`http://localhost:5000/api/auth/${ownerId}`, {
+        const response = await fetch(`${url}/api/auth/${ownerId}`, {
           method: 'GET',
           headers: {
             Authorization: `Bearer ${token}`,
@@ -109,7 +109,7 @@ export default function ProductOwner() {
 
     fetchOwnerProfile();
   }, [ownerId, navigate]);
-
+ 
   // Fetch owner's products
   useEffect(() => {
     const fetchOwnerProducts = async () => {
@@ -119,7 +119,7 @@ export default function ProductOwner() {
       try {
         // Since we need products by specific user, we'll fetch all and filter
         // Or you can create a new backend endpoint for this
-        const response = await fetch('http://localhost:5000/api/products', {
+        const response = await fetch(`${url}/api/products`, {
           method: 'GET',
           headers: {
             Authorization: `Bearer ${token}`,

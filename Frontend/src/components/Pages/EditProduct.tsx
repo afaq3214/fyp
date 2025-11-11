@@ -61,6 +61,7 @@ const suggestedTags = [
 ];
 
 export default function EditProduct() {
+   const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
   const { productId } = useParams<{ productId: string }>();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
@@ -90,7 +91,7 @@ export default function EditProduct() {
           return;
         }
 
-        const response = await fetch(`http://localhost:5000/api/products/${productId}`, {
+        const response = await fetch(`${url}/api/products/${productId}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -206,7 +207,7 @@ export default function EditProduct() {
       // Add existing media that should be kept
       data.append('existingMedia', JSON.stringify(formData.media));
 
-      const response = await fetch(`http://localhost:5000/api/products/${productId}`, {
+      const response = await fetch(`${url}/api/products/${productId}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,

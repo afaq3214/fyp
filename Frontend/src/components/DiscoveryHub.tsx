@@ -48,12 +48,12 @@ export function DiscoveryHub() {
   const [selectedCategory, setSelectedCategory] = useState('All Categories');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState('trending');
-
+const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch('http://localhost:5000/api/products');
+        const response = await fetch(`${url}/api/products`);
         if (!response.ok) throw new Error('Failed to fetch products');
         const data = await response.json();
         setProducts(data);

@@ -39,7 +39,7 @@ export function AuthModal({ isOpen, onClose, mode, onToggleMode, onAuth }: AuthM
   const [pendingEmail, setPendingEmail] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const googleBtnRef = useRef<HTMLDivElement>(null);
-
+const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
   const validatePassword = (password: string): boolean => {
     if (password.length < 8) {
       setPasswordError('Password must be at least 8 characters long');
@@ -66,7 +66,7 @@ export function AuthModal({ isOpen, onClose, mode, onToggleMode, onAuth }: AuthM
           callback: async (response: any) => {
             setIsLoading(true);
             try {
-              const res = await fetch("http://localhost:5000/api/auth/google", {
+              const res = await fetch(`${url}/api/auth/google`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ idToken: response.credential }),
@@ -133,7 +133,7 @@ export function AuthModal({ isOpen, onClose, mode, onToggleMode, onAuth }: AuthM
     try {
       if (mode === 'forgot-password') {
         if (forgotPasswordStep === 'email') {
-          const response = await fetch('http://localhost:5000/api/auth/forgot-password', {
+          const response = await fetch('${url}/api/auth/forgot-password', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email }),
@@ -146,7 +146,7 @@ export function AuthModal({ isOpen, onClose, mode, onToggleMode, onAuth }: AuthM
           setForgotPasswordStep('otp');
           console.log("otp",otp)
         } else {
-          const response = await fetch('http://localhost:5000/api/auth/reset-password', {
+          const response = await fetch(`${url}/api/auth/reset-password`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, otp, newPassword }),
@@ -161,7 +161,7 @@ export function AuthModal({ isOpen, onClose, mode, onToggleMode, onAuth }: AuthM
         }
       } else {
         const endpoint = mode === 'login' ? '/api/auth/login' : '/api/auth/register';
-        const response = await fetch(`http://localhost:5000${endpoint}`, {
+        const response = await fetch(`${url}/${endpoint}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -212,7 +212,7 @@ export function AuthModal({ isOpen, onClose, mode, onToggleMode, onAuth }: AuthM
     e.preventDefault();
     setIsLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/auth/verify-email', {
+      const response = await fetch(`${url}/api/auth/verify-email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: pendingEmail, code: verificationCode }),

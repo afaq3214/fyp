@@ -97,7 +97,7 @@ export function UserProfile() {
   const [profileCompletion, setProfileCompletion] = useState<number>(0);
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
-
+  const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
   const handleEditProfile = () => {
      navigate(`/edit-profile/${userId}`);
    };
@@ -108,7 +108,7 @@ export function UserProfile() {
 
       try {
         setIsLoading(true);
-        const response = await fetch(`http://localhost:5000/api/auth/${userId}`, {
+        const response = await fetch(`${url}/api/auth/${userId}`, {
           method: 'GET',
           headers: {
             Authorization: `Bearer ${token}`,
@@ -136,7 +136,7 @@ export function UserProfile() {
       if (!token) return;
 
       try {
-        const response = await fetch('http://localhost:5000/api/products/user/my-products', {
+        const response = await fetch(`${url}/api/products/user/my-products`, {
           method: 'GET',
           headers: {
             Authorization: `Bearer ${token}`,

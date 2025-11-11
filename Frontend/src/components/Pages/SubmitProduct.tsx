@@ -67,7 +67,7 @@ export default function SubmitProduct() {
   });
   const [isGeneratingPitch, setIsGeneratingPitch] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+ const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
@@ -248,7 +248,7 @@ export default function SubmitProduct() {
         data.append('media', file);
       });
 
-      const response = await fetch('http://localhost:5000/api/products/AddProduct', {
+      const response = await fetch(`${url}/api/products/AddProduct`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
