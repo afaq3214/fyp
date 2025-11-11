@@ -77,7 +77,7 @@ export default function App() {
   const [showSubmissionModal, setShowSubmissionModal] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [authMode, setAuthMode] = useState<'login' | 'signup' | 'forgot-password'>('login');
-
+  const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -96,7 +96,7 @@ export default function App() {
           return;
         }
 
-        const response = await fetch(`http://localhost:5000/api/auth/${userId}`, {
+        const response = await fetch(`${url}/api/auth/${userId}`, {
           method: 'GET',
           headers: {
             Authorization: `Bearer ${token}`,
