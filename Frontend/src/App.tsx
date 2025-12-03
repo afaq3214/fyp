@@ -126,7 +126,7 @@ export default function App() {
           projects: data.portfolio?.length || 0,
           products: data.portfolio?.length || 0,
           collaborations: data.portfolio?.length || 0,
-          isAdmin: data.role === 'admin',
+          isAdmin: true,
           role: data.role || 'user',
           status: 'active',
           joinDate: data.createdAt ? new Date(data.createdAt).toISOString().split('T')[0] : '',

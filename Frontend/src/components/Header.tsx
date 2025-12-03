@@ -12,6 +12,7 @@ import {
   DropdownMenuSeparator
 } from './ui/dropdown-menu';
 import { User as UserType } from '../App';
+import { Link } from 'react-router-dom';
 
 interface HeaderProps {
   currentUser: UserType | null;
@@ -151,7 +152,14 @@ export function Header({
                           <User className="mr-2 h-4 w-4" />
                           Profile
                         </button>
-                        
+                        <button
+                          onClick={() => {  setIsUserMenuOpen(false); }}
+                          className="flex items-center w-full px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                        >
+                          <Link to="/quests">
+                          Challange Quests
+                          </Link>
+                        </button>
                         <button
                           onClick={() => setIsUserMenuOpen(false)}
                           className="flex items-center w-full px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"

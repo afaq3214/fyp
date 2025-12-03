@@ -48,11 +48,7 @@ const categories = [
   'Health & Fitness'
 ];
 
-const suggestedTags = [
-  'AI', 'Machine Learning', 'Productivity', 'Design', 'Development',
-  'SaaS', 'Mobile', 'Web', 'API', 'No-Code', 'Open Source',
-  'Blockchain', 'AR/VR', 'IoT', 'Security', 'Analytics'
-];
+
 
 export default function SubmitProduct() {
   const [formData, setFormData] = useState({

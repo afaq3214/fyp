@@ -60,7 +60,7 @@ interface Product {
   pitch: string;
   description: string;
   category: string;
-  tags: string[];
+  autoTags: string[];
   media: string[];
   websiteUrl: string;
   demoUrl: string;
@@ -99,6 +99,7 @@ export default function ProductOwner() {
         if (response.ok) {
           const data = await response.json();
           setUser(data);
+          console.log('Fetched owner profile:', data);
         }
       } catch (err) {
         console.log('Could not fetch owner profile');
@@ -192,11 +193,12 @@ export default function ProductOwner() {
                    <img
                    src={user.profilePicture}
                    alt={user.name}
+                   style={{width:'100%',objectFit:'cover'}}
                    referrerPolicy="no-referrer"
                    loading="lazy"
                    />
                   }
-                                    <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                                   {!user.profilePicture && <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>}
                                   </Avatar>
                 </div>
                 <div className="text-center lg:text-left">
@@ -228,13 +230,18 @@ export default function ProductOwner() {
                     <div className="text-2xl font-bold text-blue-600">{products.length}</div>
                     <div className="text-xs text-gray-600 mt-1">Products</div>
                   </div>
-                  <div className="text-center p-3 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
-                    <div className="text-2xl font-bold text-purple-600">{user.portfolio.length}</div>
-                    <div className="text-xs text-gray-600 mt-1">Projects</div>
-                  </div>
+                
                   <div className="text-center p-3 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
                     <div className="text-2xl font-bold text-orange-600">{user.totalUpvotes}</div>
                     <div className="text-xs text-gray-600 mt-1">Upvotes</div>
+                  </div>
+                    <div className="text-center p-3 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                    <div className="text-2xl font-bold text-orange-600">0</div>
+                    <div className="text-xs text-gray-600 mt-1">Followers</div>
+                  </div>
+                  <div className="text-center p-3 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                    <div className="text-2xl font-bold text-orange-600">0</div>
+                    <div className="text-xs text-gray-600 mt-1">Following</div>
                   </div>
                 </div>
 
@@ -247,10 +254,10 @@ export default function ProductOwner() {
 
                 {/* Meta Info */}
                 <div className="flex flex-wrap gap-4 text-sm text-gray-600">
-                  <div className="flex items-center gap-2">
+                  {/* <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4" />
-                    <span>Joined {new Date(user.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span>
-                  </div>
+<span>Joined {new Date(user.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</span>
+                  </div> */}
                   <div className="flex items-center gap-2">
                     <Star className="w-4 h-4 text-yellow-500" />
                     <span>{user.badges.length} Achievement Badges</span>
@@ -389,9 +396,9 @@ export default function ProductOwner() {
                           {product.reviews.length}
                         </span>
                       </div>
-                      {product.tags.length > 0 && (
+                      {product.autoTags.length > 0 && (
                         <div className="flex flex-wrap gap-1 mt-3">
-                          {product.tags.slice(0, 3).map((tag, index) => (
+                          {product.autoTags.slice(0, 3).map((tag, index) => (
                             <Badge key={index} variant="secondary" className="text-xs">
                               {tag}
                             </Badge>

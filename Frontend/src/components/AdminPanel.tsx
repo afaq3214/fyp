@@ -105,8 +105,8 @@ export function AdminPanel() {
         setIsLoading(true);
         // Fetch users and products data
         const [usersRes, productsRes] = await Promise.all([
-          fetch('http://localhost:5000/api/users'),
-          fetch('http://localhost:5000/api/products')
+          fetch('http://localhost:5000/api/auth/'),
+          fetch('http://localhost:5000/api/products/')
         ]);
 
         if (!usersRes.ok || !productsRes.ok) {
@@ -256,21 +256,21 @@ export function AdminPanel() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {mockPendingProducts.map(product => (
-                    <div key={product.id} className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                  {products.map(product => (
+                    <div key={product._id} className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
                       <div className="flex-1">
                         <h3 className="font-semibold">{product.title}</h3>
                         <p className="text-sm text-gray-600 dark:text-gray-400">
-                          by {product.author} • {product.category} • {product.submittedAt}
+                          by {product.author_name} • {product.category} • {product.createdAt}
                         </p>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Badge 
+                        {/* <Badge 
                           variant={product.status === 'pending' ? 'secondary' : 'default'}
                           className={product.status === 'pending' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' : ''}
                         >
                           {product.status}
-                        </Badge>
+                        </Badge> */}
                         <Button variant="outline" size="sm">
                           <Eye className="w-4 h-4 mr-1" />
                           Review
@@ -278,7 +278,7 @@ export function AdminPanel() {
                         <Button 
                           variant="outline" 
                           size="sm"
-                          onClick={() => handleApproveProduct(product.id)}
+                          onClick={() => handleApproveProduct(product._id)}
                           className="text-green-600 hover:text-green-700"
                         >
                           <CheckCircle className="w-4 h-4 mr-1" />
@@ -287,7 +287,7 @@ export function AdminPanel() {
                         <Button 
                           variant="outline" 
                           size="sm"
-                          onClick={() => handleRejectProduct(product.id)}
+                          onClick={() => handleRejectProduct(product._id)}
                           className="text-red-600 hover:text-red-700"
                         >
                           <XCircle className="w-4 h-4 mr-1" />
@@ -338,7 +338,7 @@ export function AdminPanel() {
                         <TableCell>
                           <div className="flex items-center space-x-3">
                             <Avatar className="w-8 h-8">
-                              <AvatarImage src={user.avatar} />
+                              <AvatarImage src={user.profilePicture} />
                               <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                             </Avatar>
                             <div>

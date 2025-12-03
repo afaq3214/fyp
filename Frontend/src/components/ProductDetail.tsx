@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { 
   ArrowLeft, 
   Heart, 
@@ -30,13 +30,34 @@ import { toast } from 'sonner';
 import { Product, User } from '../App';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import { useParams, useNavigate } from 'react-router-dom';
-
+import axios from 'axios';
+import { UserContext } from '@/context/UserContext';
 interface ProductDetailProps {
   product: Product;
   onBack: () => void;
   currentUser: User | null;
 }
+interface MongoId {
+  $oid: string;
+}
 
+interface MongoDate {
+  $date: string;
+}
+
+export interface ProductCommentRaw {
+  _id: MongoId;
+  productId: MongoId;
+  userId: MongoId;
+  profilePicture: string;
+  username: string;
+  comment: string;
+  rating:number;
+  createdAt: MongoDate;
+  updatedAt: MongoDate;
+  __v: number;
+  emoji:string;
+}
 const mockReviews = [
   {
     id: '1',
@@ -106,9 +127,9 @@ const relatedProducts = [
 export function ProductDetail() {
   const { productId } = useParams();
   const navigate = useNavigate();
-  
+  const {userId,SendComments}=useContext(UserContext);
   const [product, setProduct] = useState<Product | null>(null);
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [currentUser, setCurrentUser] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isUpvoted, setIsUpvoted] = useState(false);
@@ -116,10 +137,47 @@ export function ProductDetail() {
   const [reviewText, setReviewText] = useState('');
   const [selectedEmoji, setSelectedEmoji] = useState('');
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
-const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
+  const [productUpvotes,setProductUpvotes]=useState(0);
+  const [productComments, setProductComments] = useState<ProductCommentRaw[]>([]);
+  const [rating, setRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState<number | null>(null);
+
+  const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
   const emojiOptions = ['🚀', '💎', '👍', '🔥', '💡', '⭐', '🎯', '💯'];
 
+  useEffect(()=>{
+    const GetProductComments=async()=>{
+        try {
+            const commentsRes = await fetch(`${url}/api/comments/product/${productId}`);
+            if (!commentsRes.ok) throw new Error('Failed to fetch comments');
+            const commentsData = await commentsRes.json(); // this is already an array
+            setProductComments(Array.isArray(commentsData) ? commentsData : []);
+        } catch (err) {
+            console.error(err);
+        }
+    }
+    GetProductComments();
+    const FetchUpvotes=async()=>{
+        try {
+            const upvoteRes = await fetch(`${url}/api/upvotes/getproductupvotes`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ productId })
+            });
+            if (!upvoteRes.ok) throw new Error('Failed to fetch upvotes');
+            const upvoteData = await upvoteRes.json();
+            setProductUpvotes(upvoteData.upvote.userIds.length);
+        } catch (err) {
+            console.error(err);
+        }
+    }
+    FetchUpvotes();
+  },[])
   useEffect(() => {
+    
+
     const fetchData = async () => {
       try {
         setIsLoading(true);
@@ -130,9 +188,9 @@ const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
         setProduct(productData);
 
         // Get current user from localStorage
-        const userJson = localStorage.getItem('user');
+        const userJson = localStorage.getItem('token');
         if (userJson) {
-          setCurrentUser(JSON.parse(userJson));
+          setCurrentUser(userJson);
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
@@ -144,16 +202,46 @@ const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
     if (productId) {
       fetchData();
     }
+
+    const checkUpvote = axios.get(`${url}/api/upvotes/check-upvote`, {
+      params: {
+        userIds: userId,
+        productId: productId
+      }
+    });
+    checkUpvote.then(response => {
+      setIsUpvoted(response.data.upvote);
+    });
   }, [productId]);
 
   const handleBack = () => {
     navigate('/');
   };
 
-  const handleUpvote = () => {
+  const handleUpvote = async () => {
+  if (!userId) {
+    toast.error('Please log in to upvote');
+    return;
+  }
+
+  const endpoint = isUpvoted 
+    ? 'http://localhost:5000/api/upvotes/remove-upvote' 
+    : 'http://localhost:5000/api/upvotes/upvote';
+
+  try {
+    const response = await axios.post(endpoint, {
+      userIds: userId,
+      productId: productId 
+    });
+    
+    console.log(response.data);
     setIsUpvoted(!isUpvoted);
-    toast.success(isUpvoted ? 'Upvote removed' : 'Product upvoted!');
-  };
+    toast.success(isUpvoted ? 'Upvote removed!' : 'Product upvoted!');
+  } catch (error) {
+    console.error('Error updating vote:', error);
+    toast.error(error.response?.data?.message || 'Failed to update vote. Please try again.');
+  }
+};
 
   const handleBookmark = () => {
     setIsBookmarked(!isBookmarked);
@@ -165,21 +253,31 @@ const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
     toast.success('Link copied to clipboard!');
   };
 
-  const handleSubmitReview = () => {
-    if (!currentUser) {
-      toast.error('Please sign in to leave a review');
-      return;
-    }
-    
-    if (!reviewText.trim()) {
-      toast.error('Please write a review');
-      return;
-    }
+  const handleSubmitReview = async () => {
+  if (!userId) {
+    toast.error('Please sign in to leave a review');
+    return;
+  }
 
+  if (!reviewText.trim()) {
+    toast.error('Please write a review');
+    return;
+  }
+
+  if (!SendComments) {
+    toast.error('Cannot send comment right now');
+    return;
+  }
+
+  try {
+    await SendComments(reviewText, product._id, selectedEmoji,rating);
     toast.success('Review submitted successfully!');
     setReviewText('');
     setSelectedEmoji('');
-  };
+  } catch (err) {
+    toast.error('Failed to submit review. Please try again.');
+  }
+};
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
@@ -372,7 +470,7 @@ const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
 
                 {/* Action Buttons */}
                 <div className="flex flex-wrap gap-3">
-                  {/* <Button
+                  <Button
                     onClick={handleUpvote}
                     variant={isUpvoted ? "default" : "outline"}
                     className={isUpvoted ? "bg-red-500 hover:bg-red-600" : ""}
@@ -380,7 +478,7 @@ const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
                     <Heart className={`w-4 h-4 mr-2 ${isUpvoted ? 'fill-current' : ''}`} />
                     {isUpvoted ? 'Upvoted' : 'Upvote'} ({product.upvotes + (isUpvoted ? 1 : 0)})
                   </Button>
-                   */}
+                  
                   {/* <Button variant="outline" onClick={handleBookmark}>
                     <Bookmark className={`w-4 h-4 mr-2 ${isBookmarked ? 'fill-current' : ''}`} />
                     {isBookmarked ? 'Bookmarked' : 'Bookmark'}
@@ -413,11 +511,11 @@ const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
             </Card>
 
             {/* Reviews Section */}
-            {/* <Card>
+            <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <MessageCircle className="w-5 h-5 mr-2" />
-                  Reviews ({mockReviews.length})
+                  Emoji Feedback Tags ({productComments.length})
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -429,18 +527,21 @@ const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
                   
                   <TabsContent value="reviews" className="mt-6">
                     <div className="space-y-6">
-                      {mockReviews.map(review => (
-                        <div key={review.id} className="border-b border-gray-200 dark:border-gray-700 pb-6 last:border-b-0">
-                          <div className="flex items-start space-x-4">
-                            <Avatar>
-                              <AvatarImage src={review.author.avatar} />
-                              <AvatarFallback>{review.author.name.charAt(0)}</AvatarFallback>
+                      {productComments.length === 0 ? (
+                        <p>No reviews yet.</p>
+                      ) : (
+                        productComments.map(review => (
+                          <div key={review._id.$oid} className="border-b border-gray-200 dark:border-gray-700 pb-6 last:border-b-0">
+                            <div className="flex items-start space-x-4">
+                              <Avatar>
+                                <AvatarImage src={review.profilePicture} />
+                              <AvatarFallback>{review.username.charAt(0)}</AvatarFallback>
                             </Avatar>
                             <div className="flex-1">
                               <div className="flex items-center justify-between mb-2">
                                 <div>
-                                  <h4 className="font-medium">{review.author.name}</h4>
-                                  <p className="text-sm text-gray-600 dark:text-gray-400">{review.author.role}</p>
+                                  <h4 className="font-medium">{review.username}</h4>
+                                  {/* <p className="text-sm text-gray-600 dark:text-gray-400">{review.author.role}</p> */}
                                 </div>
                                 <div className="flex items-center space-x-2">
                                   <span className="text-2xl">{review.emoji}</span>
@@ -454,17 +555,17 @@ const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
                                   </div>
                                 </div>
                               </div>
-                              <p className="text-gray-700 dark:text-gray-300 mb-3">{review.content}</p>
+                              <p className="text-gray-700 dark:text-gray-300 mb-3">{review.comment}</p>
                               <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
-                                <span>{review.date}</span>
-                                <Button variant="ghost" size="sm">
-                                  👍 Helpful ({review.helpful})
-                                </Button>
+                                <span>{review.createdAt.$date}</span>
+                                {/* <Button variant="ghost" size="sm">
+                                  👍 Helpful ({review.})
+                                </Button> */}
                               </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        </div>  
+                      )))}
                     </div>
                   </TabsContent>
                   
@@ -473,8 +574,8 @@ const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
                       <div className="space-y-4">
                         <div className="flex items-center space-x-4 mb-4">
                           <Avatar>
-                            <AvatarImage src={currentUser.profilePicture} />
-                            <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
+                            {/* <AvatarImage src={currentUser.profilePicture} />
+                            <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback> */}
                           </Avatar>
                           <div>
                             <h4 className="font-medium">{currentUser.name}</h4>
@@ -498,7 +599,34 @@ const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
                             ))}
                           </div>
                         </div>
-
+                        <div className="mb-2">
+  <label className="block text-sm font-medium mb-2">Your rating</label>
+  <div className="flex items-center gap-1">
+    {[1, 2, 3, 4, 5].map((starValue) => (
+      <button
+        key={starValue}
+        type="button"
+        onClick={() => setRating(starValue)}
+        onMouseEnter={() => setHoverRating(starValue)}
+        onMouseLeave={() => setHoverRating(null)}
+        className="focus:outline-none"
+      >
+        <Star
+          className={`w-6 h-6 ${
+            (hoverRating ?? rating) >= starValue
+              ? 'text-yellow-400 fill-current'
+              : 'text-gray-300'
+          }`}
+        />
+      </button>
+    ))}
+    {rating > 0 && (
+      <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">
+        {rating} / 5
+      </span>
+    )}
+  </div>
+</div>
                         <Textarea
                           placeholder="Share your thoughts about this product... (50 words max for micro-review)"
                           value={reviewText}
@@ -515,6 +643,7 @@ const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
                             Submit Review
                           </Button>
                         </div>
+
                       </div>
                     ) : (
                       <div className="text-center py-8">
@@ -527,7 +656,7 @@ const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
                   </TabsContent>
                 </Tabs>
               </CardContent>
-            </Card> */}
+            </Card>
           </div>
 
           {/* Sidebar */}
@@ -548,10 +677,11 @@ const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
                    <img
                    src={product.author_profile}
                    alt={product.author_name}
+                   style={{objectFit:'cover',width:'100%'}}
                    referrerPolicy="no-referrer"
                    loading="lazy"
                    />
-                  }<AvatarFallback>{product.author_name.charAt(0)}</AvatarFallback>
+                  }{!product.author_profile  && <AvatarFallback>{product.author_name.charAt(0)}</AvatarFallback>}
                 </Avatar>
                    <div>
                     <h4 className="font-medium hover:text-blue-600 transition-colors">{product.author_name}</h4>
@@ -566,14 +696,14 @@ const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
             </Card>
 
             {/* Product Stats */}
-            {/* <Card>
+            <Card>
               <CardHeader>
                 <CardTitle>Product Stats</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex justify-between">
                   <span className="text-gray-600 dark:text-gray-400">Total Upvotes</span>
-                  <span className="font-medium">{product.upvotes}</span>
+                  <span className="font-medium">{productUpvotes}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600 dark:text-gray-400">Reviews</span>
@@ -596,7 +726,7 @@ const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
                   <Progress value={87} />
                 </div>
               </CardContent>
-            </Card> */}
+            </Card>
 
             {/* Related Products */}
             {/* <Card>

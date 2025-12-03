@@ -6,7 +6,9 @@ import authRoutes from "./routes/auth.js";
 import productRoutes from "./routes/product.js";
 import path from "path";
 import { fileURLToPath } from "url";
-
+import upvoteRoutes from "./routes/upvotes.js"
+import commentRoutes from "./routes/comments.js"
+import questRoutes from "./routes/quest.js"
 dotenv.config();
 connectDB();
 
@@ -28,7 +30,10 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
-
+app.use("/api/upvotes", upvoteRoutes);
+app.use("/api/comments", commentRoutes);
+console.log('Routes mounted: /api/quest');
+app.use("/api/quest", questRoutes);
 // Global error handler
 app.use((err, req, res, next) => {
   console.error("Server error:", err);

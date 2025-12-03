@@ -19,7 +19,8 @@ import {
   Award,
   TrendingUp,
   Zap,
-  Target
+  Target,
+  Trash
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -95,6 +96,9 @@ export function UserProfile() {
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('projects');
   const [profileCompletion, setProfileCompletion] = useState<number>(0);
+  const [deletingProductId, setDeletingProductId] = useState<string | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<Product | null>(null);
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
   const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
@@ -175,6 +179,40 @@ export function UserProfile() {
     setProfileCompletion(completionPercentage);
   }, [user]);
 
+  const handleDeleteProduct = (product: Product) => {
+    setProductToDelete(product);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!productToDelete) return;
+    const id = productToDelete._id;
+    try {
+      setDeletingProductId(id);
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error("Not authenticated");
+
+      const res = await fetch(`${url}/api/products/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: 'Delete failed' }));
+        throw new Error(err.error || 'Delete failed');
+      }
+
+      setProducts(prev => prev.filter(p => p._id !== id));
+      setShowDeleteModal(false);
+      setProductToDelete(null);
+    } catch (err) {
+      console.error('Delete product error:', err);
+      window.alert(err instanceof Error ? err.message : 'Failed to delete product');
+    } finally {
+      setDeletingProductId(null);
+    }
+  };
+
   if (isLoading) return <div>Loading...</div>;
   if (!user) return <div>User not found</div>;
 
@@ -203,22 +241,21 @@ export function UserProfile() {
             <div className="flex flex-col md:flex-row gap-8">
               {/* Avatar and Basic Info */}
               <div className="flex flex-col items-center md:items-start">
-                  <div style={{ height: '100px', width: '100px',borderRadius: '50%' }}>
-                 {user.profilePicture &&
-
-                   <img
-                   src={user.profilePicture}
-                   alt={user.name}
-                   referrerPolicy="no-referrer"
-                   style={{borderRadius: '50%',height: '100px', width: '100px',objectFit:"cover"}}
-                   loading="lazy"
-                   />
-                  }
-                 {!user.profilePicture &&
-
-                   <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-                 }
-                </div>
+                  {/* <div style={{ height: '100px', width: '100px',borderRadius: '50%' }}> */}
+               <Avatar style={{ height: '100px', width: '100px' }}>
+                                                {user.profilePicture &&
+            
+                               <img
+                               src={user.profilePicture}
+                               alt={user.name}
+                               referrerPolicy="no-referrer"
+                               loading="lazy"
+                               style={{width:"100%",objectFit:'cover'}}
+                               />
+                              }
+                                             {!user.profilePicture &&   <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>}
+                                              </Avatar>
+                {/* </div> */}
 
                 <div className="mt-4 text-center md:text-left">
                   <h1 className="text-3xl mb-2">{user.name}</h1>
@@ -247,10 +284,7 @@ export function UserProfile() {
                     <Briefcase className="w-4 h-4 mr-2" />
                     <span className="capitalize">{user.role}</span>
                   </div>
-                  <div className="flex items-center text-gray-600">
-                    <Calendar className="w-4 h-4 mr-2" />
-                    <span>Joined {new Date(user.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</span>
-                  </div>
+                  
                   <div className="flex items-center text-gray-600">
                     <Star className="w-4 h-4 mr-2 text-yellow-500" />
                     <span>{user.badges.length} Badges</span>
@@ -430,11 +464,28 @@ export function UserProfile() {
                       <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
                         <Button 
                           size="sm" 
-                          className="bg-blue-600 hover:bg-blue-700 text-white"
+                          className="bg-blue-600 hover:bg-blue-700 text-white cursor-pointer"
                           onClick={() => navigate(`/edit-product/${product._id}`)}
+                          disabled={Boolean(deletingProductId)}
                         >
                           <Edit3 className="w-4 h-4" />
                         </Button>
+
+                        <Button 
+                          size="sm" 
+                          className="bg-red-100 hover:bg-red-200 text-gray-900 cursor-pointer"
+                          onClick={() => handleDeleteProduct(product)}
+                          disabled={Boolean(deletingProductId)}
+                          title="Delete product"
+                        >
+                          {deletingProductId === product._id ? (
+                            // simple loading indicator
+                            <span className="w-4 h-4 inline-block animate-pulse">...</span>
+                          ) : (
+                            <Trash className="w-4 h-4 text-black cursor-pointer bg-white rounded-b-full" style={{width:"30px",height:"30px",borderRadius:"5px"}} />
+                          )}
+                        </Button>
+
                         <Button size="sm" className="bg-white hover:bg-gray-100 text-gray-900" asChild>
                           <a href={product.demoUrl} target="_blank" rel="noopener noreferrer">
                             <ExternalLink className="w-4 h-4" />
@@ -564,6 +615,25 @@ export function UserProfile() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Delete confirmation modal */}
+      {showDeleteModal && productToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setShowDeleteModal(false)} />
+          <div className="relative bg-white rounded-lg shadow-lg w-full max-w-md p-6 z-10">
+            <h3 className="text-lg font-semibold mb-4">Delete product</h3>
+            <p className="text-sm text-gray-600 mb-6">Are you sure you want to delete <strong>{productToDelete.title}</strong>? This action cannot be undone.</p>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" className="cursor-pointer" onClick={() => { setShowDeleteModal(false); setProductToDelete(null); }}>
+                Cancel
+              </Button>
+              <Button className="cursor-pointer bg-red-600 hover:bg-red-700 text-white" style={{backgroundColor:'red'}} onClick={confirmDelete} disabled={Boolean(deletingProductId)}>
+                {deletingProductId === productToDelete._id ? 'Deleting...' : 'Delete'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

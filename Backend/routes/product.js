@@ -133,7 +133,7 @@ const autoTags = generateAutoTags(contentToAnalyze);
   pitch: req.body.pitch,
   description: req.body.description,
   category: req.body.category,
-  tags,
+  
   media,
   websiteUrl: req.body.websiteUrl,
   demoUrl: req.body.demoUrl,
@@ -142,7 +142,7 @@ const autoTags = generateAutoTags(contentToAnalyze);
   autoTags,  // ✅ Now contains TF-IDF generated tags
   author_id: req.user?.id,
   author_name: req.user?.name,
-  author_profile: req.user?.profilePictures,
+  author_profile: req.user?.profilePicture,
   collaborators
 });
 
@@ -209,22 +209,7 @@ router.get("/:slug", async (req, res) => {
 /**
  * 📌 Upvote a product (Module 4: Interaction System)
  */
-router.post("/:id/upvote", async (req, res) => {
-  try {
-    const product = await Product.findById(req.params.id);
-    if (!product) return res.status(404).json({ error: "Product not found" });
 
-    // Prevent duplicate upvotes
-    if (!product.upvotes.includes(req.user.id)) {
-      product.upvotes.push(req.user.id);
-      await product.save();
-    }
-
-    res.json({ upvotes: product.upvotes.length });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
 
 /**
  * 📌 Update/Edit a product
@@ -300,31 +285,7 @@ router.put("/:id", auth, (req, res) => {
   });
 });
 
-/**
- * 📌 Add a review (Module 4: Micro-reviews)
- */
-router.post("/:id/review", async (req, res) => {
-  try {
-    const { text, rating, emojiTags } = req.body;
-    const product = await Product.findById(req.params.id);
-    if (!product) return res.status(404).json({ error: "Product not found" });
 
-    product.reviews.push({
-      user: req.user.id,
-      text,
-      rating,
-      emojiTags
-    });
-
-    // Update momentum score dynamically
-    product.momentumScore += 10;
-    await product.save();
-
-    res.json(product.reviews);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
 
 /**
  * 📌 Admin approval/rejection (Module 6: Admin Panel)
@@ -341,6 +302,52 @@ router.put("/:id/status", async (req, res) => {
 
     res.json(product);
   } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * 📌 Delete a product
+ * - Only product author or admin can delete
+ * - Removes media files from uploads/products
+ */
+router.delete("/:id", auth, async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+    if (!product) return res.status(404).json({ error: "Product not found" });
+
+    // Authorization: allow author or admin
+    const requesterId = req.user.id || req.user._id;
+    const isAuthor = product.author_id && product.author_id.toString() === requesterId;
+    const isAdmin = req.user.role === "admin";
+    if (!isAuthor && !isAdmin) {
+      return res.status(403).json({ error: "Unauthorized to delete this product" });
+    }
+
+    // Delete media files from disk (if stored in uploads/products)
+    if (Array.isArray(product.media)) {
+      product.media.forEach(mediaUrl => {
+        try {
+          const fileName = mediaUrl.split("/").pop();
+          if (!fileName) return;
+          const filePath = path.join(process.cwd(), "uploads", "products", fileName);
+          if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+          }
+        } catch (err) {
+          console.warn("Failed to delete media file:", mediaUrl, err.message);
+        }
+      });
+    }
+
+    // Remove product document
+    await Product.findByIdAndDelete(req.params.id);
+
+    // Optionally: update related user stats (decrement counts) - keep minimal here
+
+    res.json({ message: "✅ Product deleted successfully", id: req.params.id });
+  } catch (error) {
+    console.error("Delete product error:", error);
     res.status(500).json({ error: error.message });
   }
 });

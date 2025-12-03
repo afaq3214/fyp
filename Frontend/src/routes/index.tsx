@@ -9,7 +9,7 @@ import { AuthPage } from '../components/AuthPage';
 import  SubmitProduct   from  '../components/Pages/SubmitProduct'
 import  EditProduct   from  '../components/Pages/EditProduct'
 import  ProductOwner   from  '../components/Pages/ProductOwner'
-
+import { ChallengeQuests } from '@/components/Pages/Quests';
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -42,8 +42,11 @@ export const router = createBrowserRouter([
       },{
         path: '/product-owner/:ownerId',
         element: <ProductOwner />   // Product owner profile page
+      },{
+        path: '/quests',
+        element: <ChallengeQuests />   // Quests page
       }
-     
+            
     ]
   }
 ]);

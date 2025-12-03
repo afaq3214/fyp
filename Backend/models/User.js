@@ -7,7 +7,6 @@ const userSchema = new mongoose.Schema(
     email: { type: String, unique: true, required: true },
     password: { type: String }, // optional if using OAuth
     googleId: { type: String }, // for Google login
-    githubId: { type: String }, // for GitHub login
     emailVerified: { type: Boolean, default: false },
     emailVerificationCode: String,
     emailVerificationExpires: Date,
@@ -18,23 +17,8 @@ const userSchema = new mongoose.Schema(
     location: String, // Added: User's city/country
     jobTitle: String, // Added: User's professional role
     status: { type: String, enum: ['active', 'inactive'], default: 'active' }, // Added: Account status
-
-    // Portfolio
-    portfolio: [
-      {
-        title: String,
-        demoUrl: String,
-        media: [String], // images/videos
-        status: { type: String, enum: ['live', 'development'], default: 'development' }, // Added: Project status
-        category: String, // Added: Project category
-        upvotes: { type: Number, default: 0 }, // Added: Project upvotes
-        comments: [{ // Added: Project comments
-          user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-          content: String,
-          createdAt: { type: Date, default: Date.now }
-        }]
-      },
-    ],
+    points:Number,
+    
 
     // Social Links
     github: String,
@@ -55,10 +39,6 @@ const userSchema = new mongoose.Schema(
     // Projects & Collaborations Metrics (Added)
     projectsCount: { type: Number, default: 0 },
    
-
-    // Collaboration
-   
-
     // System fields
     role: { type: String, enum: ["user", "admin", "moderator"], default: "user" }, // Added moderator role
     lastActive: { type: Date }, // Added: Track user activity

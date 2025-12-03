@@ -9,7 +9,7 @@ const productSchema = new mongoose.Schema(
     pitch: { type: String, required: true},
     description: { type: String },
     category: { type: String },
-    tags: [String],
+    
 
     // Media & showcase
     media: [String],
@@ -32,10 +32,6 @@ const productSchema = new mongoose.Schema(
       },
     ],
     
-
-    
-    
-
     // AI moderation
     flagged: { type: Boolean, default: false },
     moderationNotes: String,

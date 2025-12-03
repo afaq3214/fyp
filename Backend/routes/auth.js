@@ -71,18 +71,40 @@ const ResetPasswordEmail = async (email, code) => {
   });
 };
 /**
- * 📌 Register
+ * 📌 Register (prevent reuse of same plaintext password across accounts)
  */
 router.post("/register", async (req, res) => {
   try {
     const { name, email, password } = req.body;
+
+    if (!name || !email || !password) {
+      return res.status(400).json({ error: "Name, email and password are required." });
+    }
+
+    // Check duplicate email first
+    const existingEmail = await User.findOne({ email });
+    if (existingEmail) {
+      return res.status(409).json({ error: "This email is already registered. Please sign in or use Forgot Password." });
+    }
+
+    // Check if plaintext password is already used by another account
+    // Use a cursor to avoid loading all users in memory
+    const cursor = User.find().cursor();
+    for await (const u of cursor) {
+      // skip if no password stored (e.g., oauth users)
+      if (!u.password) continue;
+      const same = await bcrypt.compare(password, u.password);
+      if (same) {
+        return res.status(409).json({ error: "This password is already used by another account. Please choose a different password." });
+      }
+    }
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = new User({ name, email, password: hashedPassword });
     await user.save();
 
     // Generate and store email verification code
-    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const verificationCode = generateOTP();
     user.emailVerificationCode = verificationCode;
     user.emailVerificationExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 min
     user.emailVerified = false;
@@ -97,10 +119,22 @@ router.post("/register", async (req, res) => {
     });
   } catch (error) {
     console.error("Register error:", error);
-    res.status(400).json({ error: error.message });
+    if (error && error.code === 11000) {
+      return res.status(409).json({ error: "This email is already registered." });
+    }
+    res.status(500).json({ error: "Registration failed. Please try again." });
   }
 });
-
+// Get single user
+router.get('single-user', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ error: "User not found" });
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+})
 /**
  * 📌 Verify Email
  */

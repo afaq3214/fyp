@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import { Mail, Github, Eye, EyeOff, Sparkles, Key } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Button } from './ui/button';
@@ -8,6 +8,7 @@ import { Separator } from './ui/separator';
 import { Checkbox } from './ui/checkbox';
 import { toast } from 'sonner';
 import { User } from '../App';
+import { UserContext } from '@/context/UserContext';
 
 // Extend the Window interface to include 'google'
 declare global {
@@ -39,6 +40,7 @@ export function AuthModal({ isOpen, onClose, mode, onToggleMode, onAuth }: AuthM
   const [pendingEmail, setPendingEmail] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const googleBtnRef = useRef<HTMLDivElement>(null);
+  const {getuserId}=useContext(UserContext);
 const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
   const validatePassword = (password: string): boolean => {
     if (password.length < 8) {
@@ -88,7 +90,8 @@ const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
                 status: "active",
                 joinDate: data.user.createdAt || new Date().toISOString(),
               });
-
+              console.log('User ID set:', data.user.id); 
+              getuserId(data.user.id);
               toast.success("Signed in with Google!");
               resetForm();
               onClose();
@@ -133,7 +136,7 @@ const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
     try {
       if (mode === 'forgot-password') {
         if (forgotPasswordStep === 'email') {
-          const response = await fetch('${url}/api/auth/forgot-password', {
+          const response = await fetch(`${url}/api/auth/forgot-password`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email }),
@@ -160,7 +163,7 @@ const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
           resetForm();
         }
       } else {
-        const endpoint = mode === 'login' ? '/api/auth/login' : '/api/auth/register';
+        const endpoint = mode === 'login' ? 'api/auth/login' : 'api/auth/register';
         const response = await fetch(`${url}/${endpoint}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -170,8 +173,12 @@ const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
             ...(mode === 'signup' && { name })
           }),
         });
-
         const data = await response.json();
+    
+        if (data.user?.id) {
+  getuserId(data.user.id);
+   // For debugging
+}
         if (!response.ok) throw new Error(data.error || 'Authentication failed');
 
         // If email verification is required
