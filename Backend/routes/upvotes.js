@@ -3,6 +3,9 @@ import mongoose from "mongoose";
 import Upvotes from "../models/Upvotes.js";
 import { updateDailyProgress } from "../services/updateDailyProgress.js";
 import User from "../models/User.js";
+import { UpdateBadge } from "../services/badgeService.js";
+import Product from "../models/Product.js";
+import { notification } from "./notification.js";
 const router = express.Router();
 
 async function IncrementUserUpvoteCount(userId) {
@@ -11,25 +14,26 @@ async function IncrementUserUpvoteCount(userId) {
         if (FindUser) {
             FindUser.totalUpvotes += 1;
             await FindUser.save();
+            await UpdateBadge(userId,'upvote');
             console.log("User upvote count incremented successfully",FindUser.totalUpvotes);
-        } }
-        catch (error) {
+        }
+    } catch (error) {
         console.error("Error incrementing user upvote count:", error);
-    }}
+    }
+}
 async function DecrementUserUpvoteCount(userId) {
     try {
         const FindUser = await User.findById(userId);
         if (FindUser) {
             FindUser.totalUpvotes -= 1;
             await FindUser.save();
-            console.log("User upvote count incremented successfully",FindUser.totalUpvotes);
-        } }
-        catch (error) {
-        console.error("Error incrementing user upvote count:", error);
-    }}    
+            console.log("User upvote count decremented successfully",FindUser.totalUpvotes);
+        }
+    } catch (error) {
+        console.error("Error decrementing user upvote count:", error);
+    }
+}    
 router.post('/getproductupvotes',async(req,res)=>{
-
-
     try {
         const { productId } = req.body;
         const upvote = await Upvotes.findOne({ productId: productId });
@@ -48,7 +52,7 @@ router.post('/getproductupvotes',async(req,res)=>{
 router.post('/upvote', async (req, res) => {
     try {
         const { userIds, productId } = req.body;
-        
+        const product = await Product.findById(productId)
         if (!userIds || !productId) {
             return res.status(400).json({
                 message: "userIds and productId are required",
@@ -68,7 +72,7 @@ router.post('/upvote', async (req, res) => {
         await IncrementUserUpvoteCount(userIds);
         // Find upvote document for this product
         let upvote = await Upvotes.findOne({ productId: productIdObj });
-
+     
         if (upvote) {
             // If already upvoted
             const already = upvote.userIds.some(id => id.toString() === userIds);
@@ -82,7 +86,15 @@ router.post('/upvote', async (req, res) => {
             // Add new user ID
             upvote.userIds.push(userIdObj);
             await upvote.save();
-
+            // Update Product's upvotes array
+            await Product.findByIdAndUpdate(productId, {
+                $addToSet: { upvotes: userIdObj }
+            });
+            try {
+                await notification(product.author_id, "You have received an upvote on your product", "upvote");
+            } catch (notifError) {
+                console.error("Error sending notification:", notifError);
+            }
             return res.status(200).json({
                 message: "Product upvoted successfully",
                 upvote
@@ -96,6 +108,17 @@ router.post('/upvote', async (req, res) => {
         });
 
         await newUpvote.save();
+
+        // Update Product's upvotes array
+        await Product.findByIdAndUpdate(productId, {
+            $addToSet: { upvotes: userIdObj }
+        });
+
+        try {
+            await notification(product.author_id, "You have received an upvote on your product", "upvote");
+        } catch (notifError) {
+            console.error("Error sending notification:", notifError);
+        }
 
         return res.status(201).json({
             message: "Product upvoted successfully",
@@ -182,6 +205,11 @@ router.post('/remove-upvote', async (req, res) => {
 
         // Remove the user from the upvote array
         upvote.userIds = upvote.userIds.filter(id => id.toString() !== userIds);
+
+        // Update Product's upvotes array
+        await Product.findByIdAndUpdate(productId, {
+            $pull: { upvotes: userIdObj }
+        });
 
         // If after removing, the array is empty → delete the document
         if (upvote.userIds.length === 0) {

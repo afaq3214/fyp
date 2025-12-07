@@ -1,8 +1,8 @@
-import React, { use, useEffect, useState } from 'react';
+import React, { use, useContext, useEffect, useState } from 'react';
 import { 
   Trophy, Target, Zap, Star, Award, CheckCircle2, Clock, 
   TrendingUp, Flame, Heart, Rocket, Lightbulb, ThumbsUp,
-  Gift, Crown, Medal, Sparkles, ArrowLeft
+  Gift, Crown, Medal, Sparkles, ArrowLeft, User
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
 import { Button } from '../ui/button';
@@ -10,9 +10,9 @@ import { Badge } from '../ui/badge';
 import { Progress } from '../ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import { User } from '@/App';
 import axios from 'axios';
 import { toast } from 'sonner';
+import { UserContext } from '@/context/UserContext';
 
 interface Quest {
   id: string;
@@ -39,29 +39,136 @@ interface BadgeItem {
   requirement?: string;
 }
 
-interface ChallengeQuestsProps {
-  currentUser: User | null;
-  onBack: () => void;
+
+interface UserProgressProps {
+  dailyQuests: {
+    upvotesToday: number;
+    commentsToday: number;
+    upvotesRemaining: number;
+    commentsRemaining: number;
+    completed: boolean;
+    reward: number;
+  };
+  userStats: {
+    points: number;
+    badges: any[];
+  };
 }
-interface userProgressProps {
-    commentsToday:number,
-    upvotesToday:number
+
+interface BadgeItem {
+  id: string;
+  name: string;
+  description: string;
+  icon: React.ReactNode;
+  rarity: 'common' | 'rare' | 'epic' | 'legendary';
+  earned: boolean;
+  earnedDate?: string;
+  progress?: number;
+  requirement?: string;
 }
  const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
 export function ChallengeQuests() {
+  const {user}=useContext(UserContext)
   const [activeTab, setActiveTab] = useState('quests');
-  const [userProgress,setProgress]=useState<userProgressProps>()
+  const [userProgress,setProgress]=useState<UserProgressProps>()
   const  [dailyQuest,setdailyQuest]=useState<Quest[]>([])
+  const [userPoints,setUserPoints]=useState<number>(0)
+  const [userBadges,setUserBadges]=useState<any>([])
+  useEffect(() => {
+    const getbadges=async ()=>{
+      axios.get(`${url}/api/badge/${user._id}`).then((response)=>{
+        setUserBadges(response.data.badges);
+        console.log("user badges",response.data.badges)
+      }).catch((error)=>{
+        console.error("Error fetching badges:", error);
+      });
+    }
+    getbadges();
+  },[])
+// Update the badges mapping to use real badges
+const mapBadgesToDisplay = (): BadgeItem[] => {
+  console.log("mapBadgesToDisplay called, userBadges:", userBadges);
+  
+  const badgeMap: { [key: string]: Omit<BadgeItem, 'earned' | 'earnedDate'> } = {
+    'first5upvotes': {
+      id: 'b1',
+      name: 'Upvote Starter',
+      description: 'Cast your first 5 upvotes',
+      icon: <TrendingUp className="w-6 h-6" />,
+      rarity: 'common'
+      // Remove earned: true from here
+    },
+    'first10comments': {
+      id: 'b2',
+      name: 'Comment King',
+      description: 'Write 10 comments',
+      icon: <Heart className="w-6 h-6" />,
+      rarity: 'rare'
+    },
+    // Add more badges here
+    'first20upvotes': {
+      id: 'b3',
+      name: 'Upvote Master',
+      description: 'Receive 20 upvotes on your content',
+      icon: <TrendingUp className="w-6 h-6" />,
+      rarity: 'epic'
+    },
+    'first50upvotes': {
+      id: 'b4',
+      name: 'Upvote Legend',
+      description: 'Reach 50 upvotes milestone',
+      icon: <TrendingUp className="w-6 h-6" />,
+      rarity: 'legendary'
+    },
+    'firstLogin': {
+      id: 'b5',
+      name: 'Welcome Aboard',
+      description: 'Complete your first login',
+      icon: <User className="w-6 h-6" />,
+      rarity: 'common'
+    },
+    'profileComplete': {
+      id: 'b6',
+      name: 'Profile Perfectionist',
+      description: 'Complete your profile with all details',
+      icon: <User className="w-6 h-6" />,
+      rarity: 'rare'
+    }
+  };
+
+  // Fix: use 'key' instead of 'badge' based on the actual data structure
+  const earnedBadgeKeys = userBadges.map(b => b.key);
+  console.log("Earned badge keys:", earnedBadgeKeys);
+  
+  
+  return Object.entries(badgeMap).map(([key, badge]) => {
+    const isEarned = earnedBadgeKeys.includes(key);
+    const earnedBadge = userBadges.find(b => b.key === key);
+    console.log(`Badge Key: ${key}, isEarned: ${isEarned}, Earned Badge Data:`, earnedBadge);
+    
+    return {
+      ...badge,
+      earned: isEarned,  // This sets earned based on API data
+      earnedDate: isEarned && earnedBadge?.awardedAt 
+        ? new Date(earnedBadge.awardedAt).toLocaleDateString()
+        : undefined
+    };
+  });
+};
 useEffect(() => {
+  console.log("Fetching quest progress...",user);
+   
+
   const token = localStorage.getItem('token');
   if (token) {
-    axios.get(`${url}/api/quest`, {  // Added /api here
+    axios.get(`${url}/api/quest`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
     })
     .then(response => {
-        const questData = response.data[0];
+        const questData = response.data.quests[0];
+        setUserPoints(response.data.userPoints)
         console.log("updatedProgress",questData)
       setProgress(response.data);
       if (!questData) {
@@ -84,20 +191,18 @@ useEffect(() => {
     {
       id: 'q2',
       title: 'Upvote Champion',
-      description: 'Upvote 10 products',
+      description: `Upvote 5 products`,
       progress: questData?.upvotesToday || 0 ,
-      target: 3,
+      target: 5,
       reward: '100 XP + Badge',
       type: 'daily',
       icon: <TrendingUp className="w-5 h-5" />,
       xp: 100,
-      completed: (questData?.upvotesToday || 0) >= 3 
+      completed: (questData?.upvotesToday || 0) >= 5 
     },
     
-  ]
-
-)
- if(dailyQuests.some(quest => quest.completed)){
+  ])
+ if(dailyQuest.some(quest => quest.completed)){
   toast.success("Daily quest completed! Rewards claimed.");
 }
     })
@@ -107,34 +212,8 @@ useEffect(() => {
   }
 }, []);
   // Mock quests data
-  const dailyQuests: Quest[] = [
-   
-    {
-      id: 'q1',
-      title: 'Share the Love',
-      description: 'Give emoji reactions to 3 products',
-      progress: userProgress?.commentsToday || 0,
-      target: 3,
-      reward: '30 XP',
-      type: 'daily',
-      icon: <Heart className="w-5 h-5" />,
-      xp: 30,
-      completed: false
-    },
-    {
-      id: 'q2',
-      title: 'Upvote Champion',
-      description: 'Upvote 10 products',
-      progress: userProgress?.upvotesToday || 0,
-      target: 3,
-      reward: '100 XP + Badge',
-      type: 'daily',
-      icon: <TrendingUp className="w-5 h-5" />,
-      xp: 100,
-      completed: true
-    },
-    
-  ];
+
+ 
 
   const weeklyQuests: Quest[] = [
     {
@@ -178,7 +257,7 @@ useEffect(() => {
   const badges: BadgeItem[] = [
     {
       id: 'b1',
-      name: 'Early Adopter',
+      name:  'Early Adopter',
       description: 'Joined PeerRank in its first month',
       icon: <Star className="w-6 h-6" />,
       rarity: 'legendary',
@@ -215,15 +294,6 @@ useEffect(() => {
       requirement: '5 products'
     },
     {
-      id: 'b5',
-      name: 'Trendsetter',
-      description: 'Have a product reach trending status',
-      icon: <Flame className="w-6 h-6" />,
-      rarity: 'legendary',
-      earned: false,
-      requirement: '1 trending product'
-    },
-    {
       id: 'b6',
       name: 'Community Hero',
       description: 'Write 50 helpful reviews',
@@ -242,16 +312,6 @@ useEffect(() => {
       earned: false,
       progress: 324,
       requirement: '1000 upvotes'
-    },
-    {
-      id: 'b8',
-      name: 'Daily Warrior',
-      description: 'Complete daily quests for 7 days straight',
-      icon: <Medal className="w-6 h-6" />,
-      rarity: 'epic',
-      earned: false,
-      progress: 3,
-      requirement: '7 day streak'
     }
   ];
 
@@ -314,20 +374,12 @@ useEffect(() => {
               <CardContent className="p-6">
                 <div className="flex items-center space-x-4">
                   <div className="bg-white/20 p-4 rounded-2xl">
-                    <Trophy className="w-8 h-8 text-white" />
+                    <Trophy className="w-8 h-8 text-yellow-400" />
                   </div>
                   <div>
-                    <p className="text-sm text-white/80 mb-1">Your Level</p>
-                    <p className="text-3xl font-bold">Level {level}</p>
-                    <p className="text-xs text-white/70 mt-1">{xpForNextLevel} XP to Level {level + 1}</p>
+                    <p className="text-sm text-white/80 mb-1">Your Points</p>
+                    <p className="text-3xl font-bold text-white">{userPoints}</p>
                   </div>
-                </div>
-                <div className="mt-4">
-                  <Progress 
-                    value={(totalXP % 500) / 500 * 100} 
-                    className="h-2 bg-white/20"
-                  />
-                  <p className="text-xs text-white/70 mt-2">{totalXP % 500} / 500 XP</p>
                 </div>
               </CardContent>
             </Card>
@@ -429,7 +481,7 @@ useEffect(() => {
             </div>
 
             {/* Weekly Quests */}
-            <div>
+            {/* <div>
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center space-x-3">
                   <div className="bg-gradient-to-br from-purple-100 to-pink-100 p-3 rounded-2xl">
@@ -450,7 +502,7 @@ useEffect(() => {
                   <QuestCard key={quest.id} quest={quest} />
                 ))}
               </div>
-            </div>
+            </div> */}
           </TabsContent>
 
           {/* Badges Tab */}
@@ -463,20 +515,20 @@ useEffect(() => {
                 <div>
                   <h2 className="text-2xl font-bold text-gray-900">Badge Collection</h2>
                   <p className="text-sm text-gray-600">
-                    {badges.filter(b => b.earned).length} of {badges.length} badges earned
+                    {mapBadgesToDisplay().filter(b => b.earned).length} of {mapBadgesToDisplay().length} badges earned
                   </p>
                 </div>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {badges.map((badge) => (
+              {mapBadgesToDisplay().map((badge) => (
                 <Card
                   key={badge.id}
                   className={`${
                     badge.earned 
                       ? getRarityBg(badge.rarity) 
-                      : 'bg-gray-50 border-gray-200 opacity-60'
+                      : 'bg-gray-50 border-gray-200'
                   } border-2 shadow-lg hover:shadow-xl transition-all duration-300 ${
                     badge.earned ? 'hover:scale-105' : ''
                   }`}
@@ -486,8 +538,8 @@ useEffect(() => {
                       <div
                         className={`bg-gradient-to-br ${getRarityColor(
                           badge.rarity
-                        )} p-4 rounded-2xl mb-4 ${
-                          !badge.earned && 'grayscale'
+                        )} p-4 rounded-2xl mb-4 text-white ${
+                          !badge.earned && 'opacity-40 grayscale'
                         }`}
                       >
                         {badge.icon}
@@ -505,36 +557,19 @@ useEffect(() => {
                       >
                         {badge.rarity.toUpperCase()}
                       </Badge>
-                      <h3 className="font-bold text-lg mb-2 text-gray-900">
+                      <h3 className={`font-bold text-lg mb-2 ${badge.earned ? 'text-gray-900' : 'text-gray-500'}`}>
                         {badge.name}
                       </h3>
-                      <p className="text-sm text-gray-600 mb-4">
+                      <p className={`text-sm mb-4 ${badge.earned ? 'text-gray-600' : 'text-gray-500'}`}>
                         {badge.description}
                       </p>
                       {badge.earned ? (
-                        <div className="flex items-center text-sm text-green-600">
+                        <div className="flex items-center text-sm text-green-600 font-semibold">
                           <CheckCircle2 className="w-4 h-4 mr-1" />
                           Earned {badge.earnedDate}
                         </div>
                       ) : (
-                        <div className="w-full">
-                          {badge.progress !== undefined && (
-                            <>
-                              <Progress
-                                value={(badge.progress / parseInt(badge.requirement || '100')) * 100}
-                                className="h-2 mb-2"
-                              />
-                              <p className="text-xs text-gray-500">
-                                {badge.progress} / {badge.requirement}
-                              </p>
-                            </>
-                          )}
-                          {!badge.progress && (
-                            <p className="text-xs text-gray-500">
-                              {badge.requirement}
-                            </p>
-                          )}
-                        </div>
+                        <p className="text-xs text-gray-500">Not yet earned</p>
                       )}
                     </div>
                   </CardContent>
@@ -589,15 +624,16 @@ function QuestCard({ quest }: QuestCardProps) {
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
-          <div className="flex items-center justify-between text-sm">
+          {!quest.completed && <div className="flex items-center justify-between text-sm">
             <span className="text-gray-600">Progress</span>
             <span className="font-semibold text-gray-900">
               {quest.progress} / {quest.target}
             </span>
-          </div>
-          <Progress value={progressPercent} className="h-3" />
+          </div>}
+          {!quest.completed && 
+          <Progress value={progressPercent} className="h-3" />}
           {quest.completed ? (
-            <Button className="w-full bg-green-600 hover:bg-green-700" disabled>
+            <Button className="w-full bg-green-600 hover:bg-green-700 " style={{color:"black"}} disabled>
               <CheckCircle2 className="w-4 h-4 mr-2" />
               Completed
             </Button>
@@ -615,3 +651,5 @@ function QuestCard({ quest }: QuestCardProps) {
     </Card>
   );
 }
+
+

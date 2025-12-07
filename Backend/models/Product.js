@@ -46,6 +46,10 @@ const productSchema = new mongoose.Schema(
     author_name: { type: String },
     author_profile: { type: String },
     collaborators: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    
+    // Premium status
+    isPremium: { type: Boolean, default: false },
+    premium: { type: Boolean, default: false }, // For backward compatibility
 
     // System
    
@@ -66,6 +70,22 @@ productSchema.pre("save", async function (next) {
     }
 
     this.slug = slug;
+  }
+  next();
+});
+
+// ✅ Set premium status based on author
+productSchema.pre("save", async function (next) {
+  if (this.author_id && this.isModified('author_id')) {
+    try {
+      const author = await mongoose.models.User.findById(this.author_id);
+      if (author && author.isPremium) {
+        this.isPremium = true;
+        this.premium = true;
+      }
+    } catch (error) {
+      console.error("Error setting premium status:", error);
+    }
   }
   next();
 });

@@ -29,6 +29,7 @@ import { Progress } from './ui/progress';
 import { toast } from 'sonner';
 import { Product, User } from '../App';
 import { ImageWithFallback } from './figma/ImageWithFallback';
+import { WishlistButton } from './WishlistButton';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { UserContext } from '@/context/UserContext';
@@ -218,6 +219,8 @@ export function ProductDetail() {
     navigate('/');
   };
 
+  const userContext = useContext(UserContext);
+  
   const handleUpvote = async () => {
   if (!userId) {
     toast.error('Please log in to upvote');
@@ -237,6 +240,11 @@ export function ProductDetail() {
     console.log(response.data);
     setIsUpvoted(!isUpvoted);
     toast.success(isUpvoted ? 'Upvote removed!' : 'Product upvoted!');
+    
+    // Refresh notifications after upvoting
+    if (userContext?.refreshNotifications) {
+      await userContext.refreshNotifications();
+    }
   } catch (error) {
     console.error('Error updating vote:', error);
     toast.error(error.response?.data?.message || 'Failed to update vote. Please try again.');
@@ -274,6 +282,11 @@ export function ProductDetail() {
     toast.success('Review submitted successfully!');
     setReviewText('');
     setSelectedEmoji('');
+    
+    // Refresh notifications after submitting comment
+    if (userContext?.refreshNotifications) {
+      await userContext.refreshNotifications();
+    }
   } catch (err) {
     toast.error('Failed to submit review. Please try again.');
   }
@@ -476,8 +489,10 @@ export function ProductDetail() {
                     className={isUpvoted ? "bg-red-500 hover:bg-red-600" : ""}
                   >
                     <Heart className={`w-4 h-4 mr-2 ${isUpvoted ? 'fill-current' : ''}`} />
-                    {isUpvoted ? 'Upvoted' : 'Upvote'} ({product.upvotes + (isUpvoted ? 1 : 0)})
+                    {isUpvoted ? 'Upvoted' : 'Upvote'} 
                   </Button>
+                  
+                  <WishlistButton productId={product._id} size="md" />
                   
                   {/* <Button variant="outline" onClick={handleBookmark}>
                     <Bookmark className={`w-4 h-4 mr-2 ${isBookmarked ? 'fill-current' : ''}`} />

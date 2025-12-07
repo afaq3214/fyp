@@ -35,7 +35,11 @@ interface APIUser {
   _id: string;
   name: string;
   email: string;
-  badges: string[];
+  badges: {
+    badge: string;
+    awardedAt: string;
+    _id?: string;
+  }[];
   role: string;
   portfolio: {
     title: string;
@@ -260,10 +264,10 @@ export function UserProfile() {
                 <div className="mt-4 text-center md:text-left">
                   <h1 className="text-3xl mb-2">{user.name}</h1>
                   <div className="flex flex-wrap gap-2 justify-center md:justify-start">
-                    {user.badges.map(badge => (
-                      <Badge key={badge} className="bg-blue-100 text-blue-700 hover:bg-blue-200">
+                    {user.badges.map((badgeItem) => (
+                      <Badge key={badgeItem._id || badgeItem.badge} className="bg-blue-100 text-blue-700 hover:bg-blue-200">
                         <Award className="w-3 h-3 mr-1" />
-                        {badge}
+                        {badgeItem.badge}
                       </Badge>
                     ))}
                   </div>

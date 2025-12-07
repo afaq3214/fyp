@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { Header } from './components/Header';
 import { AuthModal } from './components/AuthModal';
@@ -8,6 +8,7 @@ import { Toaster } from './components/ui/sonner';
 import {jwtDecode} from 'jwt-decode';
 
 import "./index.css";
+import { UserContext } from './context/UserContext';
 export type Page = 'discovery' | 'profile' | 'product-detail' | 'admin';
 
 export interface User {
@@ -24,6 +25,9 @@ export interface User {
   role: string;
   status: string;
   joinDate: string;
+  createdAt: string;
+  isPremium: boolean;
+  subscriptionId?: string;
 }
 
 export interface Product {
@@ -32,9 +36,9 @@ export interface Product {
   description: string;
   pitch: string;
   category: string;
-  media: string[]; // ← change from image to media
+  media: string[]; 
   author: User;
-  upvotes: number;
+  upvotes: string[];
   reviews: number;
   autoTags: string[];
   trending: boolean;
@@ -45,6 +49,8 @@ export interface Product {
   author_id: string;
   author_name: string;
   author_profile: string;
+  isPremium: boolean;
+  premium: boolean;
 }
 
 
@@ -66,13 +72,17 @@ const mockUser: User = {
   isAdmin: true,
   role: 'admin',
   status: 'active',
-  joinDate: '2021-01-01'
+  joinDate: '2021-01-01',
+  createdAt: '2021-01-01T00:00:00.000Z',
+  isPremium: false,
+  subscriptionId: undefined
 };
 
 
 
 export default function App() {
   const navigate = useNavigate();
+  const {getuserId}=useContext(UserContext);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showSubmissionModal, setShowSubmissionModal] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -115,7 +125,7 @@ export default function App() {
 
         const data = await response.json();
         console.log('Fetched user data:', data);
-
+        getuserId(data._id);
         const user: User = {
           id: data._id,
           name: data.name,
@@ -130,6 +140,9 @@ export default function App() {
           role: data.role || 'user',
           status: 'active',
           joinDate: data.createdAt ? new Date(data.createdAt).toISOString().split('T')[0] : '',
+          createdAt: data.createdAt || '',
+          isPremium: data.isPremium || false,
+          subscriptionId: data.subscriptionId
         };
 
         setCurrentUser(user);

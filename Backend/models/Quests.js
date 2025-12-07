@@ -21,6 +21,36 @@ const QuestSchema = new mongoose.Schema({
   commentsToday: {
     type: Number,
     default: 0
+  },
+
+  emojisReactionsToday: {
+    type: Number,
+    default: 0
+  },
+
+  rewardGiven: {
+    type: Boolean,
+    default: false
+  },
+
+  // Weekly tracking
+  weekStartDate: {
+    type: String
+  },
+
+  weeklyProductsDiscovered: {
+    type: Number,
+    default: 0
+  },
+
+  weeklyEngagementPoints: {
+    type: Number,
+    default: 0
+  },
+
+  weeklyRewardGiven: {
+    type: Boolean,
+    default: false
   }
 });
 

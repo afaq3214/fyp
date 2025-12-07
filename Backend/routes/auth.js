@@ -9,6 +9,7 @@ import { OAuth2Client } from "google-auth-library";
 import nodemailer from "nodemailer";
 import path from "path";
 import fs from "fs";
+import { UpdateBadge } from "../services/badgeService.js";
 
 function generateOTP() {
   return Math.floor(100000 + Math.random() * 900000).toString();
@@ -112,7 +113,7 @@ router.post("/register", async (req, res) => {
 
     // Send verification email
     await sendVerificationEmail(user.email, verificationCode);
-
+     
     res.status(201).json({
       message: "User registered. Verification code sent to email.",
       user: { id: user._id, name: user.name, email: user.email },
@@ -273,7 +274,7 @@ router.post("/login", async (req, res) => {
       user.emailVerificationCode = verificationCode;
       user.emailVerificationExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 min
       await user.save();
-
+     
       // Send verification email
       await sendVerificationEmail(user.email, verificationCode);
 
@@ -285,7 +286,7 @@ router.post("/login", async (req, res) => {
 
     // If verified, proceed with login
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || "fyp", { expiresIn: "1d" });
-
+    await UpdateBadge(user._id,'login')
     res.json({
       message: "✅ Login successful",
       token,
@@ -420,7 +421,7 @@ router.post("/google", async (req, res) => {
 
     // Create JWT for your app
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || "fyp", { expiresIn: "1d" });
-
+    await UpdateBadge(user._id,'login')
     res.json({
       message: "✅ Google sign-in successful",
       token,

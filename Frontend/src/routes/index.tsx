@@ -10,6 +10,8 @@ import  SubmitProduct   from  '../components/Pages/SubmitProduct'
 import  EditProduct   from  '../components/Pages/EditProduct'
 import  ProductOwner   from  '../components/Pages/ProductOwner'
 import { ChallengeQuests } from '@/components/Pages/Quests';
+import { WishlistPage } from '../components/Pages/WishlistPage';
+import { PublicWishlistPage } from '../components/Pages/PublicWishlistPage';
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -45,6 +47,12 @@ export const router = createBrowserRouter([
       },{
         path: '/quests',
         element: <ChallengeQuests />   // Quests page
+      },{
+        path: '/wishlist',
+        element: <WishlistPage />   // Wishlist page
+      },{
+        path: '/wishlist/public/:userId',
+        element: <PublicWishlistPage />   // Public wishlist page
       }
             
     ]

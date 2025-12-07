@@ -9,6 +9,11 @@ import { fileURLToPath } from "url";
 import upvoteRoutes from "./routes/upvotes.js"
 import commentRoutes from "./routes/comments.js"
 import questRoutes from "./routes/quest.js"
+import badgeRoutes from './routes/badgeRoutes.js';
+import notificationRoutes from "./routes/notification.js"
+import wishlistRoutes from "./routes/wishlist.js";
+import { startScheduler } from "./scheduler.js";
+
 dotenv.config();
 connectDB();
 
@@ -16,10 +21,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+const port = process.env.PORT || 5000;
 
 // Enable CORS (restrict origin in prod: e.g., { origin: 'https://your-frontend.vercel.app' })
 app.use(cors());
-
+ 
+startScheduler();
 // Middleware for JSON parsing
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
@@ -34,7 +41,9 @@ app.use("/api/upvotes", upvoteRoutes);
 app.use("/api/comments", commentRoutes);
 console.log('Routes mounted: /api/quest');
 app.use("/api/quest", questRoutes);
-// Global error handler
+app.use('/api/badge', badgeRoutes);
+app.use('/api/notification',notificationRoutes)
+app.use('/api/wishlist', wishlistRoutes);
 app.use((err, req, res, next) => {
   console.error("Server error:", err);
   if (err.type === "entity.too.large") {
@@ -51,3 +60,9 @@ if (process.env.NODE_ENV !== 'production') {
   const PORT = process.env.PORT || 5000;
   app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
 }
+
+app.listen(port, async () => {
+  console.log(`Server running on port ${port}`);
+  // Initialize default badges
+ 
+});

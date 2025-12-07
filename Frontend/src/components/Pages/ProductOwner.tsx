@@ -30,7 +30,11 @@ interface APIUser {
   _id: string;
   name: string;
   email: string;
-  badges: string[];
+  badges: {
+    badge: string;
+    awardedAt: string;
+    _id?: string;
+  }[];
   role: string;
   portfolio: {
     title: string;
@@ -212,10 +216,10 @@ export default function ProductOwner() {
                     <span className="capitalize font-medium">{user.role}</span>
                   </div>
                   <div className="flex flex-wrap gap-2 justify-center lg:justify-start">
-                    {user.badges.map(badge => (
-                      <Badge key={badge} className="bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:shadow-lg transition-shadow">
+                    {user.badges.map((badgeItem) => (
+                      <Badge key={badgeItem._id || badgeItem.badge} className="bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:shadow-lg transition-shadow">
                         <Award className="w-3 h-3 mr-1" />
-                        {badge}
+                        {badgeItem.badge}
                       </Badge>
                     ))}
                   </div>
@@ -297,6 +301,16 @@ export default function ProductOwner() {
                     )}
                   </div>
                 )}
+                {/* View Wishlist Button */}
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors"
+                  onClick={() => navigate(`/wishlist/public/${user._id}`)}
+                >
+                  <Heart className="w-4 h-4 mr-2" />
+                  View Wishlist
+                </Button>
               </div>
             </div>
           </div>

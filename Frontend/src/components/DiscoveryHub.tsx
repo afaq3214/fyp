@@ -15,6 +15,7 @@ import {
 } from './ui/select';
 import type { Product } from '../App';
 import { ImageWithFallback } from './figma/ImageWithFallback';
+import { WishlistButton } from './WishlistButton';
 
 interface DiscoveryHubProps {
   products: Product[];
@@ -34,6 +35,7 @@ export interface User {
   role: string;
   status: string;
   joinDate: string;
+  createdAt: string;
 }
 
 
@@ -80,7 +82,7 @@ const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
       case 'trending':
         return (b.trending ? 1 : 0) - (a.trending ? 1 : 0);
       case 'popular':
-        return b.upvotes - a.upvotes;
+        return b.upvotes.length - a.upvotes.length;
       case 'fresh':
         return (b.fresh ? 1 : 0) - (a.fresh ? 1 : 0);
       default:
@@ -336,7 +338,7 @@ function ProductGrid({ products, viewMode, onProductClick }: ProductGridProps) {
                       <span className="text-sm text-gray-500">{product.createdAt}</span>
                     </div>
                     <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
-                      <span>↑ {product.upvotes}</span>
+                      <span>↑ {product.upvotes.length}</span>
                       <span>💬 {product.reviews}</span>
                     </div>
                   </div>
@@ -379,10 +381,13 @@ function ProductGrid({ products, viewMode, onProductClick }: ProductGridProps) {
                 </Badge>
               )}
             </div>
-            <div className="absolute top-3 right-3">
+            <div className="absolute top-3 right-3 flex space-x-2">
               <Button size="sm" variant="ghost" className="bg-white/80 hover:bg-white/90 text-gray-700">
-                ↑ {product.upvotes}
+                ↑ {product.upvotes.length}
               </Button>
+              <div onClick={(e) => e.stopPropagation()}>
+                <WishlistButton productId={product._id} size="sm" className="bg-white/80 hover:bg-white/90" />
+              </div>
             </div>
           </div>
 

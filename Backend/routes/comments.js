@@ -2,6 +2,9 @@ import express from "express";
 import Comments from "../models/Comments.js";
 import auth from "../middleware/auth.js";
 import { updateDailyProgress } from "../services/updateDailyProgress.js";
+import { UpdateBadge } from "../services/badgeService.js";
+import Product from "../models/Product.js";
+import { notification } from "./notification.js";
 const router = express.Router();
 
 
@@ -11,11 +14,10 @@ const router = express.Router();
 router.post("/add",auth ,async (req, res) => {
     try {
         const { productId, userId, username, comment, emoji, rating } = req.body;
-
+     
         if (!productId || !userId || !comment) {
             return res.status(400).json({ message: "Missing required fields" });
         }
-        const progress= await updateDailyProgress(userId,"comment")
         const newComment = new Comments({
             productId,
             userId,
@@ -26,8 +28,17 @@ router.post("/add",auth ,async (req, res) => {
             rating
            
         });
-
+        const product =await Product.findById(productId)
+        
+          try {
+                          await notification(product.author_id, "You have received an comment on your product", "upvote");
+                      } catch (notifError) {
+                          console.error("Error sending notification:", notifError);
+                      }  
+        
         await newComment.save();
+        const progress = await updateDailyProgress(userId, "comment");
+        await UpdateBadge(userId, 'comment');
         res.status(201).json({ message: "Comment added successfully", comment: newComment,quest:progress });
 
     } catch (error) {

@@ -9,6 +9,9 @@ interface UserContextProps {
   setToken: (token: string | null) => void;
   getuserId: (userId: string) => void;  // Add this line
   SendComments: (description: string, productId: string, emoji?: string,rating?:number) => Promise<void>;
+  notification: any[];
+  setnotification: (notifications: any[]) => void;
+  refreshNotifications: () => Promise<void>;
 }
 type UserProviderProps = {
   children: React.ReactNode;  // This is the important part
@@ -20,11 +23,51 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<any>({});
   const [userId,setuserid]=useState<string>('');
-  const getuserId=(userId)=>{
+  const [notification,setnotification]=useState([])
+  const getuserId= async (userId)=>{
     setuserid(userId);
     console.log('userId',userId)
+    const token = localStorage.getItem('token');
+        if (!token) return;
+  
+        try {
+        
+          const response = await fetch(`${url}/api/auth/${userId}`, {
+            method: 'GET',
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+  
+          if (response.ok) {
+            const data = await response.json();
+            setUser(data);
+            console.log('user',data)
+          }
+        } catch (err) {
+          console.log('Could not fetch profile');
+        } finally {
+          
+        }
   }
    useEffect(() => {
+    const token=localStorage.getItem('token')
+    const notificationData = async () => {
+        const response = await fetch(`${url}/api/notification`, { headers: { 'Authorization': `Bearer ${token}` } })
+        console.log("Notification API response status:", response.status);
+        const data = await response.json()
+        console.log("Notification API data:", data);
+        setnotification(data)
+    }
+    notificationData()
+    
+    // Poll for new notifications every 30 seconds
+    const interval = setInterval(notificationData, 30000);
+    
+    return () => clearInterval(interval);
+      }, []);
+
+  useEffect(() => {
       const fetchProfile = async () => {
         const token = localStorage.getItem('token');
         if (!token) return;
@@ -41,6 +84,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
           if (response.ok) {
             const data = await response.json();
             setUser(data);
+            console.log('user',data)
           }
         } catch (err) {
           console.log('Could not fetch profile');
@@ -50,8 +94,23 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       };
   
       fetchProfile();
-    }, []);
+    }, [userId]);
   
+   const refreshNotifications = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    
+    try {
+      const response = await fetch(`${url}/api/notification`, { 
+        headers: { 'Authorization': `Bearer ${token}` } 
+      });
+      const data = await response.json();
+      setnotification(data);
+    } catch (error) {
+      console.error('Error refreshing notifications:', error);
+    }
+  };
+
    const SendComments = async (description: string, productId: string, emoji?: string,rating?:number) => {
   try {
     const authToken = token || localStorage.getItem('token');
@@ -85,11 +144,14 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     <UserContext.Provider
       value={{
         user,
+        userId,
         token,
         setToken,
         getuserId,
-        userId,
-        SendComments
+        SendComments,
+        notification,
+        setnotification,
+        refreshNotifications
       }}
     >
       {children}
