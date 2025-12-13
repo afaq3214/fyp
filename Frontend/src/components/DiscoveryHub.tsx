@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TrendingUp, Flame, Clock, Filter, Grid3X3, List, ArrowUp } from 'lucide-react';
+import { TrendingUp, Flame, Clock, Filter, Grid3X3, List, ArrowUp, Trophy, Users, Star } from 'lucide-react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Card, CardContent, CardFooter, CardHeader } from './ui/card';
@@ -42,6 +42,14 @@ export interface User {
 
 
 
+interface TopUser {
+  id: string;
+  name: string;
+  profilePicture: string;
+  points: number;
+  badges: string[];
+}
+
 export function DiscoveryHub() {
   const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
@@ -49,16 +57,26 @@ export function DiscoveryHub() {
   const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState('All Categories');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [sortBy, setSortBy] = useState('trending');
+  const [sortBy, setSortBy] = useState('upvotes');
+  const [topUsers, setTopUsers] = useState<TopUser[]>([]);
 const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchData = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch(`${url}/api/products`);
-        if (!response.ok) throw new Error('Failed to fetch products');
-        const data = await response.json();
-        setProducts(data);
+        
+        // Fetch products
+        const productsResponse = await fetch(`${url}/api/products`);
+        if (!productsResponse.ok) throw new Error('Failed to fetch products');
+        const productsData = await productsResponse.json();
+        setProducts(productsData);
+        
+        // Fetch top users by points
+        const usersResponse = await fetch(`${url}/api/users/top-users?limit=10`);
+        if (usersResponse.ok) {
+          const usersData = await usersResponse.json();
+          setTopUsers(usersData);
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
@@ -66,7 +84,7 @@ const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
       }
     };
 
-    fetchProducts();
+    fetchData();
   }, []);
 
   const handleProductClick = (product: Product) => {
@@ -79,12 +97,14 @@ const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
 
   const sortedProducts = [...filteredProducts].sort((a, b) => {
     switch (sortBy) {
+      case 'upvotes':
+        return b.upvotes.length - a.upvotes.length;
       case 'trending':
         return (b.trending ? 1 : 0) - (a.trending ? 1 : 0);
-      case 'popular':
-        return b.upvotes.length - a.upvotes.length;
       case 'fresh':
         return (b.fresh ? 1 : 0) - (a.fresh ? 1 : 0);
+      case 'reviews':
+        return b.reviews - a.reviews;
       default:
         return 0;
     }
@@ -95,6 +115,9 @@ const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
  
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="flex flex-col lg:flex-row gap-8">
+        {/* Main Content */}
+        <div className="flex-1">
       {/* Hero Section */}
       <div className="text-center mb-12">
         <h1 className="text-4xl md:text-6xl font-bold  mb-4">
@@ -123,38 +146,24 @@ const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
         </div> */}
       </div>
 
-      {/* Filters and Controls */}
+      {/* Enhanced Filters and Controls */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 space-y-4 md:space-y-0">
         <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
-          {/* <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-            <SelectTrigger className="w-[200px]">
-              <Filter className="w-4 h-4 mr-2" />
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {categories.map(category => (
-                <SelectItem key={category} value={category}>
-                  {category}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select> */}
-{/* 
           <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-[150px]">
-              <SelectValue />
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Sort by..." />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="upvotes">
+                <div className="flex items-center">
+                  <ArrowUp className="w-4 h-4 mr-2" />
+                  Most Upvotes
+                </div>
+              </SelectItem>
               <SelectItem value="trending">
                 <div className="flex items-center">
                   <Flame className="w-4 h-4 mr-2" />
                   Trending
-                </div>
-              </SelectItem>
-              <SelectItem value="popular">
-                <div className="flex items-center">
-                  <ArrowUp className="w-4 h-4 mr-2" />
-                  Popular
                 </div>
               </SelectItem>
               <SelectItem value="fresh">
@@ -163,8 +172,14 @@ const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
                   Fresh
                 </div>
               </SelectItem>
+              <SelectItem value="reviews">
+                <div className="flex items-center">
+                  <Star className="w-4 h-4 mr-2" />
+                  Most Reviews
+                </div>
+              </SelectItem>
             </SelectContent>
-          </Select> */}
+          </Select>
         </div>
 
         <div className="flex items-center space-x-2">
@@ -256,6 +271,84 @@ const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
           ))}
         </div>
       </div> */}
+        </div>
+
+        {/* Sidebar - Top Users by Points */}
+        <div className="lg:w-80">
+          <Card className="sticky top-8">
+            <CardHeader className="pb-4">
+              <div className="flex items-center space-x-2">
+                <Trophy className="w-5 h-5 text-yellow-500" />
+                <h3 className="font-semibold">Top Contributors</h3>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Users with the most points this week
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {topUsers.length > 0 ? (
+                topUsers.map((user, index) => (
+                  <div key={user.id} className="flex items-center space-x-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                    <div className="flex-shrink-0">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                        index === 0 ? 'bg-yellow-500 text-white' :
+                        index === 1 ? 'bg-gray-400 text-white' :
+                        index === 2 ? 'bg-orange-600 text-white' :
+                        'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300'
+                      }`}>
+                        {index + 1}
+                      </div>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center space-x-2">
+                        {user.profilePicture ? (
+                          <img 
+                            src={user.profilePicture} 
+                            alt={user.name} 
+                            className="w-6 h-6 rounded-full object-cover"
+                            referrerPolicy="no-referrer"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                            <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                              {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                            </span>
+                          </div>
+                        )}
+                        <p className="text-sm font-medium truncate">
+                          {user.name}
+                        </p>
+                      </div>
+                      <div className="flex items-center space-x-2 mt-1">
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          {user.points} points
+                        </span>
+                        {user.badges && user.badges.length > 0 && (
+                          <div className="flex items-center space-x-1">
+                            {user.badges.slice(0, 2).map((badge, badgeIndex) => (
+                              <span key={badgeIndex} className="text-xs">
+                                🏆
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8">
+                  <Users className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    No top contributors yet
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }

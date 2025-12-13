@@ -1,5 +1,5 @@
 import { createBrowserRouter } from 'react-router-dom';
-import { DiscoveryHub } from '../components/DiscoveryHub';
+// import { DiscoveryHub } from '../components/DiscoveryHub';
 import { UserProfile } from '../components/UserProfile';
 import { ProductDetail } from '../components/ProductDetail';
 import { AdminPanel } from '../components/AdminPanel';
@@ -12,6 +12,7 @@ import  ProductOwner   from  '../components/Pages/ProductOwner'
 import { ChallengeQuests } from '@/components/Pages/Quests';
 import { WishlistPage } from '../components/Pages/WishlistPage';
 import { PublicWishlistPage } from '../components/Pages/PublicWishlistPage';
+import { DiscoveryHub } from '@/components/ui/DiscoveryHub2';
 export const router = createBrowserRouter([
   {
     path: '/',
