@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TrendingUp, Flame, Clock, Filter, Grid3X3, List, ArrowUp, Star, Sparkles, Zap, Users, Award, Activity, MessageSquare, Heart, Bookmark, Share2, BarChart3 } from 'lucide-react';
+import { TrendingUp, Flame, Clock, Filter, Grid3X3, List, ArrowUp, Star, Sparkles, Zap, Users, Award, Activity, MessageSquare, Heart, Bookmark, Share2, BarChart3, CheckCircle2 } from 'lucide-react';
 import { Button } from './button';
 import { Badge } from './badge';
 import { Card, CardContent, CardFooter, CardHeader } from './card';
@@ -13,8 +13,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from './select';
+import { Progress } from './progress';
 import type { Product } from '@/App';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
+import { UserContext } from '@/context/UserContext';
+import axios from 'axios';
 
 interface TopUser {
   id: string;
@@ -24,6 +27,34 @@ interface TopUser {
   badges: string[];
   projects?: number;
   engagementScore?: number;
+}
+
+interface Quest {
+  id: string;
+  title: string;
+  description: string;
+  progress: number;
+  target: number;
+  reward: string;
+  type: 'daily' | 'weekly' | 'achievement';
+  icon: React.ReactNode;
+  xp: number;
+  completed: boolean;
+}
+
+interface UserProgressProps {
+  dailyQuests: {
+    upvotesToday: number;
+    commentsToday: number;
+    upvotesRemaining: number;
+    commentsRemaining: number;
+    completed: boolean;
+    reward: number;
+  };
+  userStats: {
+    points: number;
+    badges: any[];
+  };
 }
 
 const categories = [
@@ -38,6 +69,7 @@ const categories = [
 ];
 
 export function DiscoveryHub() {
+  const { user } = useContext(UserContext);
   const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const [topUsers, setTopUsers] = useState<TopUser[]>([]);
@@ -46,9 +78,12 @@ export function DiscoveryHub() {
   const [selectedCategory, setSelectedCategory] = useState('All Categories');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState('upvotes');
-  
+  const [userProgress, setProgress] = useState<UserProgressProps>();
+  const [dailyQuest, setDailyQuest] = useState<Quest[]>([]);
+  const [userPoints, setUserPoints] = useState<number>(0);
+
   const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
-  
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -75,6 +110,55 @@ export function DiscoveryHub() {
 
     fetchData();
   }, []);
+
+  // Fetch quest progress
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token && user) {
+      axios.get(`${url}/api/quest`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      .then(response => {
+        const questData = response.data.quests[0];
+        setUserPoints(response.data.userPoints);
+        setProgress(response.data);
+        
+        if (questData) {
+          setDailyQuest([
+            {
+              id: 'q1',
+              title: 'Share the Love',
+              description: 'Give emoji reactions to 3 products',
+              progress: questData.commentsToday || 0,
+              target: 3,
+              reward: '30 XP',
+              type: 'daily',
+              icon: <Heart className="w-5 h-5" />,
+              xp: 30,
+              completed: (questData.commentsToday || 0) >= 3
+            },
+            {
+              id: 'q2',
+              title: 'Upvote Champion',
+              description: 'Upvote 5 products',
+              progress: questData?.upvotesToday || 0,
+              target: 5,
+              reward: '100 XP + Badge',
+              type: 'daily',
+              icon: <TrendingUp className="w-5 h-5" />,
+              xp: 100,
+              completed: (questData?.upvotesToday || 0) >= 5 
+            }
+          ]);
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching quest progress:', error);
+      });
+    }
+  }, [user]);
 
   const handleProductClick = (product: Product) => {
     navigate(`/product/${product._id}`);
@@ -172,7 +256,7 @@ export function DiscoveryHub() {
               <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
                 <div className="p-4 border-b border-slate-200">
                   <h2 className="font-semibold text-slate-900">Top Makers</h2>
-                  <p className="text-xs text-slate-500 mt-1">Most active this week</p>
+                  <p className="text-xs text-slate-500 mt-1">Most active People</p>
                 </div>
                 <div className="divide-y divide-slate-100">
                   {topUsers.slice(0, 8).map((user, index) => (
@@ -410,7 +494,10 @@ export function DiscoveryHub() {
                   <h3 className="font-semibold text-slate-900">Recent Activity</h3>
                 </div>
                 <div className="divide-y divide-slate-100">
-                  {products.slice(0, 5).map((product, index) => (
+                  {products
+                    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                    .slice(0, 5)
+                    .map((product, index) => (
                     <div key={index} className="p-3 hover:bg-slate-50 transition-colors">
                       <div className="flex items-start gap-3">
                         {product.author_profile ? (
@@ -442,19 +529,73 @@ export function DiscoveryHub() {
                 </div>
               </div>
 
-              {/* Trending Categories */}
+              {/* Daily Quests */}
               <div className="bg-white rounded-lg border border-slate-200 p-4">
-                <h3 className="font-semibold text-slate-900 mb-3">Trending Categories</h3>
-                <div className="space-y-2">
-                  {['AI Tools', 'Productivity', 'Design', 'Developer Tools'].map((cat) => (
-                    <button
-                      key={cat}
-                      onClick={() => setSelectedCategory(cat)}
-                      className="w-full text-left px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 rounded transition-colors"
-                    >
-                      {cat}
-                    </button>
-                  ))}
+                <h3 className="font-semibold text-slate-900 mb-3">Daily Quests</h3>
+                <div className="space-y-3">
+                  {dailyQuest.map((quest) => {
+                    const progressPercent = (quest.progress / quest.target) * 100;
+                    return (
+                      <div 
+                        key={quest.id} 
+                        className={`p-3 rounded-lg border ${
+                          quest.completed 
+                            ? 'bg-green-50 border-green-200' 
+                            : 'bg-blue-50 border-blue-200'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                            quest.completed ? 'bg-green-600' : 'bg-blue-600'
+                          }`}>
+                            {quest.completed ? (
+                              <CheckCircle2 className="w-4 h-4 text-white" />
+                            ) : (
+                              quest.icon
+                            )}
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-medium text-slate-900 text-sm">{quest.title}</h4>
+                            <p className="text-xs text-slate-600">{quest.description}</p>
+                          </div>
+                        </div>
+                        
+                        {!quest.completed && (
+                          <div className="mb-2">
+                            <div className="flex items-center justify-between text-xs mb-1">
+                              <span className="text-gray-600">Progress</span>
+                              <span className="font-semibold text-gray-900">
+                                {quest.progress} / {quest.target}
+                              </span>
+                            </div>
+                            <Progress value={progressPercent} className="h-2" />
+                          </div>
+                        )}
+                        
+                        <div className="flex items-center justify-between">
+                          <span className={`text-xs font-medium ${
+                            quest.completed ? 'text-green-600' : 'text-blue-600'
+                          }`}>
+                            {quest.reward}
+                          </span>
+                          <Button 
+                            size="sm" 
+                            className="h-6 text-xs"
+                            variant={quest.completed ? "outline" : "default"}
+                            disabled={quest.completed}
+                          >
+                            {quest.completed ? 'Completed' : 'In Progress'}
+                          </Button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  
+                  {dailyQuest.length === 0 && (
+                    <div className="text-center py-4 text-sm text-slate-500">
+                      Loading quests...
+                    </div>
+                  )}
                 </div>
               </div>
 
