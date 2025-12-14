@@ -25,18 +25,8 @@ export async function updateDailyProgress(userId, action) {
   const today = new Date().toISOString().split("T")[0];
 
   let progress = await Quests.findOne({ userId });
-  if(!progress){
-    progress = new Quests({
-      userId,
-      date: today,
-      upvotesToday: 0,
-      commentsToday: 0
-    });
-  }
- if (action === "upvote" && progress.upvotesToday >= dailyLimits.upvotesPerDay) {
-    return { completed: false, error: "Upvote limit reached for today (max 5)" };
-  }
-  // If it's a new day → reset counters
+  
+  // If it's a new day → reset counters FIRST
   if (!progress || progress.date !== today) {
     progress = await Quests.findOneAndUpdate(
       { userId },
@@ -44,10 +34,16 @@ export async function updateDailyProgress(userId, action) {
         userId,
         date: today,
         upvotesToday: 0,
-        commentsToday: 0
+        commentsToday: 0,
+        rewardGiven: false
       },
       { upsert: true, new: true }
     );
+  }
+
+  // Check limits AFTER resetting for new day
+  if (action === "upvote" && progress.upvotesToday >= dailyLimits.upvotesPerDay) {
+    return { completed: false, error: "Upvote limit reached for today (max 5)" };
   }
 
   // Increase counter based on action

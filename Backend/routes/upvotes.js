@@ -6,6 +6,7 @@ import User from "../models/User.js";
 import { UpdateBadge } from "../services/badgeService.js";
 import Product from "../models/Product.js";
 import { notification } from "./notification.js";
+import ActivityService from "../services/activityService.js";
 const router = express.Router();
 
 async function IncrementUserUpvoteCount(userId) {
@@ -95,6 +96,12 @@ router.post('/upvote', async (req, res) => {
             } catch (notifError) {
                 console.error("Error sending notification:", notifError);
             }
+            // Log activity for upvote
+            await ActivityService.logUpvote(
+                userIds,
+                product.title,
+                productId
+            );
             return res.status(200).json({
                 message: "Product upvoted successfully",
                 upvote
@@ -119,6 +126,13 @@ router.post('/upvote', async (req, res) => {
         } catch (notifError) {
             console.error("Error sending notification:", notifError);
         }
+
+        // Log activity for upvote
+        await ActivityService.logUpvote(
+            userIds,
+            product.title,
+            productId
+        );
 
         return res.status(201).json({
             message: "Product upvoted successfully",

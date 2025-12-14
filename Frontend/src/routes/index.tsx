@@ -13,6 +13,7 @@ import { ChallengeQuests } from '@/components/Pages/Quests';
 import { WishlistPage } from '../components/Pages/WishlistPage';
 import { PublicWishlistPage } from '../components/Pages/PublicWishlistPage';
 import { DiscoveryHub } from '@/components/ui/DiscoveryHub2';
+import { PublicUserProfile } from '@/components/Pages/User';
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -44,7 +45,7 @@ export const router = createBrowserRouter([
         element: <EditProduct />   // Edit product page
       },{
         path: '/product-owner/:ownerId',
-        element: <ProductOwner />   // Product owner profile page
+        element: <PublicUserProfile />   // Product owner profile page
       },{
         path: '/quests',
         element: <ChallengeQuests />   // Quests page

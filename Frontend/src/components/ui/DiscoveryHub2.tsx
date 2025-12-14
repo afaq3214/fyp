@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { TrendingUp, Flame, Clock, Filter, Grid3X3, List, ArrowUp, Star, Sparkles, Zap, Users, Award, Activity, MessageSquare, Heart, Bookmark, Share2, BarChart3, CheckCircle2 } from 'lucide-react';
 import { Button } from './button';
 import { Badge } from './badge';
@@ -260,6 +260,7 @@ export function DiscoveryHub() {
                 </div>
                 <div className="divide-y divide-slate-100">
                   {topUsers.slice(0, 8).map((user, index) => (
+                    <Link to={`/product-owner/${user._id}`}>
                     <div key={user.id} className="p-4 hover:bg-slate-50 transition-colors cursor-pointer">
                       <div className="flex items-start gap-3">
                         <div className="relative">
@@ -296,7 +297,7 @@ export function DiscoveryHub() {
                           </div>
                         </div>
                       </div>
-                    </div>
+                    </div></Link>
                   ))}
                 </div>
               </div>

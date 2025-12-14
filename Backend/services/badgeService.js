@@ -2,6 +2,7 @@ import Badge from '../models/Badge.js';
 import User from '../models/User.js';
 import Comments from '../models/Comments.js';
 import { notification } from '../routes/notification.js';
+import ActivityService from './activityService.js';
 export async function UpdateBadge(UserId, category) {
     try {
         if (!UserId || !category) {
@@ -33,7 +34,15 @@ export async function UpdateBadge(UserId, category) {
                         awardedAt: new Date()
                     });
                     await user.save();
-                    await notification(UserId, "You have received a badge for 5 upvoting products", "badge")
+                    await notification(UserId, "You have received a badge for 5 upvoting products", "badge");
+                    
+                    // Log activity for badge earned
+                    await ActivityService.logBadgeEarned(
+                        UserId,
+                        badge.name || '5 Upvotes Badge',
+                        badge._id
+                    );
+                    
                     console.log("Badge awarded:", badge.key);
                 }
             }
@@ -58,7 +67,15 @@ export async function UpdateBadge(UserId, category) {
                         awardedAt: new Date()
                     });
                     await user.save();
-                    await notification(UserId, 'You Received a Badge for 10 comments', 'badge')
+                    await notification(UserId, 'You Received a Badge for 10 comments', 'badge');
+                    
+                    // Log activity for badge earned
+                    await ActivityService.logBadgeEarned(
+                        UserId,
+                        badge.name || '10 Comments Badge',
+                        badge._id
+                    );
+                    
                     console.log("Badge awarded:", badge.key);
                 }
             }
@@ -79,7 +96,15 @@ export async function UpdateBadge(UserId, category) {
                     awardedAt: new Date()
                 });
                 await user.save();
-                await notification(UserId, 'You Received a Badge for your first login!', 'badge')
+                await notification(UserId, 'You Received a Badge for your first login!', 'badge');
+                
+                // Log activity for badge earned
+                await ActivityService.logBadgeEarned(
+                    UserId,
+                    badge.name || 'First Login Badge',
+                    badge._id
+                );
+                
                 console.log("Badge awarded:", badge.key);
             }
         }

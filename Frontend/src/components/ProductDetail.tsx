@@ -287,8 +287,13 @@ export function ProductDetail() {
     if (userContext?.refreshNotifications) {
       await userContext.refreshNotifications();
     }
-  } catch (err) {
-    toast.error('Failed to submit review. Please try again.');
+  } catch (err: any) {
+    // Handle specific error for commenting on own product
+    if (err.message === 'You cannot comment on your own product') {
+      toast.error('You cannot comment on your own product');
+    } else {
+      toast.error('Failed to submit review. Please try again.');
+    }
   }
 };
 

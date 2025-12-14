@@ -8,6 +8,7 @@ import auth from "../middleware/auth.js";
 import fs from 'fs';
 import natural from 'natural';
 import stopword from 'stopword';
+import ActivityService from "../services/activityService.js";
 
 const tfidf = new natural.TfIdf();
 
@@ -147,6 +148,14 @@ const autoTags = generateAutoTags(contentToAnalyze);
 });
 
     await product.save();
+    
+    // Log activity for product launch
+    await ActivityService.logProductLaunch(
+      req.user.id,
+      product.title,
+      product._id
+    );
+    
     res.status(201).json(product);
   } catch (error) {
     res.status(400).json({ error: error.message });

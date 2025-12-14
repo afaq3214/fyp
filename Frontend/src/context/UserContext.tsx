@@ -133,8 +133,14 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         },
       }
     );
-  } catch (err) {
+  } catch (err: any) {
     console.error('Error sending comment', err);
+    
+    // Handle specific error for commenting on own product
+    if (err.response?.status === 403 && err.response?.data?.message) {
+      throw new Error(err.response.data.message);
+    }
+    
     throw err;
   }
 };

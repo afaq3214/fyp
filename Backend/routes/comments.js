@@ -5,6 +5,7 @@ import { updateDailyProgress } from "../services/updateDailyProgress.js";
 import { UpdateBadge } from "../services/badgeService.js";
 import Product from "../models/Product.js";
 import { notification } from "./notification.js";
+import ActivityService from "../services/activityService.js";
 const router = express.Router();
 
 
@@ -18,6 +19,16 @@ router.post("/add",auth ,async (req, res) => {
         if (!productId || !userId || !comment) {
             return res.status(400).json({ message: "Missing required fields" });
         }
+
+        // Check if user is trying to comment on their own product
+        const product = await Product.findById(productId);
+        if (!product) {
+            return res.status(404).json({ message: "Product not found" });
+        }
+
+        if (product.author_id.toString() === req.user.id) {
+            return res.status(403).json({ message: "You cannot comment on your own product" });
+        }
         const newComment = new Comments({
             productId,
             userId,
@@ -28,7 +39,6 @@ router.post("/add",auth ,async (req, res) => {
             rating
            
         });
-        const product =await Product.findById(productId)
         
           try {
                           await notification(product.author_id, "You have received an comment on your product", "upvote");
@@ -37,6 +47,14 @@ router.post("/add",auth ,async (req, res) => {
                       }  
         
         await newComment.save();
+        
+        // Log activity for comment
+        await ActivityService.logComment(
+            userId,
+            product.title,
+            productId
+        );
+        
         const progress = await updateDailyProgress(userId, "comment");
         await UpdateBadge(userId, 'comment');
         res.status(201).json({ message: "Comment added successfully", comment: newComment,quest:progress });
