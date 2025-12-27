@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
-import { Search, Zap, User, Menu, X, Plus, Home, Bell, Heart } from 'lucide-react';
+import { Search, Zap, User, Menu, X, Plus, Home, Bell, Heart, Trash2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
@@ -37,14 +37,53 @@ export function Header({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [wishlistCount, setWishlistCount] = useState(0);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
   const userContext = useContext(UserContext);
-  const notifications = userContext?.notification || [];
+  const [notifications, setNotifications] = useState(userContext?.notification || []);
   const navigate = useNavigate();
-  
+
+  // Update local state when context updates
+  useEffect(() => {
+    if (userContext?.notification) {
+      setNotifications(userContext.notification);
+    }
+  }, [userContext?.notification]);
+
+  const deleteNotification = async (notificationId: string) => {
+    if (!notificationId) return;
+    
+    setIsDeleting(notificationId);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/notification/${notificationId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+      });
+
+      if (response.ok) {
+        // Remove the notification from local state
+        setNotifications(prev => prev.filter(n => n._id !== notificationId));
+        // Update the context if needed
+        if (userContext?.refreshNotifications) {
+          userContext.refreshNotifications();
+        }
+      } else {
+        console.error('Failed to delete notification');
+      }
+    } catch (error) {
+      console.error('Error deleting notification:', error);
+    } finally {
+      setIsDeleting(null);
+    }
+  };
+
   // Close user menu when clicking outside
   useEffect(() => {
     
@@ -101,22 +140,19 @@ export function Header({
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700">
+    <header className="sticky top-0 z-50 w-full bg-gray-900 shadow-lg">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           {/* Logo and Brand */}
           <div className="flex items-center space-x-4">
             <button 
               onClick={onHomeClick}
-              className="flex items-center space-x-2 group"
+              className="flex items-center space-x-2 group focus:outline-none"
             >
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+              <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center transform transition-transform group-hover:scale-105">
                 <Zap className="w-5 h-5 text-white" />
               </div>
-              {/* <span className="font-bold text-3xl bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                PRS
-              </span> */}
-               <span className="font-bold text-3xl text-black ">
+              <span className="font-bold text-2xl bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
                 PRS
               </span>
             </button>
@@ -161,12 +197,13 @@ export function Header({
                     variant="ghost" 
                     size="sm"
                     className="relative"
-                    onClick={() => {
-                      setIsNotificationOpen(!isNotificationOpen);
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate('/notifications');
                       userContext?.refreshNotifications();
                     }}
                   >
-                    <Bell className="w-4 h-4" />
+                    <Bell className="w-4 h-4 text-white" />
                     <Badge className="absolute -top-2 -right-2 w-5 h-5 p-0 flex items-center justify-center text-xs bg-red-500">
                       {Array.isArray(notifications) ? notifications.filter(n => !n.viewed).length : 0}
                     </Badge>
@@ -175,33 +212,59 @@ export function Header({
                   {/* Notification Dropdown */}
                   {isNotificationOpen && (
                     <div className="absolute right-0 top-10 w-80 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg z-50 max-h-96 overflow-y-auto">
-                      <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-                        <h3 className="font-semibold text-sm">Notifications</h3>
+                    <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+                      <h3 className="font-semibold text-sm">Notifications</h3>
+                    </div>
+                    
+                    {!Array.isArray(notifications) || notifications.length === 0 ? (
+                      <div className="p-4 text-center text-gray-500">
+                        <Bell className="w-8 h-8 mx-auto mb-2 opacity-50 " />
+                        <p className="text-sm">No notifications yet</p>
                       </div>
-                      
-                      {!Array.isArray(notifications) || notifications.length === 0 ? (
-                        <div className="p-4 text-center text-gray-500">
-                          <Bell className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                          <p className="text-sm">No notifications yet</p>
-                        </div>
-                      ) : (
-                        notifications.map((notification) => (
-                          <div
-                            key={notification._id}
-                            className={`p-4 border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer ${
-                              !notification.viewed ? 'bg-blue-50 dark:bg-blue-900/20' : ''
-                            }`}
-                          >
-                            <div className="flex items-start space-x-3">
-                              <div className="flex-shrink-0">
-                                {notification.type === 'badge' && <span className="text-yellow-500">_</span>}
-                                <span className="text-sm">{notification.description}</span>
+                    ) : (
+                      notifications.map((notification) => (
+                        <div
+                          key={notification._id}
+                          className={`p-4 border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 ${
+                            !notification.viewed ? 'bg-blue-50 dark:bg-blue-900/20' : ''
+                          }`}
+                        >
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <div className="flex items-start space-x-3">
+                                <div className="flex-shrink-0">
+                                  {notification.type === 'badge' && <span className="text-yellow-500">🏆</span>}
+                                  {notification.type === 'upvote' && <span className="text-blue-500">👍</span>}
+                                  {notification.type === 'comment' && <span className="text-green-500">💬</span>}
+                                </div>
+                                <span className="text-sm text-gray-800 dark:text-gray-200">
+                                  {notification.description}
+                                </span>
                               </div>
                             </div>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                deleteNotification(notification._id);
+                              }}
+                              disabled={isDeleting === notification._id}
+                              className="text-gray-400 hover:text-red-500 p-1 -mr-2 -mt-1"
+                              title="Delete notification"
+                            >
+                              {isDeleting === notification._id ? (
+                                <span className="loading loading-spinner loading-xs"></span>
+                              ) : (
+                                <Trash2 className="w-3.5 h-3.5" />
+                              )}
+                            </button>
                           </div>
-                        ))
-                      )}
-                    </div>
+                          <div className="text-xs text-gray-500 mt-1 pl-7">
+                            {new Date(notification.createdAt).toLocaleString()}
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
                   )}
                 </div>
                 <Button 
@@ -210,11 +273,11 @@ export function Header({
                   className="relative"
                   onClick={() => navigate('/wishlist')}
                 >
-                  <Heart className="w-4 h-4" />
+                  <Heart className="w-4 h-4 text-white" />
                   {wishlistCount > 0 && (
-                    <Badge className="absolute -top-2 -right-2 w-5 h-5 p-0 flex items-center justify-center text-xs bg-blue-500">
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
                       {wishlistCount}
-                    </Badge>
+                    </span>
                   )}
                 </Button>
                 <div className="relative" ref={userMenuRef}>
@@ -235,23 +298,23 @@ export function Header({
                   </Button>
                   
                   {isUserMenuOpen && (
-                    <div className="absolute right-0 top-10 w-56 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg z-50">
-                      <div className="flex flex-col space-y-1 p-2 border-b border-gray-200 dark:border-gray-700">
-                        <p className="font-medium text-sm">{currentUser.name}</p>
-                        <p className="text-xs text-gray-600 dark:text-gray-400">{currentUser.email}</p>
+                    <div className="absolute right-0 top-12 w-56 bg-white border border-gray-200 rounded-md shadow-lg z-50">
+                      <div className="flex flex-col space-y-1 p-2 border-b border-gray-200">
+                        <p className="font-medium text-sm text-black">{currentUser.name}</p>
+                        <p className="text-xs text-black">{currentUser.email}</p>
                       </div>
                       
                       <div className="py-1">
                         <button
                           onClick={() => { onProfileClick(); setIsUserMenuOpen(false); }}
-                          className="flex items-center w-full px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                          className="flex items-center w-full px-4 py-2 text-sm text-black hover:bg-gray-100 transition-colors"
                         >
                           <User className="mr-2 h-4 w-4" />
                           Profile
                         </button>
                         <button
                           onClick={() => {  setIsUserMenuOpen(false); }}
-                          className="flex items-center w-full px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                          className="flex items-center w-full px-4 py-2 text-sm text-gray-900 hover:bg-gray-100 transition-colors"
                         >
                           <Link to="/quests">
                           Challange Quests
@@ -259,27 +322,21 @@ export function Header({
                         </button>
                         <button
                           onClick={() => { setIsUserMenuOpen(false); }}
-                          className="flex items-center w-full px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                          className="flex items-center w-full px-4 py-2 text-sm text-gray-900 hover:bg-gray-100 transition-colors"
                         >
-                          <Link to="/wishlist">
+                          <Link to="/wishlist" className='flex items-center'>
                           <Heart className="mr-2 h-4 w-4" />
                           Wishlist
                           </Link>
                         </button>
-                        <button
-                          onClick={() => setIsUserMenuOpen(false)}
-                          className="flex items-center w-full px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                        >
-                          <Zap className="mr-2 h-4 w-4" />
-                          My Products
-                        </button>
+                       
                         
                         {currentUser?.isAdmin && (
                           <>
                             <div className="border-t border-gray-200 dark:border-gray-700 my-1" />
                             <button
                               onClick={() => { onAdminClick(); setIsUserMenuOpen(false); }}
-                              className="flex items-center w-full px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                              className="flex items-center w-full px-4 py-2 text-sm text-gray-900 hover:bg-gray-100 transition-colors"
                             >
                               <span className="mr-2">👑</span>
                               Admin Panel
@@ -290,7 +347,7 @@ export function Header({
                         <div className="border-t border-gray-200 dark:border-gray-700 my-1" />
                         <button
                           onClick={() => { onLogout(); setIsUserMenuOpen(false); }}
-                          className="flex items-center w-full px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                          className="flex items-center w-full px-4 py-2 text-sm text-gray-900 hover:bg-gray-100 transition-colors"
                         >
                           Logout
                         </button>
@@ -361,7 +418,7 @@ export function Header({
                   )}
                   <button
                           onClick={() => {  setIsUserMenuOpen(false); }}
-                          className="flex items-center w-full px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                          className="flex items-center w-full px-4 py-2 text-sm text-gray-900 hover:bg-gray-100 transition-colors"
                         >
                           <Link to="/quests">
                           Challange Quests

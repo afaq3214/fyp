@@ -14,6 +14,8 @@ import { WishlistPage } from '../components/Pages/WishlistPage';
 import { PublicWishlistPage } from '../components/Pages/PublicWishlistPage';
 import { DiscoveryHub } from '@/components/ui/DiscoveryHub2';
 import { PublicUserProfile } from '@/components/Pages/User';
+import NotificationsPage from '@/components/Pages/NotificationsPage';
+import { AdminRoute } from '@/components/ProtectedRoute';
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -33,7 +35,11 @@ export const router = createBrowserRouter([
       },
       {
         path: '/admin',
-        element: <AdminPanel />   // Already correct
+        element: (
+          <AdminRoute>
+            <AdminPanel />
+          </AdminRoute>
+        )
       },{
         path: '/edit-profile/:userId',
         element: <EditProfile />   // Already correct
@@ -55,6 +61,10 @@ export const router = createBrowserRouter([
       },{
         path: '/wishlist/public/:userId',
         element: <PublicWishlistPage />   // Public wishlist page
+      },
+      {
+        path: '/notifications',
+        element: <NotificationsPage />   // Notifications page
       }
             
     ]

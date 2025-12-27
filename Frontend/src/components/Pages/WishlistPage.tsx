@@ -212,7 +212,10 @@ export function WishlistPage() {
   // Get unique categories from wishlist items
   const getCategories = () => {
     if (!wishlist) return [];
-    const categories = [...new Set(wishlist.items.map(item => item.productId.category))];
+    const categories = [...new Set(wishlist.items
+      .filter(item => item.productId && item.productId.category)
+      .map(item => item.productId.category)
+    )];
     return categories;
   };
 
@@ -308,9 +311,19 @@ export function WishlistPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Advanced Search and Filter Bar */}
-      <div className="mb-6 space-y-4">
+    <div className="min-h-screen bg-gray-50">
+      {/* Header with light blue background */}
+      <div className="bg-blue-50 border-b border-blue-100">
+        <div className="container mx-auto px-4 py-6">
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">My Wishlist</h1>
+          <p className="text-gray-600">Manage and organize your favorite products</p>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-8">
+        {/* Advanced Search and Filter Bar */}
+        <div className="mb-6 space-y-4">
         {/* Search Bar */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -585,8 +598,8 @@ export function WishlistPage() {
                     )}
                     <div className="w-full h-48 bg-gray-100 rounded-lg overflow-hidden">
                       <ImageWithFallback
-                        src={item.productId.media?.[0] || ''}
-                        alt={item.productId.title}
+                        src={item.productId?.media?.[0] || ''}
+                        alt={item.productId?.title || 'Product image'}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
                       />
                     </div>
@@ -594,7 +607,7 @@ export function WishlistPage() {
                       size="sm"
                       variant="destructive"
                       className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={() => removeFromWishlist(item.productId._id)}
+                      onClick={() => item.productId?._id && removeFromWishlist(item.productId._id)}
                     >
                       <X className="w-4 h-4" />
                     </Button>
@@ -605,20 +618,20 @@ export function WishlistPage() {
                   <div>
                     <h3 
                       className="font-semibold cursor-pointer hover:text-blue-600 transition-colors"
-                      onClick={() => navigate(`/product/${item.productId._id}`)}
+                      onClick={() => item.productId?._id && navigate(`/product/${item.productId._id}`)}
                     >
-                      {item.productId.title}
+                      {item.productId?.title || 'Untitled Product'}
                     </h3>
                     <p className="text-sm text-gray-600 line-clamp-2">
-                      {item.productId.description}
+                      {item.productId?.description || 'No description available'}
                     </p>
                   </div>
                   
                   <div className="flex flex-wrap gap-1">
                     <Badge variant="secondary" className="text-xs">
-                      {item.productId.category}
+                      {item.productId?.category || 'Uncategorized'}
                     </Badge>
-                    {item.productId.tags?.slice(0, 2).map((tag, index) => (
+                    {item.productId?.tags?.slice(0, 2).map((tag, index) => (
                       <Badge key={index} variant="outline" className="text-xs">
                         {tag}
                       </Badge>
@@ -626,14 +639,18 @@ export function WishlistPage() {
                   </div>
 
                   <div className="space-y-2">
-                    {editingNotes[item.productId._id] !== undefined ? (
+                    {item.productId?._id && editingNotes[item.productId._id] !== undefined ? (
                       <div className="space-y-2">
                         <Textarea
-                          value={editingNotes[item.productId._id]}
-                          onChange={(e) => setEditingNotes(prev => ({ 
-                            ...prev, 
-                            [item.productId._id]: e.target.value 
-                          }))}
+                          value={item.productId?._id ? editingNotes[item.productId._id] : ''}
+                          onChange={(e) => {
+                            if (item.productId?._id) {
+                              setEditingNotes(prev => ({
+                                ...prev,
+                                [item.productId._id]: e.target.value
+                              }));
+                            }
+                          }}
                           placeholder="Add notes..."
                           className="text-sm"
                           rows={2}
@@ -641,7 +658,7 @@ export function WishlistPage() {
                         <div className="flex space-x-2">
                           <Button 
                             size="sm" 
-                            onClick={() => updateItemNotes(item.productId._id, editingNotes[item.productId._id])}
+                            onClick={() => item.productId?._id && updateItemNotes(item.productId._id, editingNotes[item.productId._id] || '')}
                           >
                             Save
                           </Button>
@@ -667,7 +684,7 @@ export function WishlistPage() {
                           <Button
                             size="sm"
                             variant="ghost"
-                            onClick={() => setEditingNotes(prev => ({ 
+                            onClick={() => item.productId?._id && setEditingNotes(prev => ({ 
                               ...prev, 
                               [item.productId._id]: item.notes || '' 
                             }))}
@@ -683,7 +700,7 @@ export function WishlistPage() {
 
                   <div className="flex items-center justify-between text-xs text-gray-500">
                     <span>
-                      ❤️ {item.productId.upvotes?.length || 0} upvotes
+                      ❤️ {item.productId?.upvotes?.length || 0} upvotes
                     </span>
                     <span>
                       Added {new Date(item.addedAt).toLocaleDateString()}
@@ -712,46 +729,31 @@ export function WishlistPage() {
                       </div>
                     )}
                     
-                    <div className="w-24 h-24 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
-                      <ImageWithFallback
-                        src={item.productId.media?.[0] || ''}
-                        alt={item.productId.title}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between mb-2">
-                        <div>
-                          <h3 
-                            className="font-semibold cursor-pointer hover:text-blue-600 transition-colors mb-1"
-                            onClick={() => navigate(`/product/${item.productId._id}`)}
-                          >
-                            {item.productId.title}
-                          </h3>
-                          <p className="text-sm text-gray-600 line-clamp-2 mb-2">
-                            {item.productId.description}
-                          </p>
+                    {item.productId ? (
+                      <>
+                        <div className="w-24 h-24 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                          <ImageWithFallback
+                            src={item.productId.media?.[0] || ''}
+                            alt={item.productId.title || 'Product image'}
+                            className="w-full h-full object-cover"
+                          />
                         </div>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => removeFromWishlist(item.productId._id)}
-                        >
-                          <X className="w-4 h-4" />
-                        </Button>
+                        
+                        <div className="flex items-center space-x-4 text-sm">
+                          <Badge variant="outline">{item.productId?.category || 'Uncategorized'}</Badge>
+                          <span className="text-gray-500">
+                            ❤️ {item.productId.upvotes?.length || 0} upvotes
+                          </span>
+                          <span className="text-gray-500">
+                            Added {new Date(item.addedAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="text-gray-500">
+                        Product not found or has been removed
                       </div>
-                      
-                      <div className="flex items-center space-x-4 text-sm">
-                        <Badge variant="outline">{item.productId.category}</Badge>
-                        <span className="text-gray-500">
-                          ❤️ {item.productId.upvotes?.length || 0} upvotes
-                        </span>
-                        <span className="text-gray-500">
-                          Added {new Date(item.addedAt).toLocaleDateString()}
-                        </span>
-                      </div>
-                    </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -759,6 +761,7 @@ export function WishlistPage() {
           </div>
         )
       )}
+    </div>
     </div>
   );
 }

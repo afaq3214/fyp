@@ -708,10 +708,10 @@ export function ProductDetail() {
                     <p className="text-sm text-gray-600 dark:text-gray-400">View Profile</p>
                   </div> 
                 </div>
-                <Button variant="outline" className="w-full">
+                {/* <Button variant="outline" className="w-full">
                   <Users className="w-4 h-4 mr-2" />
                   Connect & Collaborate
-                </Button>
+                </Button> */}
               </CardContent>
             </Card>
 
@@ -725,26 +725,17 @@ export function ProductDetail() {
                   <span className="text-gray-600 dark:text-gray-400">Total Upvotes</span>
                   <span className="font-medium">{productUpvotes}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Reviews</span>
-                  <span className="font-medium">{product.reviews}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Views</span>
-                  <span className="font-medium">1,247</span>
-                </div>
+              
                 <div className="flex justify-between">
                   <span className="text-gray-600 dark:text-gray-400">Created</span>
-                  <span className="font-medium">{product.createdAt}</span>
+                  <span className="font-medium">{new Date(product.createdAt).toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  })}</span>
                 </div>
                 <Separator />
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Community Score</span>
-                    <span>87/100</span>
-                  </div>
-                  <Progress value={87} />
-                </div>
+                
               </CardContent>
             </Card>
 

@@ -92,7 +92,7 @@ router.post('/upvote', async (req, res) => {
                 $addToSet: { upvotes: userIdObj }
             });
             try {
-                await notification(product.author_id, "You have received an upvote on your product", "upvote");
+                await notification(product.author_id, `Your product "${product.title}" has been upvoted!`, "upvote");
             } catch (notifError) {
                 console.error("Error sending notification:", notifError);
             }

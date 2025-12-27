@@ -20,6 +20,7 @@ import { UserContext } from '@/context/UserContext';
 import axios from 'axios';
 
 interface TopUser {
+  _id:string;
   id: string;
   name: string;
   profilePicture: string;
@@ -291,8 +292,6 @@ export function DiscoveryHub() {
                             </div>
                           )}
                           <div className="flex items-center gap-3 mt-2 text-xs text-slate-500">
-                            <span>{user.projects || 0} products</span>
-                            <span>•</span>
                             <span>{user.points || 0} pts</span>
                           </div>
                         </div>
@@ -417,7 +416,12 @@ export function DiscoveryHub() {
                               <span className="text-sm text-slate-600">{product.author_name}</span>
                             </div>
                             <span className="text-slate-300">•</span>
-                            <span className="text-sm text-slate-500">{product.createdAt}</span>
+                            <span className="text-sm text-slate-500">
+                              {new Date(product.createdAt).toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  })}</span>
                           </div>
 
                           {/* Engagement Stats */}
@@ -476,15 +480,8 @@ export function DiscoveryHub() {
                     </div>
                   </div>
                   <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm text-slate-600">Reviews Written</span>
-                      <span className="text-sm font-semibold text-slate-900">
-                        {products.reduce((sum, p) => sum + p.reviews, 0)}
-                      </span>
-                    </div>
-                    <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-green-600 rounded-full" style={{width: '85%'}} />
-                    </div>
+                    
+                    
                   </div>
                 </div>
               </div>
@@ -522,7 +519,11 @@ export function DiscoveryHub() {
                             {' launched '}
                             <span className="font-medium">{product.title}</span>
                           </p>
-                          <p className="text-xs text-slate-500 mt-1">{product.createdAt}</p>
+                          <p className="text-xs text-slate-500 mt-1">{new Date(product.createdAt).toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  })}</p>
                         </div>
                       </div>
                     </div>

@@ -7,11 +7,12 @@ interface UserContextProps {
   userId:any;
   token: string | null;
   setToken: (token: string | null) => void;
-  getuserId: (userId: string) => void;  // Add this line
+  getuserId: (userId: string) => void;
   SendComments: (description: string, productId: string, emoji?: string,rating?:number) => Promise<void>;
   notification: any[];
   setnotification: (notifications: any[]) => void;
   refreshNotifications: () => Promise<void>;
+  markNotificationsAsViewed: () => Promise<void>;
 }
 type UserProviderProps = {
   children: React.ReactNode;  // This is the important part
@@ -111,6 +112,46 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     }
   };
 
+  const markNotificationsAsViewed = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    try {
+      // First update the local state optimistically
+      setnotification(prev => {
+        const hasUnread = prev.some(n => !n.viewed);
+        if (!hasUnread) return prev; // No need to update if all are already read
+        
+        return prev.map(n => ({
+          ...n,
+          viewed: true
+        }));
+      });
+
+      // Then make the API call
+      const response = await fetch(`${url}/api/notification/mark-viewed`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        // If API call fails, refresh notifications to get the correct state
+        if (refreshNotifications) {
+          await refreshNotifications();
+        }
+      }
+    } catch (error) {
+      console.error('Error marking notifications as viewed:', error);
+      // On error, refresh notifications to ensure consistency
+      if (refreshNotifications) {
+        await refreshNotifications();
+      }
+    }
+  };
+
    const SendComments = async (description: string, productId: string, emoji?: string,rating?:number) => {
   try {
     const authToken = token || localStorage.getItem('token');
@@ -157,7 +198,8 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         SendComments,
         notification,
         setnotification,
-        refreshNotifications
+        refreshNotifications,
+        markNotificationsAsViewed
       }}
     >
       {children}
