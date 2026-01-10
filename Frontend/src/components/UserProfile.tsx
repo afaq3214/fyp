@@ -435,19 +435,15 @@ export function UserProfile() {
 
         {/* Tabs Section */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-12">
-          <TabsList className="grid w-full max-w-lg  mb-8 bg-transparent">
-            <TabsTrigger value="projects" style={{width:"500px"}} className="flex  items-center text-3xl gap-2" >
-              <Briefcase size={80} />
+          <TabsList className="grid w-full grid-cols-2 gap-4 mb-8 bg-transparent">
+            <TabsTrigger value="projects" className="flex items-center justify-center text-xl gap-2 py-6">
+              <Briefcase className="w-6 h-6" />
               Products
             </TabsTrigger>
-            {/* <TabsTrigger value="achievements" className="flex items-center gap-2">
-              <Award className="w-4 h-4" />
-              Achievements
+            <TabsTrigger value="portfolio" className="flex items-center justify-center text-xl gap-2 py-6">
+              <Briefcase className="w-6 h-6" />
+              Portfolio
             </TabsTrigger>
-            <TabsTrigger value="activity" className="flex items-center gap-2">
-              <Zap className="w-4 h-4" />
-              Activity
-            </TabsTrigger> */}
           </TabsList>
 
           {/* Projects Tab */}
@@ -544,6 +540,74 @@ export function UserProfile() {
                 <Button className="mx-auto  text-md p-10" style={{backgroundColor:"black",width:'300px',marginBottom:"10px"}} onClick={() => navigate('/submit-product')}>
                   <Plus className="w-4 h-4 mr-2" />
                   Submit Your First Product
+                </Button>
+              </Card>
+            )}
+          </TabsContent>
+
+          {/* Portfolio Tab */}
+          <TabsContent value="portfolio" className="space-y-6">
+            {user.portfolio && user.portfolio.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {user.portfolio.map((item, index) => (
+                  <Card key={item._id || index} className="group overflow-hidden hover:shadow-xl transition-all duration-300 border-2 border-gray-100 hover:border-blue-200">
+                    <div className="relative h-48 bg-gradient-to-br from-blue-50 to-purple-50 overflow-hidden">
+                      {item.media && item.media[0] ? (
+                        <img
+                          src={item.media[0]}
+                          alt={item.title}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                          <Briefcase className="w-12 h-12 text-gray-400" />
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                      {item.demoUrl && (
+                        <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button size="sm" className="bg-white hover:bg-gray-100 text-gray-900" asChild>
+                            <a href={item.demoUrl} target="_blank" rel="noopener noreferrer">
+                              <ExternalLink className="w-4 h-4" />
+                            </a>
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                    <CardContent className="p-5">
+                      <h3 className="text-lg mb-2 group-hover:text-blue-600 transition-colors">
+                        {item.title}
+                      </h3>
+                      {item.demoUrl && (
+                        <div className="mt-3">
+                          <a 
+                            href={item.demoUrl} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-sm text-blue-600 hover:underline flex items-center gap-1"
+                          >
+                            View Project <ExternalLink className="w-3 h-3" />
+                          </a>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <Card className="p-12 text-center">
+                <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Briefcase className="w-8 h-8 text-gray-400" />
+                </div>
+                <h3 className="text-xl mb-2 text-gray-900">No Portfolio Items Yet</h3>
+                <p className="text-gray-600 mb-6">Add your portfolio items to showcase your work!</p>
+                <Button 
+                  className="mx-auto text-md p-6" 
+                  style={{backgroundColor: "black", width: '300px', marginBottom: "10px"}} 
+                  onClick={() => navigate('/edit-profile')}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Portfolio Item
                 </Button>
               </Card>
             )}

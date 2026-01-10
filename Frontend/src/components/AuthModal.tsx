@@ -59,6 +59,49 @@ const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
     return true;
   };
 
+  const validateEmailDomain = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error('Please enter a valid email address');
+      return false;
+    }
+    
+    if (!email.endsWith('.com')) {
+      toast.error('Only .com domain emails are allowed for registration');
+      return false;
+    }
+    
+    return true;
+  };
+
+  const validateName = (name: string): boolean => {
+    if (!name || name.trim().length === 0) {
+      toast.error('Please enter your full name');
+      return false;
+    }
+    
+    if (name.trim().length < 2) {
+      toast.error('Name must be at least 2 characters long');
+      return false;
+    }
+    
+    // Check if name contains only letters, spaces, hyphens, and apostrophes
+    const nameRegex = /^[a-zA-Z\s'-]+$/;
+    if (!nameRegex.test(name.trim())) {
+      toast.error('Name can only contain letters, spaces, hyphens, and apostrophes');
+      return false;
+    }
+    
+    // Check if name has at least two parts (first and last name)
+    const nameParts = name.trim().split(/\s+/);
+    if (nameParts.length < 2) {
+      toast.error('Please enter your full name (first and last name)');
+      return false;
+    }
+    
+    return true;
+  };
+
   // ✅ Render Google Button reliably (works in both Sign In & Sign Up)
   useEffect(() => {
     const renderGoogleButton = () => {
@@ -123,6 +166,19 @@ const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Additional validations for signup mode
+    if (mode === 'signup') {
+      // Validate email domain
+      if (!validateEmailDomain(email)) {
+        return;
+      }
+      
+      // Validate name
+      if (!validateName(name)) {
+        return;
+      }
+    }
     
     // Skip password validation for login and email step of forgot password
     if (mode === 'signup' || (mode === 'forgot-password' && forgotPasswordStep === 'otp')) {

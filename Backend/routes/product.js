@@ -4,6 +4,7 @@ import path from "path";
 import { fileURLToPath } from 'url';
 import Product from "../models/Product.js";
 import User from "../models/User.js";
+import { Wishlist } from "../models/Wishlist.js";
 import auth from "../middleware/auth.js";
 import fs from 'fs';
 import natural from 'natural';
@@ -348,6 +349,12 @@ router.delete("/:id", auth, async (req, res) => {
         }
       });
     }
+
+    // Remove product from all wishlists
+    await Wishlist.updateMany(
+      { 'items.productId': req.params.id },
+      { $pull: { items: { productId: req.params.id } } }
+    );
 
     // Remove product document
     await Product.findByIdAndDelete(req.params.id);
