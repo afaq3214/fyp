@@ -380,6 +380,30 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+/**
+ * 📌 Delete user by ID
+ */
+router.delete("/users/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    await User.findByIdAndDelete(userId);
+    
+    res.json({ 
+      message: "✅ User deleted successfully",
+      userId: userId
+    });
+  } catch (error) {
+    console.error("Delete user error:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Google OAuth (use env var for Client ID)
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);

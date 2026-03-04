@@ -41,11 +41,9 @@ const userSchema = new mongoose.Schema(
     linkedin: String,
     website: String,
 
-    // Engagement Metrics (Added)
-    profileViews: { type: Number, default: 0 },
+    //
     totalUpvotes: { type: Number, default: 0 },
-    followers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-    following: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+
     otp: { type: Number, default: 0 }, // count of OTPs sent for rate limiting
     // Achievements
     badges: [
@@ -57,21 +55,10 @@ const userSchema = new mongoose.Schema(
 
     // Projects & Collaborations Metrics (Added)
     projectsCount: { type: Number, default: 0 },
-    collaborationsCount: { type: Number, default: 0 },
-
-    // Collaboration
-    collaborators: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-    collaborationInvites: [
-      {
-        from: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-        status: { type: String, enum: ["pending", "accepted", "rejected"], default: "pending" },
-        createdAt: { type: Date, default: Date.now },
-      },
-    ],
-
+   
     // System fields
     role: { type: String, enum: ["user", "admin", "moderator"], default: "user" }, // Added moderator role
-    lastActive: { type: Date }, // Added: Track user activity
+    
 
     // Activity tracking for badges
     upvotesGiven: {
@@ -82,23 +69,7 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0
     },
-    productsDiscovered: {
-      type: Number,
-      default: 0
-    },
-    emojisReceived: {
-      type: Number,
-      default: 0
-    },
-    consecutiveLoginDays: {
-      type: Number,
-      default: 0
-    },
-    lastLoginDate: Date,
-    reputationScore: {
-      type: Number,
-      default: 0
-    },
+   
     points: {
       type: Number,
       default: 0
@@ -118,7 +89,10 @@ const userSchema = new mongoose.Schema(
     subscriptionId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Subscription"
-    }
+    },
+
+    // AI Recommendations: weekly digest email
+    digestOptIn: { type: Boolean, default: false }
   },
   { timestamps: true }
 );

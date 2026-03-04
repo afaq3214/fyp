@@ -473,18 +473,7 @@ export function AdminPanel() {
             </CardContent>
           </Card>
           
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Moderators</p>
-                  <p className="text-2xl font-bold">{userStats.moderators}</p>
-                  <p className="text-xs text-purple-600">Team members</p>
-                </div>
-                <Crown className="w-8 h-8 text-purple-600" />
-              </div>
-            </CardContent>
-          </Card>
+
         </div>
 
         {/* Main Content Tabs */}

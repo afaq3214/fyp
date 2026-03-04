@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
   ArrowLeft,
   MapPin,
@@ -20,8 +20,10 @@ import {
   TrendingUp,
   Zap,
   Target,
-  Trash
+  Trash,
+  Mail
 } from 'lucide-react';
+import { UserContext } from '@/context/UserContext';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
@@ -103,9 +105,13 @@ export function UserProfile() {
   const [deletingProductId, setDeletingProductId] = useState<string | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
+  const [digestOptIn, setDigestOptIn] = useState(false);
+  const [digestLoading, setDigestLoading] = useState(false);
+  const { user: currentUser } = useContext(UserContext);
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
   const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
+  const isOwnProfile = userId ;
   const handleEditProfile = () => {
      navigate(`/edit-profile/${userId}`);
    };
@@ -135,7 +141,35 @@ export function UserProfile() {
     };
 
     fetchProfile();
-  }, []);
+  }, [userId, url]);
+
+  // Fetch digest preference (own profile only)
+  useEffect(() => {
+    if (!isOwnProfile) return;
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    fetch(`${url}/api/recommendations/digest-preference`, { headers: { Authorization: `Bearer ${token}` } })
+      .then((r) => r.ok ? r.json() : null)
+      .then((data: { digestOptIn?: boolean } | null) => data && setDigestOptIn(!!data.digestOptIn))
+      .catch(() => {});
+  }, [url, isOwnProfile]);
+
+  const handleDigestToggle = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    setDigestLoading(true);
+    try {
+      const res = await fetch(`${url}/api/recommendations/digest-preference`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ optIn: !digestOptIn }),
+      });
+      const data = await res.json().catch(() => ({}));
+      setDigestOptIn(!!data.digestOptIn);
+    } finally {
+      setDigestLoading(false);
+    }
+  };
 
   // Fetch user's products
   useEffect(() => {
@@ -355,6 +389,35 @@ export function UserProfile() {
                 <p className="text-sm text-blue-700 mt-3">
                   Add more details to increase visibility and unlock premium features!
                 </p>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Weekly digest (own profile only) */}
+        {isOwnProfile && (
+          <div className="mb-8">
+            <Card className="border-2 border-blue-100 bg-blue-50/30">
+              <CardHeader className="border-b border-blue-100">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Mail className="w-5 h-5 text-blue-600" />
+                  AI Recommendations
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <label className="flex items-center justify-between gap-4 cursor-pointer">
+                  <div>
+                    <p className="font-medium text-gray-900">Weekly digest email</p>
+                    <p className="text-sm text-gray-600 mt-1">Get top products and feedback sentiment in your inbox every week.</p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={digestOptIn}
+                    disabled={digestLoading}
+                    onChange={handleDigestToggle}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                </label>
               </CardContent>
             </Card>
           </div>

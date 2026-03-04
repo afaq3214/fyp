@@ -36,6 +36,10 @@ const CommentSchema = new mongoose.Schema({
         required: false
     },
 
+    // AI: sentiment analysis (positive / negative / neutral)
+    sentimentScore: { type: Number, default: 0 },
+    sentimentLabel: { type: String, enum: ["positive", "negative", "neutral"], default: "neutral" },
+
 }, { timestamps: true });
 
 export default mongoose.model("Comment", CommentSchema);

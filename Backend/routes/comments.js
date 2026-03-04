@@ -1,4 +1,5 @@
 import express from "express";
+import Sentiment from "sentiment";
 import Comments from "../models/Comments.js";
 import auth from "../middleware/auth.js";
 import { updateDailyProgress } from "../services/updateDailyProgress.js";
@@ -6,7 +7,15 @@ import { UpdateBadge } from "../services/badgeService.js";
 import Product from "../models/Product.js";
 import { notification } from "./notification.js";
 import ActivityService from "../services/activityService.js";
+
 const router = express.Router();
+const sentiment = new Sentiment();
+
+function getSentimentLabel(score) {
+  if (score > 0) return "positive";
+  if (score < 0) return "negative";
+  return "neutral";
+}
 
 
 // ===============================
@@ -24,28 +33,35 @@ router.post("/add",auth ,async (req, res) => {
         const product = await Product.findById(productId);
         if (!product) {
             return res.status(404).json({ message: "Product not found" });
-        }
+       }
+        product.totalcomments += 1;
+        await product.save();
 
         if (product.author_id.toString() === req.user.id) {
             return res.status(403).json({ message: "You cannot comment on your own product" });
         }
+        const sentimentResult = sentiment.analyze(comment || "");
+        const sentimentScore = sentimentResult.score ?? 0;
+        const sentimentLabel = getSentimentLabel(sentimentScore);
+
         const newComment = new Comments({
             productId,
             userId,
-            username:req.user.name,
-            profilePicture:req.user.profilePicture,
+            username: req.user.name,
+            profilePicture: req.user.profilePicture,
             comment,
             emoji,
-            rating
-           
+            rating,
+            sentimentScore,
+            sentimentLabel,
         });
-        
-          try {
-                          await notification(product.author_id, "You have received an comment on your product", "upvote");
-                      } catch (notifError) {
-                          console.error("Error sending notification:", notifError);
-                      }  
-        
+
+        try {
+            await notification(product.author_id, "You have received an comment on your product", "upvote");
+        } catch (notifError) {
+            console.error("Error sending notification:", notifError);
+        }
+
         await newComment.save();
         
         // Log activity for comment

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TrendingUp, Flame, Clock, Filter, Grid3X3, List, ArrowUp, Trophy, Users, Star } from 'lucide-react';
+import { TrendingUp, Flame, Clock, Filter, Grid3X3, List, ArrowUp, Trophy, Users, Star, Activity, Award, Zap, Sparkles } from 'lucide-react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Card, CardContent, CardFooter, CardHeader } from './ui/card';
@@ -16,6 +16,10 @@ import {
 import type { Product } from '../App';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import { WishlistButton } from './WishlistButton';
+import { TrendPulses } from './DiscoveryHub/TrendPulses/TrendPulses';
+import { HiddenGemsFeed } from './DiscoveryHub/HiddenGemsFeed/HiddenGemsFeed';
+import { HoverPreview } from './DiscoveryHub/HoverPreviews/HoverPreviews';
+import { SmartFilters } from './DiscoveryHub/SmartFilters/SmartFilters';
 
 interface DiscoveryHubProps {
   products: Product[];
@@ -53,12 +57,14 @@ interface TopUser {
 export function DiscoveryHub() {
   const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState('All Categories');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState('upvotes');
   const [topUsers, setTopUsers] = useState<TopUser[]>([]);
+  const [activeTab, setActiveTab] = useState('discover');
 const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
   useEffect(() => {
     const fetchData = async () => {
@@ -70,6 +76,7 @@ const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
         if (!productsResponse.ok) throw new Error('Failed to fetch products');
         const productsData = await productsResponse.json();
         setProducts(productsData);
+        setFilteredProducts(productsData);
         
         // Fetch top users by points
         const usersResponse = await fetch(`${url}/api/users/top-users?limit=10`);
@@ -89,6 +96,14 @@ const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
 
   const handleProductClick = (product: Product) => {
     navigate(`/product/${product._id}`);
+  };
+
+  const handleFiltersChange = (filtered: Product[]) => {
+    setFilteredProducts(filtered);
+  };
+
+  const handleSortChange = (sortOption: string) => {
+    setSortBy(sortOption);
   };
 
   const filteredProducts = products.filter(product => 
@@ -119,34 +134,137 @@ const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
         {/* Main Content */}
         <div className="flex-1">
       {/* Hero Section */}
-      <div className="text-center mb-12">
-        <h1 className="text-4xl md:text-6xl font-bold  mb-4">
-          Discover the Next Big Thing
-        </h1>
-        <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto mb-8">
-          A community-driven platform where indie makers, students, and entrepreneurs showcase their latest innovations. 
-          No funding required. Pure peer-to-peer discovery.
-        </p>
-        
-        {/* Trend Pulse */}
-        {/* <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center justify-center mb-4">
-            <TrendingUp className="w-5 h-5 text-blue-600 mr-2" />
-            <h3 className="font-semibold">Trend Pulse</h3>
+          <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-b border-slate-700">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="text-center mb-8">
+            <h1 className="text-5xl text-white mb-3">
+              Discovery Hub
+            </h1>
+            <p className="text-slate-300 text-lg max-w-2xl mx-auto">
+              Explore innovative products ranked by genuine peer feedback, not paid promotions
+            </p>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            {trendingTopics.map((topic, index) => (
-              <div key={index} className="text-center">
-                <div className={`${topic.color} w-3 h-3 rounded-full mx-auto mb-2`} />
-                <p className="text-sm font-medium mb-1">{topic.name}</p>
-                <p className="text-xs text-green-600 font-semibold">{topic.growth}</p>
+          
+          {/* Stats Bar */}
+          <div className="flex items-center justify-center gap-8 mb-8">
+            <div className="text-center">
+              <div className="text-3xl text-white mb-1">{products.length}</div>
+              <div className="text-sm text-slate-400">Active Products</div>
+            </div>
+            <div className="w-px h-12 bg-slate-700" />
+            <div className="text-center">
+              <div className="text-3xl text-white mb-1">{topUsers.length}</div>
+              <div className="text-sm text-slate-400">Top Makers</div>
+            </div>
+            <div className="w-px h-12 bg-slate-700" />
+            <div className="text-center">
+              <div className="text-3xl text-white mb-1">12K+</div>
+              <div className="text-sm text-slate-400">Community Members</div>
+            </div>
+          </div>
+
+          {/* About Section */}
+          <div className="max-w-4xl mx-auto bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 mb-8">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
+                <Sparkles className="w-6 h-6 text-white" />
               </div>
-            ))}
+              <div className="flex-1">
+                <h2 className="text-white mb-2">Equal Opportunity Platform</h2>
+                <p className="text-slate-300 leading-relaxed mb-4">
+                  A community-driven platform where students, indie makers, and entrepreneurs showcase their projects with equal opportunity. 
+                  Discover innovative products ranked by genuine peer feedback. Upvote products you love, write reviews, 
+                  and connect with makers building the future.
+                </p>
+                <div className="flex flex-wrap items-center gap-6">
+                  <div className="flex items-center gap-2 text-sm text-slate-300">
+                    <Award className="w-4 h-4 text-blue-400" />
+                    No Paid Promotions
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-slate-300">
+                    <Zap className="w-4 h-4 text-blue-400" />
+                    AI-Powered Discovery
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-slate-300">
+                    <Users className="w-4 h-4 text-blue-400" />
+                    Peer-Driven Rankings
+                  </div>
+                  <Button variant="link" className="text-blue-400 hover:text-blue-300 p-0 h-auto">
+                    Learn More →
+                  </Button>
+                </div>
+              </div>
+            </div>
           </div>
-        </div> */}
+
+          {/* TREND PULSES - Real-time metrics dashboard */}
+          <TrendPulses products={products} />
+          <div className="max-w-6xl mx-auto">
+            <div className="flex items-center gap-2 mb-4">
+              <Activity className="w-5 h-5 text-blue-400" />
+              <h3 className="text-white">Trend Pulses</h3>
+              <Badge className="bg-blue-600 text-white border-0">Live</Badge>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Trending Now */}
+              {/* <div className="bg-gradient-to-br from-orange-600/20 to-orange-800/20 backdrop-blur-sm border border-orange-500/30 rounded-lg p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <Flame className="w-5 h-5 text-orange-400" />
+                  <span className="text-sm text-orange-200">Trending Now</span>
+                </div>
+                <div className="text-3xl text-white mb-2">{trendingProducts.length}</div>
+                <div className="text-sm text-orange-200">
+                  {trendingProducts.length > 0 && (
+                    <span className="flex items-center gap-1">
+                      <TrendingUp className="w-3 h-3" />
+                      +{Math.round(trendingProducts.length / products.length * 100)}% of total
+                    </span>
+                  )}
+                </div>
+              </div> */}
+
+              {/* Fresh Launches */}
+              {/* <div className="bg-gradient-to-br from-green-600/20 to-green-800/20 backdrop-blur-sm border border-green-500/30 rounded-lg p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <Rocket className="w-5 h-5 text-green-400" />
+                  <span className="text-sm text-green-200">Fresh Launches</span>
+                </div>
+                <div className="text-3xl text-white mb-2">{freshProducts.length}</div>
+                <div className="text-sm text-green-200">Last 24 hours</div>
+              </div> */}
+
+              {/* Hidden Gems */}
+              {/* <div className="bg-gradient-to-br from-purple-600/20 to-purple-800/20 backdrop-blur-sm border border-purple-500/30 rounded-lg p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <Gem className="w-5 h-5 text-purple-400" />
+                  <span className="text-sm text-purple-200">Hidden Gems</span>
+                </div>
+                <div className="text-3xl text-white mb-2">{hiddenGems.length}</div>
+                <div className="text-sm text-purple-200">Quality with low visibility</div>
+              </div> */}
+
+              {/* Rising Stars */}
+              {/* <div className="bg-gradient-to-br from-blue-600/20 to-blue-800/20 backdrop-blur-sm border border-blue-500/30 rounded-lg p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <Target className="w-5 h-5 text-blue-400" />
+                  <span className="text-sm text-blue-200">Rising Stars</span>
+                </div>
+                <div className="text-3xl text-white mb-2">{risingProducts.length}</div>
+                <div className="text-sm text-blue-200">Gaining momentum</div>
+              </div> */}
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Enhanced Filters and Controls */}
+
+      {/* Smart Filters */}
+      <SmartFilters 
+        products={products} 
+        onFiltersChange={handleFiltersChange}
+        onSortChange={handleSortChange}
+      />
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 space-y-4 md:space-y-0">
         <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
           <Select value={sortBy} onValueChange={setSortBy}>
@@ -200,21 +318,25 @@ const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
         </div>
       </div>
 
-      {/* Product Grid/List */}
-      <Tabs defaultValue="all" className="w-full">
-        {/* <TabsList className="grid w-full max-w-md mx-auto grid-cols-3 mb-8">
-          <TabsTrigger value="all">All Products</TabsTrigger>
+      {/* Main Content Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full max-w-md mx-auto grid-cols-4 mb-8">
+          <TabsTrigger value="discover">Discover</TabsTrigger>
           <TabsTrigger value="trending">
             <Flame className="w-4 h-4 mr-2" />
             Trending
+          </TabsTrigger>
+          <TabsTrigger value="gems">
+            <Sparkles className="w-4 h-4 mr-2" />
+            Hidden Gems
           </TabsTrigger>
           <TabsTrigger value="fresh">
             <Clock className="w-4 h-4 mr-2" />
             Fresh
           </TabsTrigger>
-        </TabsList> */}
+        </TabsList>
 
-        <TabsContent value="all">
+        <TabsContent value="discover">
           <ProductGrid 
             products={sortedProducts} 
             viewMode={viewMode} 
@@ -226,6 +348,13 @@ const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
           <ProductGrid 
             products={sortedProducts.filter(p => p.trending)} 
             viewMode={viewMode} 
+            onProductClick={handleProductClick}
+          />
+        </TabsContent>
+
+        <TabsContent value="gems">
+          <HiddenGemsFeed 
+            products={products}
             onProductClick={handleProductClick}
           />
         </TabsContent>
@@ -364,12 +493,12 @@ function ProductGrid({ products, viewMode, onProductClick }: ProductGridProps) {
     return (
       <div className="space-y-4">
         {products.map(product => (
-          <Card 
-            key={product._id}
-            className="group cursor-pointer hover:shadow-md transition-all duration-200"
-            onClick={() => onProductClick(product)}
-          >
-            <CardContent className="p-6">
+          <HoverPreview key={product._id} product={product} onProductClick={onProductClick}>
+            <Card 
+              className="group cursor-pointer hover:shadow-md transition-all duration-200"
+              onClick={() => onProductClick(product)}
+            >
+              <CardContent className="p-6">
               <div className="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-6">
                 <div className="w-full md:w-32 h-20 md:h-44 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 flex-shrink-0" style={{width:'300px',height:'150px'}}>
                   <ImageWithFallback
@@ -447,11 +576,11 @@ function ProductGrid({ products, viewMode, onProductClick }: ProductGridProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {products.map(product => (
-        <Card 
-          key={product._id}
-          className="group cursor-pointer hover:shadow-lg transition-all duration-200 overflow-hidden"
-          onClick={() => onProductClick(product)}
-        >
+        <HoverPreview key={product._id} product={product} onProductClick={onProductClick}>
+          <Card 
+            className="group cursor-pointer hover:shadow-lg transition-all duration-200 overflow-hidden"
+            onClick={() => onProductClick(product)}
+          >
           <div className="relative">
             <div className="w-full h-48 bg-gray-100 dark:bg-gray-800 overflow-hidden">
               <ImageWithFallback
@@ -536,7 +665,8 @@ function ProductGrid({ products, viewMode, onProductClick }: ProductGridProps) {
               </div>
             </div>
           </CardFooter>
-        </Card>
+          </Card>
+        </HoverPreview>
       ))}
     </div>
   );

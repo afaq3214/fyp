@@ -31,7 +31,7 @@ const productSchema = new mongoose.Schema(
         createdAt: { type: Date, default: Date.now },
       },
     ],
-    
+    totalcomments: { type: Number, default: 0 },
     // AI moderation
     flagged: { type: Boolean, default: false },
     moderationNotes: String,

@@ -178,6 +178,197 @@ router.get("/", async (req, res) => {
 });
 
 /**
+ * 📌 Ranking with Momentum – Popular Products
+ * GET /api/products/ranking/popular?limit=20
+ * Sorted by upvotes count (desc), then by total comments.
+ */
+router.get("/ranking/popular", async (req, res) => {
+  try {
+    const limit = Math.min(parseInt(req.query.limit, 10) || 20, 50);
+    const products = await Product.aggregate([
+      { $addFields: { upvotesCount: { $size: { $ifNull: ["$upvotes", []] } } } },
+      { $sort: { upvotesCount: -1, totalcomments: -1 } },
+      { $limit: limit },
+    ]);
+    const withCounts = products.map((p) => {
+      const up = p.upvotesCount ?? (Array.isArray(p.upvotes) ? p.upvotes.length : 0);
+      const rev = p.totalcomments ?? (Array.isArray(p.reviews) ? p.reviews.length : 0);
+      return { ...p, upvotesCount: up, reviewsCount: rev, reviews: rev };
+    });
+    res.json(withCounts);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * 📌 Ranking with Momentum – Fresh Products
+ * GET /api/products/ranking/fresh?limit=20&days=14
+ * Newest first; optional filter by days since creation.
+ */
+router.get("/ranking/fresh", async (req, res) => {
+  try {
+    const limit = Math.min(parseInt(req.query.limit, 10) || 20, 50);
+    const days = parseInt(req.query.days, 10) || 30;
+    const since = new Date();
+    since.setDate(since.getDate() - days);
+    const products = await Product.find({ createdAt: { $gte: since } })
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .lean();
+    res.json(products);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * 📌 Ranking with Momentum – Hidden Gems
+ * GET /api/products/ranking/hidden-gems?limit=20
+ * Good engagement but lower visibility: not in top by upvotes, scored by momentum (engagement / time).
+ */
+router.get("/ranking/hidden-gems", async (req, res) => {
+  try {
+    const limit = Math.min(parseInt(req.query.limit, 10) || 20, 50);
+    const all = await Product.find().lean();
+    const withMeta = all.map((p) => {
+      const upvotesCount = Array.isArray(p.upvotes) ? p.upvotes.length : 0;
+      const reviewsCount = p.totalcomments ?? (Array.isArray(p.reviews) ? p.reviews.length : 0);
+      const daysSince = Math.max(
+        1,
+        (Date.now() - new Date(p.createdAt).getTime()) / (24 * 60 * 60 * 1000)
+      );
+      const momentum = (upvotesCount + reviewsCount * 1.5) / daysSince;
+      return { ...p, upvotesCount, reviewsCount, momentum, daysSince };
+    });
+    const byUpvotes = [...withMeta].sort((a, b) => b.upvotesCount - a.upvotesCount);
+    const topCount = Math.max(1, Math.floor(byUpvotes.length * 0.25));
+    const excludedIds = new Set(byUpvotes.slice(0, topCount).map((p) => p._id.toString()));
+    const hidden = withMeta
+      .filter(
+        (p) =>
+          !excludedIds.has(p._id.toString()) &&
+          (p.upvotesCount >= 1 || p.reviewsCount >= 1)
+      )
+      .sort((a, b) => b.momentum - a.momentum)
+      .slice(0, limit)
+      .map((p) => ({ ...p, reviews: p.reviewsCount }));
+    res.json(hidden);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * 📌 Get distinct autoTags for Smart Filters (Topic filter)
+ * GET /api/products/tags
+ */
+router.get("/tags", async (req, res) => {
+  try {
+    const tags = await Product.aggregate([
+      { $unwind: { path: "$autoTags", preserveNullAndEmptyArrays: false } },
+      { $group: { _id: "$autoTags" } },
+      { $sort: { _id: 1 } },
+      { $project: { tag: "$_id", _id: 0 } },
+    ]);
+    const list = tags.map((t) => t.tag).filter(Boolean);
+    res.json(list);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * 📌 Ranking with Momentum – Smart Filters
+ * GET /api/products/ranking/smart
+ * Query: category, sort (popular|fresh|momentum|hidden_gems|rising_week), tags (comma), diversity=maker, minUpvotes, minComments, limit
+ */
+router.get("/ranking/smart", async (req, res) => {
+  try {
+    const limit = Math.min(parseInt(req.query.limit, 10) || 20, 50);
+    const category = req.query.category;
+    const sort = (req.query.sort || "popular").toLowerCase();
+    const tagsParam = req.query.tags; // comma-separated, e.g. "AI,Productivity"
+    const diversity = (req.query.diversity || "").toLowerCase();
+    const minUpvotes = Math.max(0, parseInt(req.query.minUpvotes, 10) || 0);
+    const minComments = Math.max(0, parseInt(req.query.minComments, 10) || 0);
+
+    const query = {};
+    if (category && category !== "All Categories") query.category = category;
+    if (tagsParam && typeof tagsParam === "string") {
+      const tagList = tagsParam.split(",").map((t) => t.trim()).filter(Boolean);
+      if (tagList.length) {
+        query.autoTags = { $in: tagList.map((t) => new RegExp(`^${t}$`, "i")) };
+      }
+    }
+
+    let products = await Product.find(query).lean();
+
+    const withMeta = products.map((p) => {
+      const upvotesCount = Array.isArray(p.upvotes) ? p.upvotes.length : 0;
+      const reviewsCount = p.totalcomments ?? (Array.isArray(p.reviews) ? p.reviews.length : 0);
+      const daysSince = Math.max(
+        1,
+        (Date.now() - new Date(p.createdAt).getTime()) / (24 * 60 * 60 * 1000)
+      );
+      const momentum = (upvotesCount + reviewsCount * 1.5) / daysSince;
+      return { ...p, upvotesCount, reviewsCount, momentum };
+    });
+
+    // Min engagement filters
+    let filtered = withMeta.filter(
+      (p) => p.upvotesCount >= minUpvotes && p.reviewsCount >= minComments
+    );
+
+    if (sort === "rising_week") {
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+      filtered = filtered.filter((p) => new Date(p.createdAt) >= oneWeekAgo);
+      filtered.sort((a, b) => b.momentum - a.momentum);
+    } else if (sort === "fresh") {
+      filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    } else if (sort === "momentum") {
+      filtered.sort((a, b) => b.momentum - a.momentum);
+    } else if (sort === "hidden_gems") {
+      const byUpvotes = [...filtered].sort((a, b) => b.upvotesCount - a.upvotesCount);
+      const topCount = Math.max(1, Math.floor(byUpvotes.length * 0.25));
+      const excludedIds = new Set(byUpvotes.slice(0, topCount).map((p) => p._id.toString()));
+      filtered = filtered
+        .filter(
+          (p) =>
+            !excludedIds.has(p._id.toString()) &&
+            (p.upvotesCount >= 1 || p.reviewsCount >= 1)
+        )
+        .sort((a, b) => b.momentum - a.momentum);
+    } else {
+      filtered.sort(
+        (a, b) =>
+          b.upvotesCount - a.upvotesCount ||
+          (b.reviewsCount - a.reviewsCount)
+      );
+    }
+
+    // One per maker: keep first (best) product per author
+    if (diversity === "maker") {
+      const seen = new Set();
+      filtered = filtered.filter((p) => {
+        const key = p.author_id ? p.author_id.toString() : p.author_name || p._id.toString();
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+    }
+
+    const out = filtered
+      .slice(0, limit)
+      .map((p) => ({ ...p, reviews: p.reviewsCount ?? p.totalcomments ?? 0 }));
+    res.json(out);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
  * 📌 Get products by logged-in user
  */
 router.get("/user/my-products", auth, async (req, res) => {

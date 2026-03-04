@@ -13,6 +13,8 @@ interface UserContextProps {
   setnotification: (notifications: any[]) => void;
   refreshNotifications: () => Promise<void>;
   markNotificationsAsViewed: () => Promise<void>;
+  darkmode:boolean;
+  ToggleDarkMode:()=>void;
 }
 type UserProviderProps = {
   children: React.ReactNode;  // This is the important part
@@ -25,6 +27,26 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const [user, setUser] = useState<any>({});
   const [userId,setuserid]=useState<string>('');
   const [notification,setnotification]=useState([])
+  const [darkmode,setdarkmode]=useState(() => {
+    // Get initial value from localStorage or default to false
+    const saved = localStorage.getItem('darkmode');
+    return saved ? JSON.parse(saved) : false;
+  });
+
+  const ToggleDarkMode=()=>{
+    const newDarkMode = !darkmode;
+    setdarkmode(newDarkMode);
+    localStorage.setItem('darkmode', JSON.stringify(newDarkMode));
+  }
+
+  // Apply dark mode class to document root
+  useEffect(() => {
+    if (darkmode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [darkmode]);
   const getuserId= async (userId)=>{
     setuserid(userId);
     console.log('userId',userId)
@@ -199,7 +221,9 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         notification,
         setnotification,
         refreshNotifications,
-        markNotificationsAsViewed
+        markNotificationsAsViewed,
+        darkmode,
+        ToggleDarkMode
       }}
     >
       {children}

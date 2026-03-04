@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { 
   ArrowLeft, 
   MapPin, 
@@ -23,6 +23,7 @@ import { Card, CardContent } from '../ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
+import { UserContext } from '../../context/UserContext';
 
 interface PublicUserProfileProps {
   user: {
@@ -134,6 +135,7 @@ interface Product {
 }
 
 export function PublicUserProfile() {
+  const { darkmode } = useContext(UserContext);
   const [user, setUser] = useState<APIUser | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [wishlist, setWishlist] = useState<any[]>([]);
@@ -267,26 +269,25 @@ export function PublicUserProfile() {
   
     if (isLoading) {
       return (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className={`min-h-screen flex items-center justify-center ${darkmode ? 'bg-gray-900' : 'bg-slate-50'}`}>
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading profile...</p>
+            <div className={`animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4 ${darkmode ? 'border-blue-400' : 'border-slate-600'}`}></div>
+            <p className={darkmode ? 'text-gray-300' : 'text-slate-600'}>Loading profile...</p>
           </div>
         </div>
       );
     }
   
-    if (!user) return <div>User not found</div>;
+    if (!user) return <div className={`min-h-screen ${darkmode ? 'bg-gray-900 text-white' : 'bg-white text-black'}`}>User not found</div>;
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className={`min-h-screen ${darkmode ? 'bg-gray-900' : 'bg-gradient-to-br from-indigo-50 via-white to-purple-50'}`}>
       {/* Header */}
-      <div className="border-b border-gray-200 bg-white sticky top-0 z-10">
+      <div className={`sticky top-0 z-10 shadow-lg ${darkmode ? 'bg-gray-800/90 border-gray-700' : 'bg-white/80 backdrop-blur-lg border-slate-200/50'} border-b`}>
         <div className="max-w-6xl mx-auto px-6 py-4">
           <Button 
             variant="ghost"
-            // onClick={onBack}
-            className="text-gray-600 hover:text-gray-900"
+            className={`transition-all rounded-xl ${darkmode ? 'text-gray-300 hover:text-white hover:bg-gray-700' : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'}`}
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back
@@ -295,333 +296,469 @@ export function PublicUserProfile() {
       </div>
 
       <div className="max-w-6xl mx-auto px-6 py-12">
-        {/* Profile Header */}
-        <div className="flex flex-col md:flex-row gap-8 mb-12">
-          {/* Avatar */}
-          <div className="flex-shrink-0">
-            
-            <Avatar style={{ height: '100px', width: '100px' }}>
-              {user.profilePicture && (
-                <img
-                  src={user.profilePicture}
-                  alt={user.name}
-                  style={{width:'100%',objectFit:'cover'}}
-                  referrerPolicy="no-referrer"
-                  loading="lazy"
-                />
-              )}
-              {!user.profilePicture && <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>}
-            </Avatar>
+        {/* Profile Header with Gradient Background */}
+        <div className="relative bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-3xl shadow-2xl p-8 mb-8 overflow-hidden">
+          {/* Background Pattern */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute inset-0 bg-gradient-to-br from-white to-transparent"></div>
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white/20 rounded-full blur-3xl"></div>
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/20 rounded-full blur-3xl"></div>
           </div>
-
-          {/* Info */}
-          <div className="flex-1">
-            <h1 className="text-3xl mb-3 text-gray-900">{user.name}</h1>
-            
-            {/* Badges */}
-            {user.badges.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-4">
-                {user.badges.map(badgeObj => (
-                  <Badge 
-                    key={badgeObj._id || badgeObj.badge} 
-                    variant="outline"
-                    className="border-slate-300 text-slate-700 bg-slate-50"
-                  >
-                    <Award className="w-3 h-3 mr-1" />
-                    {badgeObj.badge}
-                  </Badge>
-                ))}
+          
+          <div className="relative z-10">
+            <div className="flex flex-col md:flex-row gap-8 mb-8">
+              {/* Avatar with Glow Effect */}
+              <div className="flex-shrink-0">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-white/30 rounded-full blur-2xl"></div>
+                  <Avatar className="relative border-4 border-white shadow-2xl" style={{ height: '120px', width: '120px' }}>
+                    {user.profilePicture && (
+                      <img
+                        src={user.profilePicture}
+                        alt={user.name}
+                        style={{width:'100%',objectFit:'cover'}}
+                        referrerPolicy="no-referrer"
+                        loading="lazy"
+                      />
+                    )}
+                    {!user.profilePicture && <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white text-2xl font-bold">{user.name.charAt(0)}</AvatarFallback>}
+                  </Avatar>
+                  <div className="absolute bottom-0 right-0 w-6 h-6 bg-emerald-400 border-3 border-white rounded-full shadow-lg animate-pulse"></div>
+                </div>
               </div>
-            )}
 
-            {/* Bio */}
-            {user.bio && (
-              <p className="text-gray-700 text-lg mb-6 leading-relaxed max-w-2xl">
-                {user.bio}
-              </p>
-            )}
-
-            {/* Social Links */}
-            <div className="flex flex-wrap gap-3 mb-6">
-              {user.github && (
-                <a 
-                  href={`https://github.com/${user.github}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
-                >
-                  <Github className="w-4 h-4" />
-                  GitHub
-                </a>
-              )}
-              {user.twitter && (
-                <a 
-                  href={`https://twitter.com/${user.twitter}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
-                >
-                  <Twitter className="w-4 h-4" />
-                  Twitter
-                </a>
-              )}
-              {user.linkedin && (
-                <a 
-                  href={`https://linkedin.com/in/${user.linkedin}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
-                >
-                  <Linkedin className="w-4 h-4" />
-                  LinkedIn
-                </a>
-              )}
-              {user.website && (
-                <a 
-                  href={user.website.startsWith('http') ? user.website : `https://${user.website}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
-                >
-                  <Globe className="w-4 h-4" />
-                  Website
-                </a>
-              )}
-            </div>
-
-            {/* Stats */}
-            <div className="flex flex-wrap gap-6 mb-6 text-sm">
-              <div className="flex items-center gap-2">
-                <Briefcase className="w-4 h-4 text-gray-400" />
-                <span className="text-gray-900">{products.length}</span>
-                <span className="text-gray-500">Projects</span>
-              </div>
+              {/* Info */}
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-3">
+                  <h1 className="text-4xl font-bold text-white drop-shadow-lg">{user.name}</h1>
+                  <div className="px-3 py-1 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold rounded-full shadow-lg">PRO</div>
+                </div>
               
-              {user.totalpoints && (
-                <div className="flex items-center gap-2">
-                  <Zap className="w-4 h-4 text-gray-400" />
-                  <span className="text-gray-900">{user.totalpoints.toLocaleString()}</span>
-                  <span className="text-gray-500">Engagement</span>
-                </div>
-              )}
-            </div>
+                {/* Badges */}
+                {user.badges.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {user.badges.map(badgeObj => (
+                      <div 
+                        key={badgeObj._id || badgeObj.badge} 
+                        className="px-3 py-1 bg-white/20 backdrop-blur-sm text-white text-sm font-bold rounded-full border border-white/30 shadow-lg"
+                      >
+                        <Award className="w-3 h-3 mr-1 inline" />
+                        {badgeObj.badge}
+                      </div>
+                    ))}
+                  </div>
+                )}
 
-            {/* Action Buttons */}
+                {/* Bio */}
+                {user.bio && (
+                  <p className="text-white/90 text-lg mb-6 leading-relaxed max-w-2xl drop-shadow">
+                    {user.bio}
+                  </p>
+                )}
+
+                {/* Social Links */}
+                <div className="flex flex-wrap gap-3 mb-6">
+                  {user.github && (
+                    <a 
+                      href={`https://github.com/${user.github}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-white bg-white/20 backdrop-blur-sm hover:bg-white/30 rounded-xl transition-all shadow-lg border border-white/20"
+                    >
+                      <Github className="w-4 h-4" />
+                      GitHub
+                    </a>
+                  )}
+                  {user.twitter && (
+                    <a 
+                      href={`https://twitter.com/${user.twitter}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-white bg-white/20 backdrop-blur-sm hover:bg-white/30 rounded-xl transition-all shadow-lg border border-white/20"
+                    >
+                      <Twitter className="w-4 h-4" />
+                      Twitter
+                    </a>
+                  )}
+                  {user.linkedin && (
+                    <a 
+                      href={`https://linkedin.com/in/${user.linkedin}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-white bg-white/20 backdrop-blur-sm hover:bg-white/30 rounded-xl transition-all shadow-lg border border-white/20"
+                    >
+                      <Linkedin className="w-4 h-4" />
+                      LinkedIn
+                    </a>
+                  )}
+                  {user.website && (
+                    <a 
+                      href={user.website.startsWith('http') ? user.website : `https://${user.website}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-white bg-white/20 backdrop-blur-sm hover:bg-white/30 rounded-xl transition-all shadow-lg border border-white/20"
+                    >
+                      <Globe className="w-4 h-4" />
+                      Website
+                    </a>
+                  )}
+                </div>
+
+                {/* Stats */}
+                <div className="flex flex-wrap gap-8 mb-6">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-white drop-shadow">{products.length}</div>
+                    <div className="text-sm text-white/80">Projects</div>
+                  </div>
+                  {user.totalpoints && (
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-white drop-shadow">{user.totalpoints.toLocaleString()}</div>
+                      <div className="text-sm text-white/80">Engagement</div>
+                    </div>
+                  )}
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-white drop-shadow">{user.totalUpvotes || 0}</div>
+                    <div className="text-sm text-white/80">Upvotes</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-white drop-shadow">{user.badges.length}</div>
+                    <div className="text-sm text-white/80">Badges</div>
+                  </div>
+                </div>
+            </div>
+          </div>
+        </div>
+        </div>
+
+        {/* Stats Cards with Gradient */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+            <div className="flex items-center justify-between mb-2">
+              <TrendingUp className="w-5 h-5 text-white/80" />
+              <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                <span className="text-sm font-bold text-white">↑</span>
+              </div>
+            </div>
+            <div className="text-2xl font-bold text-white mb-1">
+              {user.totalUpvotes || 0}
+            </div>
+            <div className="text-sm text-white/80">Upvotes Given</div>
+          </div>
+
+          <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+            <div className="flex items-center justify-between mb-2">
+              <Briefcase className="w-5 h-5 text-white/80" />
+              <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                <span className="text-sm font-bold text-white">P</span>
+              </div>
+            </div>
+            <div className="text-2xl font-bold text-white mb-1">
+              {products.length}
+            </div>
+            <div className="text-sm text-white/80">Projects</div>
+          </div>
+
+          <div className="bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+            <div className="flex items-center justify-between mb-2">
+              <Award className="w-5 h-5 text-white/80" />
+              <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                <span className="text-sm font-bold text-white">★</span>
+              </div>
+            </div>
+            <div className="text-2xl font-bold text-white mb-1">
+              {user.badges.length}
+            </div>
+            <div className="text-sm text-white/80">Badges Earned</div>
+          </div>
+
+          {user.totalpoints && (
+            <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+              <div className="flex items-center justify-between mb-2">
+                <Zap className="w-5 h-5 text-white/80" />
+                <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                  <span className="text-sm font-bold text-white">⚡</span>
+                </div>
+              </div>
+              <div className="text-2xl font-bold text-white mb-1">
+                {user.totalpoints.toLocaleString()}
+              </div>
+              <div className="text-sm text-white/80">Engagement</div>
+            </div>
+          )}
+        </div>
+
+        {/* Modern Tabs with Glass Effect */}
+        <div className={`rounded-2xl shadow-xl border mb-8 ${darkmode ? 'bg-gray-800/60 border-gray-700' : 'bg-white/60 backdrop-blur-lg border-white/20'}`}>
+          <div className={`flex flex-col sm:flex-row border-b ${darkmode ? 'border-gray-700' : 'border-white/20'}`}>
+            <button
+              onClick={() => setActiveTab('projects')}
+              className={`flex-1 px-6 py-4 text-sm font-medium transition-all relative rounded-tl-2xl ${
+                activeTab === 'projects'
+                  ? darkmode ? 'text-white bg-gray-700 shadow-lg' : 'text-slate-900 bg-white/80 shadow-lg'
+                  : darkmode ? 'text-gray-300 hover:text-white hover:bg-gray-700' : 'text-slate-600 hover:text-slate-800 hover:bg-white/40'
+              }`}
+            >
+              <div className="flex items-center justify-center gap-2">
+                <Briefcase className="w-4 h-4" />
+                <span>Projects</span>
+                <span className="px-2 py-0.5 bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-xs rounded-full">
+                  {products.length}
+                </span>
+              </div>
+              {activeTab === 'projects' && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-indigo-500 to-purple-500"></div>
+              )}
+            </button>
             
+            <button
+              onClick={() => setActiveTab('wishlist')}
+              className={`flex-1 px-6 py-4 text-sm font-medium transition-all relative ${
+                activeTab === 'wishlist'
+                  ? darkmode ? 'text-white bg-gray-700 shadow-lg' : 'text-slate-900 bg-white/80 shadow-lg'
+                  : darkmode ? 'text-gray-300 hover:text-white hover:bg-gray-700' : 'text-slate-600 hover:text-slate-800 hover:bg-white/40'
+              }`}
+            >
+              <div className="flex items-center justify-center gap-2">
+                <Heart className="w-4 h-4" />
+                <span>Wishlist</span>
+                <span className="px-2 py-0.5 bg-gradient-to-r from-pink-500 to-red-500 text-white text-xs rounded-full">
+                  {wishlist.length}
+                </span>
+              </div>
+              {activeTab === 'wishlist' && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-pink-500 to-red-500"></div>
+              )}
+            </button>
+            
+            <button
+              onClick={() => setActiveTab('activity')}
+              className={`flex-1 px-6 py-4 text-sm font-medium transition-all relative rounded-tr-2xl ${
+                activeTab === 'activity'
+                  ? darkmode ? 'text-white bg-gray-700 shadow-lg' : 'text-slate-900 bg-white/80 shadow-lg'
+                  : darkmode ? 'text-gray-300 hover:text-white hover:bg-gray-700' : 'text-slate-600 hover:text-slate-800 hover:bg-white/40'
+              }`}
+            >
+              <div className="flex items-center justify-center gap-2">
+                <Zap className="w-4 h-4" />
+                <span>Activity</span>
+              </div>
+              {activeTab === 'activity' && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-500 to-teal-500"></div>
+              )}
+            </button>
           </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-          <Card className="border-gray-200">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-2">
-                <TrendingUp className="w-5 h-5 text-blue-600" />
-              </div>
-              <div className="text-2xl text-gray-900 mb-1">
-                {user.totalUpvotes || 0}
-              </div>
-              <div className="text-sm text-gray-500">Upvotes Given</div>
-            </CardContent>
-          </Card>
-{/* 
-          <Card className="border-gray-200">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-2">
-                <MessageCircle className="w-5 h-5 text-orange-600" />
-              </div>
-              <div className="text-2xl text-gray-900 mb-1">
-                {user.reviewsWritten || 0}
-              </div>
-              <div className="text-sm text-gray-500">Reviews Written</div>
-            </CardContent>
-          </Card> */}
-
-          {/* <Card className="border-gray-200">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-2">
-                <ExternalLink className="w-5 h-5 text-slate-600" />
-              </div>
-              <div className="text-2xl text-gray-900 mb-1">
-                {user.productsShared || 0}
-              </div>
-              <div className="text-sm text-gray-500">Products Shared</div>
-            </CardContent>
-          </Card> */}
-
-          <Card className="border-gray-200">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-2">
-                <Award className="w-5 h-5 text-slate-600" />
-              </div>
-              <div className="text-2xl text-gray-900 mb-1">
-                {user.badges.length}
-              </div>
-              <div className="text-sm text-gray-500">Badges Earned</div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="mb-8 bg-gray-100">
-            <TabsTrigger value="projects" className="data-[state=active]:bg-white">
-              Projects ({products.length})
-            </TabsTrigger>
-            <TabsTrigger value="wishlist" className="data-[state=active]:bg-white">
-              Wishlist ({wishlist.length})
-            </TabsTrigger>
-            <TabsTrigger value="activity" className="data-[state=active]:bg-white">
-              Activity
-            </TabsTrigger>
-          </TabsList>
-
-          {/* Projects Tab */}
-          <TabsContent value="projects" className="space-y-6">
-            {mockProjects.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {products.map(project => (
-                  <Card 
-                    key={project._id} 
-                    className="group overflow-hidden hover:shadow-lg transition-all border-gray-200 cursor-pointer"
-                  >
-                    <div className="relative h-48 bg-gray-100 overflow-hidden">
-                      <ImageWithFallback
-                        src={project.media[0]}
-                        alt={project.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    </div>
-                    <CardContent className="p-5">
-                      <h3 className="text-lg mb-2 text-gray-900 group-hover:text-blue-600 transition-colors">
-                        {project.title}
-                      </h3>
-                      <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-                        {project.description}
-                      </p>
-                      <div className="flex items-center gap-4 text-sm text-gray-500">
-                        <span className="flex items-center gap-1">
-                          <Heart className="w-4 h-4" />
-                          {project.upvotes}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <MessageCircle className="w-4 h-4" />
-                          {project.reviews.length}
-                        </span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-16">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Briefcase className="w-8 h-8 text-gray-400" />
-                </div>
-                <p className="text-gray-500">No projects yet</p>
-              </div>
-            )}
-          </TabsContent>
-
-          {/* Wishlist Tab */}
-          <TabsContent value="wishlist" className="space-y-6">
-            {wishlist.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {wishlist.map((item: any) => (
-                  <Card 
-                    key={item._id} 
-                    className="group overflow-hidden hover:shadow-lg transition-all border-gray-200 cursor-pointer"
-                  >
-                    <div className="relative h-48 bg-gray-100 overflow-hidden">
-                      <ImageWithFallback
-                        src={item.productId?.media?.[0] || '/placeholder-product.jpg'}
-                        alt={item.productId?.title || 'Product'}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        fallback="/placeholder-product.jpg"
-                      />
-                      <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm rounded-full p-2">
-                        <Heart className="w-4 h-4 text-red-500 fill-current" />
-                      </div>
-                    </div>
-                    <CardContent className="p-5">
-                      <h3 className="font-semibold text-gray-900 mb-2 line-clamp-1">
-                        {item.productId?.title || 'Untitled Product'}
-                      </h3>
-                      <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                        {item.productId?.description || 'No description available'}
-                      </p>
-                      <div className="flex items-center justify-between text-sm text-gray-500">
-                        <span className="flex items-center gap-1">
-                          <Heart className="w-4 h-4" />
-                          Added {new Date(item.addedAt).toLocaleDateString()}
-                        </span>
-                      </div>
-                      {item.notes && (
-                        <div className="mt-3 p-3 bg-gray-50 rounded-md">
-                          <p className="text-sm text-gray-600 italic">"{item.notes}"</p>
+          {/* Projects Tab Content */}
+          {activeTab === 'projects' && (
+            <div className="space-y-6">
+              {products.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {products.map(project => (
+                    <div 
+                      key={project._id} 
+                      className={`rounded-2xl shadow-xl border overflow-hidden hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:-translate-y-2 ${
+                        darkmode 
+                          ? 'bg-gray-800 border-gray-700' 
+                          : 'bg-white/80 backdrop-blur-lg border-white/20'
+                      }`}
+                    >
+                      <div className={`relative h-48 overflow-hidden ${
+                        darkmode ? 'bg-gray-700' : 'bg-gradient-to-br from-slate-100 to-slate-200'
+                      }`}>
+                        <ImageWithFallback
+                          src={project.media[0]}
+                          alt={project.title}
+                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                        />
+                        <div className={`absolute top-3 right-3 rounded-full px-3 py-1 text-sm font-medium shadow-lg ${
+                          darkmode 
+                            ? 'bg-gray-800/90 text-gray-200 border-gray-600' 
+                            : 'bg-white/90 text-slate-700 border-white/20'
+                        }`}>
+                          <Heart className="w-3 h-3 inline mr-1 text-red-500" />
+                          {project.upvotes?.length || 0}
                         </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-16">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Heart className="w-8 h-8 text-gray-400" />
-                </div>
-                <p className="text-gray-500">No wishlist items yet</p>
-              </div>
-            )}
-          </TabsContent>
-
-          {/* Activity Tab */}
-          <TabsContent value="activity" className="space-y-3">
-            {activities.length > 0 ? (
-              activities.map((activity: any, index: number) => (
-                <Card key={activity._id || index} className="border-gray-200 hover:border-gray-300 transition-colors">
-                  <CardContent className="p-5">
-                    <div className="flex items-start gap-4">
-                      <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                        {activity.type === 'launch' && <Zap className="w-5 h-5 text-blue-600" />}
-                        {activity.type === 'update' && <TrendingUp className="w-5 h-5 text-orange-600" />}
-                        {activity.type === 'milestone' && <Award className="w-5 h-5 text-slate-600" />}
-                        {activity.type === 'collab' && <Users className="w-5 h-5 text-slate-600" />}
-                        {activity.type === 'badge' && <Award className="w-5 h-5 text-slate-600" />}
-                        {activity.type === 'upvote' && <Heart className="w-5 h-5 text-red-600" />}
-                        {activity.type === 'review' && <MessageCircle className="w-5 h-5 text-blue-600" />}
-                        {activity.type === 'comment' && <MessageCircle className="w-5 h-5 text-green-600" />}
-                        {!activity.type && <Award className="w-5 h-5 text-slate-600" />}
                       </div>
-                      <div className="flex-1">
-                        <p className="text-gray-900 mb-1">
-                          <span className="text-gray-700">{activity.action || 'Activity'}</span>
-                          {' '}
-                          {activity.target && (
-                            <span className="text-blue-600 hover:underline cursor-pointer">
-                              {activity.target}
+                      <div className="p-6">
+                        <h3 className={`text-lg font-semibold mb-2 transition-colors ${
+                          darkmode 
+                            ? 'text-white hover:text-blue-400' 
+                            : 'text-slate-900 hover:text-indigo-600'
+                        }`}>
+                          {project.title}
+                        </h3>
+                        <p className={`text-sm mb-4 line-clamp-2 ${
+                          darkmode ? 'text-gray-400' : 'text-slate-600'
+                        }`}>
+                          {project.description}
+                        </p>
+                        <div className="flex items-center justify-between">
+                          <div className={`flex items-center gap-3 text-sm ${
+                            darkmode ? 'text-gray-400' : 'text-slate-500'
+                          }`}>
+                            <span className="flex items-center gap-1">
+                              <Heart className="w-4 h-4 text-red-500" />
+                              {project.upvotes?.length || 0}
                             </span>
-                          )}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          {activity.createdAt ? new Date(activity.createdAt).toLocaleDateString() : 'Recently'}
-                        </p>
+                            <span className="flex items-center gap-1">
+                              <MessageCircle className="w-4 h-4 text-blue-500" />
+                              {project.reviews?.length || 0}
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              ))
-            ) : (
-              <div className="text-center py-16">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Award className="w-8 h-8 text-gray-400" />
+                  ))}
                 </div>
-                <p className="text-gray-500">No recent activity</p>
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
+              ) : (
+                <div className={`text-center py-16 rounded-2xl border ${darkmode ? 'bg-gray-800/40 border-gray-700' : 'bg-white/40 backdrop-blur-lg border-white/20'}`}>
+                  <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${darkmode ? 'bg-gray-700' : 'bg-gradient-to-br from-slate-200 to-slate-300'}`}>
+                    <Briefcase className={`w-8 h-8 ${darkmode ? 'text-gray-400' : 'text-slate-500'}`} />
+                  </div>
+                  <p className={`font-medium ${darkmode ? 'text-gray-300' : 'text-slate-600'}`}>No projects yet</p>
+                  <p className={`text-sm mt-2 ${darkmode ? 'text-gray-500' : 'text-slate-400'}`}>Start building and showcase your amazing work!</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Wishlist Tab Content */}
+          {activeTab === 'wishlist' && (
+            <div className="space-y-6">
+              {wishlist.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {wishlist.map((item: any) => (
+                    <div 
+                      key={item._id} 
+                      className={`rounded-2xl shadow-xl border overflow-hidden hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:-translate-y-2 ${
+                        darkmode 
+                          ? 'bg-gray-800 border-gray-700' 
+                          : 'bg-white/80 backdrop-blur-lg border-white/20'
+                      }`}
+                    >
+                      <div className={`relative h-48 overflow-hidden ${
+                        darkmode ? 'bg-gray-700' : 'bg-gradient-to-br from-pink-50 to-rose-100'
+                      }`}>
+                        <ImageWithFallback
+                          src={item.productId?.media?.[0] || '/placeholder-product.jpg'}
+                          alt={item.productId?.title || 'Product'}
+                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                          fallback="/placeholder-product.jpg"
+                        />
+                        <div className={`absolute top-3 right-3 rounded-full p-2 shadow-lg ${
+                          darkmode 
+                            ? 'bg-gray-800/90 border-gray-600' 
+                            : 'bg-white/90 border-white/20'
+                        }`}>
+                          <Heart className="w-4 h-4 text-red-500 fill-current" />
+                        </div>
+                      </div>
+                      <div className="p-6">
+                        <h3 className={`text-lg font-semibold mb-2 line-clamp-1 transition-colors ${
+                          darkmode 
+                            ? 'text-white hover:text-pink-400' 
+                            : 'text-slate-900 hover:text-pink-600'
+                        }`}>
+                          {item.productId?.title || 'Untitled Product'}
+                        </h3>
+                        <p className={`text-sm mb-4 line-clamp-2 ${
+                          darkmode ? 'text-gray-400' : 'text-slate-600'
+                        }`}>
+                          {item.productId?.description || 'No description available'}
+                        </p>
+                        <div className="flex items-center justify-between text-sm">
+                          <span className={`flex items-center gap-1 ${
+                            darkmode ? 'text-gray-400' : 'text-slate-500'
+                          }`}>
+                            <Heart className="w-4 h-4 text-red-500" />
+                            Added {new Date(item.addedAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                        {item.notes && (
+                          <div className={`mt-3 p-3 rounded-xl border ${
+                            darkmode 
+                              ? 'bg-gray-700 border-gray-600' 
+                              : 'bg-gradient-to-r from-pink-50 to-rose-50 border-pink-100'
+                          }`}>
+                            <p className={`text-sm italic ${
+                              darkmode ? 'text-gray-300' : 'text-slate-600'
+                            }`}>"{item.notes}"</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className={`text-center py-16 rounded-2xl border ${darkmode ? 'bg-gray-800/40 border-gray-700' : 'bg-white/40 backdrop-blur-lg border-white/20'}`}>
+                  <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${darkmode ? 'bg-gray-700' : 'bg-gradient-to-br from-pink-200 to-rose-200'}`}>
+                    <Heart className={`w-8 h-8 ${darkmode ? 'text-pink-400' : 'text-pink-500'}`} />
+                  </div>
+                  <p className={`font-medium ${darkmode ? 'text-gray-300' : 'text-slate-600'}`}>No wishlist items yet</p>
+                  <p className={`text-sm mt-2 ${darkmode ? 'text-gray-500' : 'text-slate-400'}`}>Start adding products you love!</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Activity Tab Content */}
+          {activeTab === 'activity' && (
+            <div className="space-y-4">
+              {activities.length > 0 ? (
+                activities.map((activity: any, index: number) => (
+                  <div key={activity._id || index} className={`rounded-2xl shadow-xl border hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 ${
+                    darkmode 
+                      ? 'bg-gray-800 border-gray-700' 
+                      : 'bg-white/80 backdrop-blur-lg border-white/20'
+                  }`}>
+                    <div className="p-6">
+                      <div className="flex items-start gap-4">
+                        <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0">
+                          {activity.type === 'launch' && <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center shadow-lg"><Zap className="w-5 h-5 text-white" /></div>}
+                          {activity.type === 'update' && <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center shadow-lg"><TrendingUp className="w-5 h-5 text-white" /></div>}
+                          {activity.type === 'milestone' && <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full flex items-center justify-center shadow-lg"><Award className="w-5 h-5 text-white" /></div>}
+                          {activity.type === 'collab' && <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-full flex items-center justify-center shadow-lg"><Users className="w-5 h-5 text-white" /></div>}
+                          {activity.type === 'badge' && <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-amber-600 rounded-full flex items-center justify-center shadow-lg"><Award className="w-5 h-5 text-white" /></div>}
+                          {activity.type === 'upvote' && <div className="w-10 h-10 bg-gradient-to-br from-red-400 to-red-600 rounded-full flex items-center justify-center shadow-lg"><Heart className="w-5 h-5 text-white" /></div>}
+                          {activity.type === 'review' && <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center shadow-lg"><MessageCircle className="w-5 h-5 text-white" /></div>}
+                          {activity.type === 'comment' && <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-full flex items-center justify-center shadow-lg"><MessageCircle className="w-5 h-5 text-white" /></div>}
+                          {!activity.type && <div className="w-10 h-10 bg-gradient-to-br from-slate-400 to-slate-600 rounded-full flex items-center justify-center shadow-lg"><Award className="w-5 h-5 text-white" /></div>}
+                        </div>
+                        <div className="flex-1">
+                          <p className={`mb-1 ${darkmode ? 'text-white' : 'text-slate-900'}`}>
+                            <span className={`font-medium ${darkmode ? 'text-gray-300' : 'text-slate-700'}`}>{activity.action || 'Activity'}</span>
+                            {' '}
+                            {activity.target && (
+                              <span className={`hover:underline cursor-pointer font-semibold transition-colors ${
+                                darkmode 
+                                  ? 'text-white hover:text-blue-400' 
+                                  : 'text-slate-900 hover:text-indigo-600'
+                              }`}>
+                                {activity.target}
+                              </span>
+                            )}
+                          </p>
+                          <p className={`text-sm ${darkmode ? 'text-gray-400' : 'text-slate-500'}`}>
+                            {activity.createdAt ? new Date(activity.createdAt).toLocaleDateString() : 'Recently'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className={`text-center py-16 rounded-2xl border ${darkmode ? 'bg-gray-800/40 border-gray-700' : 'bg-white/40 backdrop-blur-lg border-white/20'}`}>
+                  <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${darkmode ? 'bg-gray-700' : 'bg-gradient-to-br from-slate-200 to-slate-300'}`}>
+                    <Award className={`w-8 h-8 ${darkmode ? 'text-gray-400' : 'text-slate-500'}`} />
+                  </div>
+                  <p className={`font-medium ${darkmode ? 'text-gray-300' : 'text-slate-600'}`}>No recent activity</p>
+                  <p className={`text-sm mt-2 ${darkmode ? 'text-gray-500' : 'text-slate-400'}`}>Start engaging with the community!</p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
   );
 }

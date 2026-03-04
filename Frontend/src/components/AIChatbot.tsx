@@ -26,15 +26,17 @@ interface Message {
   suggestions?: string[];
 }
 
+const apiUrl = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
+
 interface AIChatbotProps {
-  currentUser?: { name: string; profilePicture: string } | null;
+  currentUser?: { name: string; profilePicture: string; id?: string } | null;
 }
 
 const quickActions = [
   { icon: Search, label: 'Find Products', query: 'Help me find AI tools for productivity' },
-  { icon: Lightbulb, label: 'Product Ideas', query: 'Give me ideas for my next project' },
+  { icon: Sparkles, label: 'Suggest for me', query: 'Suggest products for me' },
+  { icon: Lightbulb, label: 'Sentiment insights', query: 'Show feedback sentiment' },
   { icon: HelpCircle, label: 'How PeerRank Works', query: 'How does PeerRank work?' },
-  { icon: Sparkles, label: 'Writing Help', query: 'Help me write a better product pitch' }
 ];
 
 const initialMessages: Message[] = [
@@ -68,9 +70,9 @@ export function AIChatbot({ currentUser }: AIChatbotProps) {
     scrollToBottom();
   }, [messages]);
 
-  const generateBotResponse = (userMessage: string): string => {
+  const generateBotResponseSync = (userMessage: string): string => {
     const lowerMessage = userMessage.toLowerCase();
-    
+
     if (lowerMessage.includes('how') && (lowerMessage.includes('work') || lowerMessage.includes('peerrank'))) {
       return "PeerRank is a community-driven platform where makers showcase their products without needing funding! 🚀 You can:\n\n• Submit your products with AI-powered pitch suggestions\n• Discover trending projects through our Trend Pulse\n• Give and receive peer reviews\n• Collaborate with other makers\n• Earn badges and build your reputation\n\nThe best part? Everything is based on community engagement, not paid promotions!";
     }
@@ -112,18 +114,61 @@ export function AIChatbot({ currentUser }: AIChatbotProps) {
     setInputMessage('');
     setIsTyping(true);
 
-    // Simulate typing delay
+    const lower = message.toLowerCase();
+    const token = localStorage.getItem('token');
+
+    // AI Suggested products (logged-in)
+    if ((lower.includes('suggest') || lower.includes('recommend') || lower.includes('for me')) && (lower.includes('product') || lower.includes('show') || lower.includes('me'))) {
+      if (!token) {
+        setMessages(prev => [...prev, { id: (Date.now() + 1).toString(), type: 'bot', content: "Please log in to get AI-suggested products based on your upvotes and interests.", timestamp: new Date() }]);
+        setIsTyping(false);
+        return;
+      }
+      try {
+        const res = await fetch(`${apiUrl}/api/recommendations/suggested?limit=5`, { headers: { Authorization: `Bearer ${token}` } });
+        const data = res.ok ? await res.json() : [];
+        const list = Array.isArray(data) ? data : [];
+        const text = list.length
+          ? "Here are products I suggest for you:\n\n" + list.map((p: { title?: string; _id?: string }) => "• " + (p.title || "Product") + " — view at /product/" + p._id).join("\n")
+          : "Upvote or comment on products so I can suggest similar ones!";
+        setMessages(prev => [...prev, { id: (Date.now() + 1).toString(), type: 'bot', content: text, timestamp: new Date() }]);
+      } catch {
+        setMessages(prev => [...prev, { id: (Date.now() + 1).toString(), type: 'bot', content: "Could not load suggestions. Try again later.", timestamp: new Date() }]);
+      }
+      setIsTyping(false);
+      return;
+    }
+
+    // Feedback sentiment insights
+    if (lower.includes('sentiment') || lower.includes('feedback insight') || lower.includes('review sentiment')) {
+      try {
+        const res = await fetch(`${apiUrl}/api/recommendations/sentiment?limit=50`);
+        const data = res.ok ? await res.json() : null;
+        if (data && typeof data.total === 'number') {
+          const d = data.distribution || {};
+          const text = "Feedback sentiment insights:\n\n• Total comments analyzed: " + data.total + "\n• Average score: " + (data.averageScore ?? 0) + "\n• Positive: " + (d.positive ?? 0) + ", Neutral: " + (d.neutral ?? 0) + ", Negative: " + (d.negative ?? 0);
+          setMessages(prev => [...prev, { id: (Date.now() + 1).toString(), type: 'bot', content: text, timestamp: new Date() }]);
+        } else {
+          setMessages(prev => [...prev, { id: (Date.now() + 1).toString(), type: 'bot', content: "No sentiment data yet. Comments are analyzed as they come in!", timestamp: new Date() }]);
+        }
+      } catch {
+        setMessages(prev => [...prev, { id: (Date.now() + 1).toString(), type: 'bot', content: "Could not load sentiment. Try again later.", timestamp: new Date() }]);
+      }
+      setIsTyping(false);
+      return;
+    }
+
+    // Default: use sync responses
     setTimeout(() => {
       const botResponse: Message = {
         id: (Date.now() + 1).toString(),
         type: 'bot',
-        content: generateBotResponse(message),
+        content: generateBotResponseSync(message),
         timestamp: new Date()
       };
-      
       setMessages(prev => [...prev, botResponse]);
       setIsTyping(false);
-    }, 1500);
+    }, 800);
   };
 
   const handleQuickAction = (query: string) => {

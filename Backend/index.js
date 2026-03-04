@@ -14,6 +14,7 @@ import notificationRoutes from "./routes/notification.js"
 import wishlistRoutes from "./routes/wishlist.js";
 import userRoutes from "./routes/user.js";
 import activityRoutes from "./routes/activity.js";
+import recommendationsRoutes from "./routes/recommendations.js";
 import { startScheduler } from "./scheduler.js";
 
 dotenv.config();
@@ -48,6 +49,7 @@ app.use('/api/notification',notificationRoutes)
 app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/activity', activityRoutes);
+app.use('/api/recommendations', recommendationsRoutes);
 app.use((err, req, res, next) => {
   console.error("Server error:", err);
   if (err.type === "entity.too.large") {

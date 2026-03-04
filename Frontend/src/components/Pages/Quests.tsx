@@ -106,20 +106,20 @@ const mapBadgesToDisplay = (): BadgeItem[] => {
       rarity: 'rare'
     },
     // Add more badges here
-    'first20upvotes': {
-      id: 'b3',
-      name: 'Upvote Master',
-      description: 'Receive 20 upvotes on your content',
-      icon: <TrendingUp className="w-6 h-6" />,
-      rarity: 'epic'
-    },
-    'first50upvotes': {
-      id: 'b4',
-      name: 'Upvote Legend',
-      description: 'Reach 50 upvotes milestone',
-      icon: <TrendingUp className="w-6 h-6" />,
-      rarity: 'legendary'
-    },
+    // 'first20upvotes': {
+    //   id: 'b3',
+    //   name: 'Upvote Master',
+    //   description: 'Receive 20 upvotes on your content',
+    //   icon: <TrendingUp className="w-6 h-6" />,
+    //   rarity: 'epic'
+    // },
+    // 'first50upvotes': {
+    //   id: 'b4',
+    //   name: 'Upvote Legend',
+    //   description: 'Reach 50 upvotes milestone',
+    //   icon: <TrendingUp className="w-6 h-6" />,
+    //   rarity: 'legendary'
+    // },
     'firstLogin': {
       id: 'b5',
       name: 'Welcome Aboard',
@@ -182,7 +182,7 @@ useEffect(() => {
       description: 'Give emoji reactions to 3 products',
       progress: questData.commentsToday || 0 ,
       target: 3,
-      reward: '30 XP',
+      reward: '2.5 pts',
       type: 'daily',
       icon: <Heart className="w-5 h-5" />,
       xp: 30,
@@ -191,14 +191,14 @@ useEffect(() => {
     {
       id: 'q2',
       title: 'Upvote Champion',
-      description: `Upvote 5 products`,
+      description: `Upvote 2 products`,
       progress: questData?.upvotesToday || 0 ,
-      target: 5,
-      reward: '100 XP + Badge',
+      target: 2,
+      reward: '2.5 pts',
       type: 'daily',
       icon: <TrendingUp className="w-5 h-5" />,
       xp: 100,
-      completed: (questData?.upvotesToday || 0) >= 5 
+      completed: (questData?.upvotesToday || 0) >= 2 
     },
     
   ])

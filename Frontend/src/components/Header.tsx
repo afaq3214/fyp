@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
-import { Search, Zap, User, Menu, X, Plus, Home, Bell, Heart, Trash2 } from 'lucide-react';
+import { Search, Zap, User, Menu, X, Plus, Home, Bell, Heart, Trash2, Sun, Moon } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
@@ -14,6 +14,7 @@ import {
 import { User as UserType } from '../App';
 import { Link, useNavigate } from 'react-router-dom';
 import { UserContext } from '@/context/UserContext';
+import { Label } from './ui/label';
 
 interface HeaderProps {
   currentUser: UserType | null;
@@ -189,7 +190,14 @@ export function Header({
               <Plus className="w-4 h-4 mr-2" />
               Submit Product
             </Button>
-
+           <Button onClick={userContext.ToggleDarkMode} className="mr-4 cursor-pointer flex items-center space-x-2 p-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition duration-300">
+              <input type="checkbox" className="hidden theme-controller" />
+              <div className="flex items-center justify-center w-6 h-6 bg-gray-700 rounded-full">
+               {!userContext.darkmode && <Sun className="w-4 h-4 text-yellow-400 swap-on" />}
+               {userContext.darkmode && <Moon className="w-4 h-4 text-blue-400 swap-off" />}
+              </div>
+              <span className="text-sm font-medium">Toggle Theme</span>
+            </Button>
             {currentUser ? (
               <div className="flex items-center space-x-3">
                 <div className="relative" ref={notificationRef}>
