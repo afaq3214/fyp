@@ -281,13 +281,13 @@ export function PublicUserProfile() {
     if (!user) return <div className={`min-h-screen ${darkmode ? 'bg-gray-900 text-white' : 'bg-white text-black'}`}>User not found</div>;
 
   return (
-    <div className={`min-h-screen ${darkmode ? 'bg-gray-900' : 'bg-gradient-to-br from-indigo-50 via-white to-purple-50'}`}>
+    <div className={`min-h-screen ${darkmode ? 'bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900' : 'bg-gradient-to-br from-indigo-50 via-white to-purple-50'}`}>
       {/* Header */}
-      <div className={`sticky top-0 z-10 shadow-lg ${darkmode ? 'bg-gray-800/90 border-gray-700' : 'bg-white/80 backdrop-blur-lg border-slate-200/50'} border-b`}>
+      <div className={`sticky top-0 z-10 shadow-lg ${darkmode ? 'bg-blue-800/90 border-blue-600' : 'bg-white/80 backdrop-blur-lg border-slate-200/50'} border-b`}>
         <div className="max-w-6xl mx-auto px-6 py-4">
           <Button 
             variant="ghost"
-            className={`transition-all rounded-xl ${darkmode ? 'text-gray-300 hover:text-white hover:bg-gray-700' : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'}`}
+            className={`transition-all rounded-xl ${darkmode ? 'text-gray-300 hover:text-white hover:bg-blue-700' : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'}`}
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back
@@ -297,13 +297,8 @@ export function PublicUserProfile() {
 
       <div className="max-w-6xl mx-auto px-6 py-12">
         {/* Profile Header with Gradient Background */}
-        <div className="relative bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-3xl shadow-2xl p-8 mb-8 overflow-hidden">
-          {/* Background Pattern */}
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute inset-0 bg-gradient-to-br from-white to-transparent"></div>
-            <div className="absolute top-0 right-0 w-64 h-64 bg-white/20 rounded-full blur-3xl"></div>
-            <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/20 rounded-full blur-3xl"></div>
-          </div>
+        <div className={`relative ${darkmode ? 'bg-gradient-to-br from-blue-800 to-indigo-800' : 'bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500'} rounded-3xl shadow-2xl p-8 mb-8 overflow-hidden text-white`}>
+          <div className="absolute inset-0 bg-black/10"></div>
           
           <div className="relative z-10">
             <div className="flex flex-col md:flex-row gap-8 mb-8">
@@ -488,14 +483,14 @@ export function PublicUserProfile() {
         </div>
 
         {/* Modern Tabs with Glass Effect */}
-        <div className={`rounded-2xl shadow-xl border mb-8 ${darkmode ? 'bg-gray-800/60 border-gray-700' : 'bg-white/60 backdrop-blur-lg border-white/20'}`}>
-          <div className={`flex flex-col sm:flex-row border-b ${darkmode ? 'border-gray-700' : 'border-white/20'}`}>
+        <div className={`rounded-2xl shadow-xl border mb-8 ${darkmode ? 'bg-blue-800/60 border-blue-600' : 'bg-white/60 backdrop-blur-lg border-white/20'}`}>
+          <div className={`flex flex-col sm:flex-row border-b ${darkmode ? 'border-blue-600' : 'border-white/20'}`}>
             <button
               onClick={() => setActiveTab('projects')}
               className={`flex-1 px-6 py-4 text-sm font-medium transition-all relative rounded-tl-2xl ${
                 activeTab === 'projects'
-                  ? darkmode ? 'text-white bg-gray-700 shadow-lg' : 'text-slate-900 bg-white/80 shadow-lg'
-                  : darkmode ? 'text-gray-300 hover:text-white hover:bg-gray-700' : 'text-slate-600 hover:text-slate-800 hover:bg-white/40'
+                  ? darkmode ? 'text-white bg-blue-700 shadow-lg' : 'text-slate-900 bg-white/80 shadow-lg'
+                  : darkmode ? 'text-gray-300 hover:text-white hover:bg-blue-700' : 'text-slate-600 hover:text-slate-800 hover:bg-white/40'
               }`}
             >
               <div className="flex items-center justify-center gap-2">
@@ -514,8 +509,8 @@ export function PublicUserProfile() {
               onClick={() => setActiveTab('wishlist')}
               className={`flex-1 px-6 py-4 text-sm font-medium transition-all relative ${
                 activeTab === 'wishlist'
-                  ? darkmode ? 'text-white bg-gray-700 shadow-lg' : 'text-slate-900 bg-white/80 shadow-lg'
-                  : darkmode ? 'text-gray-300 hover:text-white hover:bg-gray-700' : 'text-slate-600 hover:text-slate-800 hover:bg-white/40'
+                  ? darkmode ? 'text-white bg-blue-700 shadow-lg' : 'text-slate-900 bg-white/80 shadow-lg'
+                  : darkmode ? 'text-gray-300 hover:text-white hover:bg-blue-700' : 'text-slate-600 hover:text-slate-800 hover:bg-white/40'
               }`}
             >
               <div className="flex items-center justify-center gap-2">
@@ -534,8 +529,8 @@ export function PublicUserProfile() {
               onClick={() => setActiveTab('activity')}
               className={`flex-1 px-6 py-4 text-sm font-medium transition-all relative rounded-tr-2xl ${
                 activeTab === 'activity'
-                  ? darkmode ? 'text-white bg-gray-700 shadow-lg' : 'text-slate-900 bg-white/80 shadow-lg'
-                  : darkmode ? 'text-gray-300 hover:text-white hover:bg-gray-700' : 'text-slate-600 hover:text-slate-800 hover:bg-white/40'
+                  ? darkmode ? 'text-white bg-blue-700 shadow-lg' : 'text-slate-900 bg-white/80 shadow-lg'
+                  : darkmode ? 'text-gray-300 hover:text-white hover:bg-blue-700' : 'text-slate-600 hover:text-slate-800 hover:bg-white/40'
               }`}
             >
               <div className="flex items-center justify-center gap-2">
@@ -559,12 +554,12 @@ export function PublicUserProfile() {
                       key={project._id} 
                       className={`rounded-2xl shadow-xl border overflow-hidden hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:-translate-y-2 ${
                         darkmode 
-                          ? 'bg-gray-800 border-gray-700' 
+                          ? 'bg-blue-800 border-blue-600' 
                           : 'bg-white/80 backdrop-blur-lg border-white/20'
                       }`}
                     >
                       <div className={`relative h-48 overflow-hidden ${
-                        darkmode ? 'bg-gray-700' : 'bg-gradient-to-br from-slate-100 to-slate-200'
+                        darkmode ? 'bg-blue-700' : 'bg-gradient-to-br from-slate-100 to-slate-200'
                       }`}>
                         <ImageWithFallback
                           src={project.media[0]}
@@ -612,8 +607,8 @@ export function PublicUserProfile() {
                   ))}
                 </div>
               ) : (
-                <div className={`text-center py-16 rounded-2xl border ${darkmode ? 'bg-gray-800/40 border-gray-700' : 'bg-white/40 backdrop-blur-lg border-white/20'}`}>
-                  <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${darkmode ? 'bg-gray-700' : 'bg-gradient-to-br from-slate-200 to-slate-300'}`}>
+                <div className={`text-center py-16 rounded-2xl border ${darkmode ? 'bg-blue-800/40 border-blue-600' : 'bg-white/40 backdrop-blur-lg border-white/20'}`}>
+                  <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${darkmode ? 'bg-blue-700' : 'bg-gradient-to-br from-slate-200 to-slate-300'}`}>
                     <Briefcase className={`w-8 h-8 ${darkmode ? 'text-gray-400' : 'text-slate-500'}`} />
                   </div>
                   <p className={`font-medium ${darkmode ? 'text-gray-300' : 'text-slate-600'}`}>No projects yet</p>
@@ -633,12 +628,12 @@ export function PublicUserProfile() {
                       key={item._id} 
                       className={`rounded-2xl shadow-xl border overflow-hidden hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:-translate-y-2 ${
                         darkmode 
-                          ? 'bg-gray-800 border-gray-700' 
+                          ? 'bg-blue-800 border-blue-600' 
                           : 'bg-white/80 backdrop-blur-lg border-white/20'
                       }`}
                     >
                       <div className={`relative h-48 overflow-hidden ${
-                        darkmode ? 'bg-gray-700' : 'bg-gradient-to-br from-pink-50 to-rose-100'
+                        darkmode ? 'bg-blue-700' : 'bg-gradient-to-br from-pink-50 to-rose-100'
                       }`}>
                         <ImageWithFallback
                           src={item.productId?.media?.[0] || '/placeholder-product.jpg'}
@@ -648,7 +643,7 @@ export function PublicUserProfile() {
                         />
                         <div className={`absolute top-3 right-3 rounded-full p-2 shadow-lg ${
                           darkmode 
-                            ? 'bg-gray-800/90 border-gray-600' 
+                            ? 'bg-blue-800/90 border-blue-600' 
                             : 'bg-white/90 border-white/20'
                         }`}>
                           <Heart className="w-4 h-4 text-red-500 fill-current" />
@@ -657,19 +652,19 @@ export function PublicUserProfile() {
                       <div className="p-6">
                         <h3 className={`text-lg font-semibold mb-2 line-clamp-1 transition-colors ${
                           darkmode 
-                            ? 'text-white hover:text-pink-400' 
+                            ? 'text-slate-100 hover:text-pink-400' 
                             : 'text-slate-900 hover:text-pink-600'
                         }`}>
                           {item.productId?.title || 'Untitled Product'}
                         </h3>
                         <p className={`text-sm mb-4 line-clamp-2 ${
-                          darkmode ? 'text-gray-400' : 'text-slate-600'
+                          darkmode ? 'text-slate-300' : 'text-slate-600'
                         }`}>
                           {item.productId?.description || 'No description available'}
                         </p>
                         <div className="flex items-center justify-between text-sm">
                           <span className={`flex items-center gap-1 ${
-                            darkmode ? 'text-gray-400' : 'text-slate-500'
+                            darkmode ? 'text-slate-300' : 'text-slate-500'
                           }`}>
                             <Heart className="w-4 h-4 text-red-500" />
                             Added {new Date(item.addedAt).toLocaleDateString()}
@@ -678,11 +673,11 @@ export function PublicUserProfile() {
                         {item.notes && (
                           <div className={`mt-3 p-3 rounded-xl border ${
                             darkmode 
-                              ? 'bg-gray-700 border-gray-600' 
+                              ? 'bg-blue-700 border-blue-600' 
                               : 'bg-gradient-to-r from-pink-50 to-rose-50 border-pink-100'
                           }`}>
                             <p className={`text-sm italic ${
-                              darkmode ? 'text-gray-300' : 'text-slate-600'
+                              darkmode ? 'text-slate-300' : 'text-slate-600'
                             }`}>"{item.notes}"</p>
                           </div>
                         )}
@@ -691,12 +686,12 @@ export function PublicUserProfile() {
                   ))}
                 </div>
               ) : (
-                <div className={`text-center py-16 rounded-2xl border ${darkmode ? 'bg-gray-800/40 border-gray-700' : 'bg-white/40 backdrop-blur-lg border-white/20'}`}>
-                  <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${darkmode ? 'bg-gray-700' : 'bg-gradient-to-br from-pink-200 to-rose-200'}`}>
+                <div className={`text-center py-16 rounded-2xl border ${darkmode ? 'bg-blue-800/40 border-blue-600' : 'bg-white/40 backdrop-blur-lg border-white/20'}`}>
+                  <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${darkmode ? 'bg-blue-700' : 'bg-gradient-to-br from-pink-200 to-rose-200'}`}>
                     <Heart className={`w-8 h-8 ${darkmode ? 'text-pink-400' : 'text-pink-500'}`} />
                   </div>
-                  <p className={`font-medium ${darkmode ? 'text-gray-300' : 'text-slate-600'}`}>No wishlist items yet</p>
-                  <p className={`text-sm mt-2 ${darkmode ? 'text-gray-500' : 'text-slate-400'}`}>Start adding products you love!</p>
+                  <p className={`font-medium ${darkmode ? 'text-slate-200' : 'text-slate-600'}`}>No wishlist items yet</p>
+                  <p className={`text-sm mt-2 ${darkmode ? 'text-slate-400' : 'text-slate-400'}`}>Start adding products you love!</p>
                 </div>
               )}
             </div>
@@ -748,8 +743,8 @@ export function PublicUserProfile() {
                   </div>
                 ))
               ) : (
-                <div className={`text-center py-16 rounded-2xl border ${darkmode ? 'bg-gray-800/40 border-gray-700' : 'bg-white/40 backdrop-blur-lg border-white/20'}`}>
-                  <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${darkmode ? 'bg-gray-700' : 'bg-gradient-to-br from-slate-200 to-slate-300'}`}>
+                <div className={`text-center py-16 rounded-2xl border ${darkmode ? 'bg-blue-800/40 border-blue-600' : 'bg-white/40 backdrop-blur-lg border-white/20'}`}>
+                  <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${darkmode ? 'bg-blue-700' : 'bg-gradient-to-br from-slate-200 to-slate-300'}`}>
                     <Award className={`w-8 h-8 ${darkmode ? 'text-gray-400' : 'text-slate-500'}`} />
                   </div>
                   <p className={`font-medium ${darkmode ? 'text-gray-300' : 'text-slate-600'}`}>No recent activity</p>
