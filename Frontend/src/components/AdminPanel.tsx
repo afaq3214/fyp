@@ -49,6 +49,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
+import ModerationDashboard from './ModerationDashboard';
 import { 
   Select,
   SelectContent,
@@ -478,9 +479,10 @@ export function AdminPanel() {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="products" className="w-full">
-          <TabsList className="grid w-full max-w-md grid-cols-3">
+          <TabsList className="grid w-full max-w-xl grid-cols-4">
             <TabsTrigger value="products">Products</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
+            <TabsTrigger value="moderation">Moderation</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
           </TabsList>
 
@@ -723,6 +725,11 @@ export function AdminPanel() {
                 </Table>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Content Moderation */}
+          <TabsContent value="moderation" className="mt-8">
+            <ModerationDashboard />
           </TabsContent>
 
           {/* Analytics */}

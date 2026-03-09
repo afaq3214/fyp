@@ -6,9 +6,7 @@ import {
   Share2, 
   ExternalLink, 
   Github, 
-  Star,
-  Flag,
-  Bookmark,
+  Star,Bookmark,
   TrendingUp,
   Users,
   Calendar,
@@ -33,6 +31,10 @@ import { WishlistButton } from './WishlistButton';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { UserContext } from '@/context/UserContext';
+import ContentWarning, { ContentChecker, useContentChecker } from './ContentWarning';
+import { Flag } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 interface ProductDetailProps {
   product: Product;
   onBack: () => void;
@@ -59,71 +61,9 @@ export interface ProductCommentRaw {
   __v: number;
   emoji:string;
 }
-const mockReviews = [
-  {
-    id: '1',
-    author: {
-      name: 'Sarah Johnson',
-      avatar: 'https://images.unsplash.com/photo-1494790108755-2616b2143c5f?w=150&h=150&fit=crop&crop=face',
-      role: 'Product Designer'
-    },
-    rating: 5,
-    content: 'This tool has completely transformed my writing workflow. The AI suggestions are incredibly accurate and contextual. Highly recommended for content creators!',
-    date: '2 days ago',
-    helpful: 12,
-    emoji: '🚀'
-  },
-  {
-    id: '2',
-    author: {
-      name: 'Mike Chen',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
-      role: 'Developer'
-    },
-    rating: 4,
-    content: 'Great concept and execution. The interface is clean and intuitive. Would love to see more customization options in future updates.',
-    date: '5 days ago',
-    helpful: 8,
-    emoji: '👍'
-  },
-  {
-    id: '3',
-    author: {
-      name: 'Emma Wilson',
-      avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face',
-      role: 'Marketing Manager'
-    },
-    rating: 5,
-    content: 'Been using this for my team\'s content creation. The collaboration features work seamlessly. Definitely a game-changer!',
-    date: '1 week ago',
-    helpful: 15,
-    emoji: '💎'
-  }
-];
 
-const relatedProducts = [
-  {
-    id: '4',
-    title: 'Grammar Pro',
-    author: 'John Doe',
-    upvotes: 78,
-    category: 'AI Tools'
-  },
-  {
-    id: '5',
-    title: 'Content Planner',
-    author: 'Lisa Smith',
-    upvotes: 134,
-    category: 'Productivity'
-  },
-  {
-    id: '6',
-    title: 'AI Copywriter',
-    author: 'Tom Wilson',
-    upvotes: 92,
-    category: 'AI Tools'
-  }
-];
+
+;
 
 export function ProductDetail() {
   const { productId } = useParams();
@@ -142,6 +82,14 @@ export function ProductDetail() {
   const [productComments, setProductComments] = useState<ProductCommentRaw[]>([]);
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState<number | null>(null);
+  const [contentWarning, setContentWarning] = useState<any>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showReportDialog, setShowReportDialog] = useState(false);
+  const [selectedComment, setSelectedComment] = useState<any>(null);
+  const [reportReason, setReportReason] = useState('');
+  const [reportDescription, setReportDescription] = useState('');
+
+  const { checkContent, isChecking } = useContentChecker();
 
   const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
   const emojiOptions = ['🚀', '💎', '👍', '🔥', '💡', '⭐', '🎯', '💯'];
@@ -277,11 +225,27 @@ export function ProductDetail() {
     return;
   }
 
+  // Check content before submitting
+  setIsSubmitting(true);
   try {
-    await SendComments(reviewText, product._id, selectedEmoji,rating);
-    toast.success('Review submitted successfully!');
+    const analysisResult = await checkContent(reviewText, 'comment');
+    
+    if (analysisResult && analysisResult.analysis.requiresModeration) {
+      toast.warning('Your comment has been flagged for review and will be moderated before being posted.');
+    }
+
+    await SendComments(reviewText, product._id, selectedEmoji, rating);
+    
+    if (analysisResult && analysisResult.analysis.requiresModeration) {
+      toast.success('Review submitted and is under review.');
+    } else {
+      toast.success('Review submitted successfully!');
+    }
+    
     setReviewText('');
     setSelectedEmoji('');
+    setRating(0);
+    setContentWarning(null);
     
     // Refresh notifications after submitting comment
     if (userContext?.refreshNotifications) {
@@ -294,6 +258,55 @@ export function ProductDetail() {
     } else {
       toast.error('Failed to submit review. Please try again.');
     }
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
+const handleReportComment = async () => {
+  if (!selectedComment || !reportReason) {
+    toast.error('Please select a reason for reporting');
+    return;
+  }
+
+  console.log('🚨 Reporting comment:', selectedComment);
+  console.log('📝 Report reason:', reportReason);
+  console.log('📄 Report description:', reportDescription);
+
+  const payload = {
+    contentId: selectedComment._id?.toString() || selectedComment._id,
+    contentType: 'Comment',
+    reason: reportReason,
+    description: reportDescription
+  };
+
+  console.log('📦 Sending payload:', payload);
+
+  try {
+    const response = await fetch('/api/moderation/report', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      },
+      body: JSON.stringify(payload)
+    });
+
+    console.log('📡 Response status:', response.status);
+    
+    if (response.ok) {
+      toast.success('Comment reported successfully');
+      setShowReportDialog(false);
+      setSelectedComment(null);
+      setReportReason('');
+      setReportDescription('');
+    } else {
+      const errorData = await response.json();
+      console.error('❌ Error response:', errorData);
+      toast.error(errorData.message || 'Failed to report comment');
+    }
+  } catch (error) {
+    toast.error('Error reporting comment');
   }
 };
 
@@ -578,9 +591,20 @@ export function ProductDetail() {
                               <p className="text-gray-700 dark:text-gray-300 mb-3">{review.comment}</p>
                               <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
                                 <span>{review.createdAt.$date}</span>
-                                {/* <Button variant="ghost" size="sm">
-                                  👍 Helpful ({review.})
-                                </Button> */}
+                                <div className="flex items-center gap-2">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => {
+                                      setSelectedComment(review);
+                                      setShowReportDialog(true);
+                                    }}
+                                    className="text-red-600 hover:text-red-700"
+                                  >
+                                    <Flag className="w-3 h-3" />
+                                    Report
+                                  </Button>
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -654,13 +678,34 @@ export function ProductDetail() {
                           className="min-h-[100px]"
                         />
                         
+                        {/* Real-time content checking */}
+                        <ContentChecker 
+                          content={reviewText}
+                          contentType="comment"
+                          onWarning={(warning) => setContentWarning(warning)}
+                        />
+                        
+                        {/* Show content warning if any */}
+                        {contentWarning && (
+                          <div className="mt-2">
+                            <ContentWarning
+                              warning={contentWarning}
+                              variant="inline"
+                              showDismiss={false}
+                            />
+                          </div>
+                        )}
+                        
                         <div className="flex justify-between items-center">
                           <span className="text-sm text-gray-600 dark:text-gray-400">
                             {reviewText.length}/280 characters
                           </span>
-                          <Button onClick={handleSubmitReview} disabled={!reviewText.trim() || !selectedEmoji}>
+                          <Button 
+                            onClick={handleSubmitReview} 
+                            disabled={!reviewText.trim() || !selectedEmoji || isSubmitting || isChecking}
+                          >
                             <Send className="w-4 h-4 mr-2" />
-                            Submit Review
+                            {isSubmitting ? 'Submitting...' : 'Submit Review'}
                           </Button>
                         </div>
 
@@ -768,10 +813,62 @@ export function ProductDetail() {
                   Report Product
                 </Button>
               </CardContent>
-            </Card> */}
+            </Card>
           </div>
+
+          {/* Report Dialog */}
+          <Dialog open={showReportDialog} onOpenChange={setShowReportDialog}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Report Comment</DialogTitle>
+                <DialogDescription>
+                  Help us keep the community safe by reporting inappropriate content.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Reason for Report</label>
+                  <Select value={reportReason} onValueChange={setReportReason}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a reason" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="spam">Spam</SelectItem>
+                      <SelectItem value="harassment">Harassment</SelectItem>
+                      <SelectItem value="inappropriate_content">Inappropriate Content</SelectItem>
+                      <SelectItem value="hate_speech">Hate Speech</SelectItem>
+                      <SelectItem value="violence">Violence</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium mb-2">Additional Details (Optional)</label>
+                  <Textarea
+                    value={reportDescription}
+                    onChange={(e) => setReportDescription(e.target.value)}
+                    placeholder="Please provide any additional context..."
+                    className="min-h-[100px]"
+                  />
+                </div>
+                
+                <div className="flex gap-2 justify-end">
+                  <Button variant="outline" onClick={() => setShowReportDialog(false)}>
+                    Cancel
+                  </Button>
+                  <Button 
+                    onClick={handleReportComment}
+                    disabled={!reportReason}
+                  >
+                    Submit Report
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
-    </div>
+    </div> </div>
   );
-}
+};

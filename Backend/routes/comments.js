@@ -7,6 +7,7 @@ import { UpdateBadge } from "../services/badgeService.js";
 import Product from "../models/Product.js";
 import { notification } from "./notification.js";
 import ActivityService from "../services/activityService.js";
+import contentModerationService from "../services/contentModerationService.js";
 
 const router = express.Router();
 const sentiment = new Sentiment();
@@ -44,6 +45,12 @@ router.post("/add",auth ,async (req, res) => {
         const sentimentScore = sentimentResult.score ?? 0;
         const sentimentLabel = getSentimentLabel(sentimentScore);
 
+        // AI Content Moderation Check
+        const moderationAnalysis = contentModerationService.analyzeContent(comment, 'comment');
+        console.log('🔍 Moderation Analysis for comment:', comment);
+        console.log('🔍 Analysis result:', moderationAnalysis);
+        
+        // Create the comment first
         const newComment = new Comments({
             productId,
             userId,
@@ -56,14 +63,92 @@ router.post("/add",auth ,async (req, res) => {
             sentimentLabel,
         });
 
+        await newComment.save();
+        
+        // If content is flagged, add to moderation queue
+        if (moderationAnalysis.requiresModeration) {
+            console.log('🚨 Content requires moderation!');
+            try {
+                const ModerationQueue = (await import("../models/ModerationQueue.js")).default;
+                const ContentWarning = (await import("../models/ContentWarning.js")).default;
+                
+                const queueItem = new ModerationQueue({
+                    contentId: newComment._id,
+                    contentType: 'Comment',
+                    userId,
+                    analysis: moderationAnalysis,
+                    contentSnapshot: { comment }
+                });
+
+                await queueItem.save();
+                console.log('✅ Added to moderation queue:', queueItem._id);
+
+                // Send warning if needed
+                if (moderationAnalysis.warning && moderationAnalysis.score >= 10) {
+                    const warning = new ContentWarning({
+                        userId,
+                        warningType: moderationAnalysis.flags[0] || 'manual_review',
+                        severity: moderationAnalysis.riskLevel === 'high' ? 'high' : 'medium',
+                        contentId: newComment._id,
+                        contentType: 'Comment',
+                        message: contentModerationService.generateUserWarning(moderationAnalysis),
+                        source: 'ai_detection',
+                        moderationQueueId: queueItem._id,
+                        metadata: {
+                            detectedWords: moderationAnalysis.detectedIssues,
+                            analysisScore: moderationAnalysis.score,
+                            riskLevel: moderationAnalysis.riskLevel,
+                            originalContent: comment
+                        }
+                    });
+
+                    await warning.save();
+                    console.log('⚠️ Warning sent to user:', warning._id);
+                    
+                    try {
+                        await notification(userId, warning.message, 'warning');
+                    } catch (notifError) {
+                        console.error("Error sending warning notification:", notifError);
+                    }
+                }
+
+                // Continue with normal flow but include moderation info
+                try {
+                    await notification(product.author_id, "You have received an comment on your product", "upvote");
+                } catch (notifError) {
+                    console.error("Error sending notification:", notifError);
+                }
+
+                await ActivityService.logComment(userId, product.title, productId);
+                const progress = await updateDailyProgress(userId, "comment");
+                await UpdateBadge(userId, 'comment');
+
+                return res.status(201).json({ 
+                    message: "Comment added successfully but is under review", 
+                    comment: newComment, 
+                    quest: progress,
+                    moderation: {
+                        flagged: true,
+                        requiresModeration: true,
+                        warningSent: moderationAnalysis.warning && moderationAnalysis.score >= 10
+                    }
+                });
+
+            } catch (modError) {
+                console.error("Error in moderation process:", modError);
+                // Continue with normal flow if moderation fails
+            }
+        } else {
+            console.log('✅ Content is appropriate, no moderation needed');
+        }
+
+        // Normal flow for non-flagged content
         try {
             await notification(product.author_id, "You have received an comment on your product", "upvote");
         } catch (notifError) {
             console.error("Error sending notification:", notifError);
         }
 
-        await newComment.save();
-        
         // Log activity for comment
         await ActivityService.logComment(
             userId,
