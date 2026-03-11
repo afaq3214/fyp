@@ -14,7 +14,8 @@ import {
   Sparkles,
   Send,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  BarChart3
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -68,7 +69,7 @@ export interface ProductCommentRaw {
 export function ProductDetail() {
   const { productId } = useParams();
   const navigate = useNavigate();
-  const {userId,SendComments}=useContext(UserContext);
+  const {userId,SendComments,darkmode}=useContext(UserContext);
   const [product, setProduct] = useState<Product | null>(null);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -315,26 +316,58 @@ const handleReportComment = async () => {
   if (!product) return <div>Product not found</div>;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Back Button */}
+    <div className={`min-h-screen relative overflow-hidden ${
+      darkmode 
+        ? 'bg-gradient-to-br from-slate-900 via-blue-900/20 to-purple-900/30' 
+        : 'bg-gradient-to-br from-blue-50 via-white to-purple-50'
+    }`}>
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className={`absolute top-20 left-10 w-72 h-72 rounded-full blur-3xl opacity-20 ${
+          darkmode ? 'bg-blue-500' : 'bg-purple-300'
+        } animate-pulse`}></div>
+        <div className={`absolute bottom-20 right-10 w-96 h-96 rounded-full blur-3xl opacity-20 ${
+          darkmode ? 'bg-purple-500' : 'bg-blue-300'
+        } animate-pulse delay-1000`}></div>
+        <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-3xl opacity-10 ${
+          darkmode ? 'bg-indigo-500' : 'bg-indigo-200'
+        } animate-pulse delay-2000`}></div>
+      </div>
+
+      <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Enhanced Back Button */}
         <Button 
           variant="ghost" 
           onClick={handleBack}
-          className="mb-6"
+          className={`mb-8 group backdrop-blur-md border ${
+            darkmode 
+              ? 'bg-slate-800/50 border-slate-700/50 text-slate-300 hover:bg-slate-700/50 hover:text-white' 
+              : 'bg-white/50 border-gray-200/50 text-gray-600 hover:bg-white/70 hover:text-gray-900'
+          } transition-all duration-300`}
         >
-          <ArrowLeft className="w-4 h-4 mr-2" />
+          <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform duration-300" />
           Back to Discovery
         </Button>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Product Header */}
-            <Card>
-              <CardContent className="p-8">
+            {/* Enhanced Product Header */}
+            <div className={`relative rounded-3xl shadow-2xl overflow-hidden backdrop-blur-xl border transition-all duration-500 hover:shadow-3xl ${
+              darkmode 
+                ? 'bg-gradient-to-br from-slate-800/90 to-blue-900/70 border-slate-700/50' 
+                : 'bg-gradient-to-br from-white/90 to-blue-50/80 border-white/50'
+            }`}>
+              {/* Gradient Overlay */}
+              <div className={`absolute inset-0 bg-gradient-to-br ${
+                darkmode 
+                  ? 'from-blue-600/10 via-purple-600/10 to-pink-600/10' 
+                  : 'from-indigo-500/5 via-purple-500/5 to-pink-500/5'
+              } opacity-0 hover:opacity-100 transition-opacity duration-500 pointer-events-none`}></div>
+              
+              <div className="relative p-8">
                 {/* Product Media Carousel */}
-                <div className="relative w-full h-96 bg-gray-100 dark:bg-gray-800 rounded-xl overflow-hidden mb-6 group">
+                <div className="relative w-full h-96 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 rounded-2xl overflow-hidden mb-8 group shadow-inner">
                   {product.media && product.media.length > 0 ? (
                     <>
                       {/* Current Media Display */}
@@ -352,19 +385,19 @@ const handleReportComment = async () => {
                           <ImageWithFallback
                             src={product.media[currentMediaIndex]}
                             alt={`${product.title} - ${currentMediaIndex + 1}`}
-                            className="w-full h-full object-contain bg-white"
+                            className="w-full h-full object-contain bg-white/50"
                           />
                         )}
                       </div>
 
-                      {/* Navigation Arrows */}
+                      {/* Enhanced Navigation Arrows */}
                       {product.media.length > 1 && (
                         <>
                           <button
                             onClick={() => setCurrentMediaIndex(prev => 
                               prev === 0 ? product.media.length - 1 : prev - 1
                             )}
-                            className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                            className="absolute left-4 top-1/2 -translate-y-1/2 bg-gradient-to-r from-black/70 to-black/50 hover:from-black/80 hover:to-black/60 text-white p-3 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 transform hover:scale-110 shadow-lg"
                           >
                             <ChevronLeft className="w-6 h-6" />
                           </button>
@@ -372,28 +405,28 @@ const handleReportComment = async () => {
                             onClick={() => setCurrentMediaIndex(prev => 
                               prev === product.media.length - 1 ? 0 : prev + 1
                             )}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                            className="absolute right-4 top-1/2 -translate-y-1/2 bg-gradient-to-r from-black/50 to-black/70 hover:from-black/60 hover:to-black/80 text-white p-3 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 transform hover:scale-110 shadow-lg"
                           >
                             <ChevronRight className="w-6 h-6" />
                           </button>
 
-                          {/* Dots Indicator */}
-                          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                          {/* Enhanced Dots Indicator */}
+                          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 bg-black/30 backdrop-blur-md px-4 py-2 rounded-full">
                             {product.media.map((_, index) => (
                               <button
                                 key={index}
                                 onClick={() => setCurrentMediaIndex(index)}
-                                className={`w-2 h-2 rounded-full transition-all ${
+                                className={`w-2 h-2 rounded-full transition-all duration-300 ${
                                   index === currentMediaIndex 
-                                    ? 'bg-white w-8' 
-                                    : 'bg-white/50 hover:bg-white/75'
+                                    ? 'bg-white w-8 shadow-lg' 
+                                    : 'bg-white/50 hover:bg-white/75 hover:scale-125'
                                 }`}
                               />
                             ))}
                           </div>
 
-                          {/* Counter */}
-                          <div className="absolute top-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
+                          {/* Enhanced Counter */}
+                          <div className="absolute top-4 right-4 bg-gradient-to-r from-black/60 to-black/40 backdrop-blur-md text-white px-4 py-2 rounded-full text-sm font-medium shadow-lg">
                             {currentMediaIndex + 1} / {product.media.length}
                           </div>
                         </>
@@ -401,22 +434,29 @@ const handleReportComment = async () => {
                     </>
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-400">
-                      No media available
+                      <div className="text-center">
+                        <div className={`w-20 h-20 mx-auto mb-4 rounded-full flex items-center justify-center ${
+                          darkmode ? 'bg-gray-800' : 'bg-gray-200'
+                        }`}>
+                          <Eye className="w-10 h-10 text-gray-400" />
+                        </div>
+                        <p className="text-gray-500">No media available</p>
+                      </div>
                     </div>
                   )}
                 </div>
 
-                {/* Thumbnail Gallery */}
+                {/* Enhanced Thumbnail Gallery */}
                 {product.media && product.media.length > 1 && (
-                  <div className="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-hide">
+                  <div className="flex gap-3 overflow-x-auto pb-4 mb-8 scrollbar-hide">
                     {product.media.map((mediaUrl, index) => (
                       <button
                         key={index}
                         onClick={() => setCurrentMediaIndex(index)}
-                        className={`relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
+                        className={`relative flex-shrink-0 w-24 h-24 rounded-2xl overflow-hidden border-2 transition-all duration-300 transform hover:scale-105 ${
                           index === currentMediaIndex
-                            ? 'border-blue-500 ring-2 ring-blue-200'
-                            : 'border-gray-200 hover:border-gray-300'
+                            ? 'border-blue-500 ring-4 ring-blue-200/50 shadow-lg scale-105'
+                            : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
                         }`}
                       >
                         {mediaUrl.endsWith('.mp4') || 
@@ -427,9 +467,9 @@ const handleReportComment = async () => {
                               src={mediaUrl}
                               className="w-full h-full object-cover"
                             />
-                            <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                              <div className="w-8 h-8 bg-white/90 rounded-full flex items-center justify-center">
-                                <svg className="w-4 h-4 text-gray-900" fill="currentColor" viewBox="0 0 20 20">
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+                              <div className="w-10 h-10 bg-white/90 rounded-full flex items-center justify-center shadow-lg">
+                                <svg className="w-5 h-5 text-gray-900" fill="currentColor" viewBox="0 0 20 20">
                                   <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
                                 </svg>
                               </div>
@@ -443,52 +483,119 @@ const handleReportComment = async () => {
                           />
                         )}
                         {index === currentMediaIndex && (
-                          <div className="absolute inset-0 bg-blue-500/10"></div>
+                          <div className="absolute inset-0 bg-blue-500/20 backdrop-blur-sm"></div>
                         )}
                       </button>
                     ))}
                   </div>
                 )}
 
-                {/* Title and Badges */}
-                <div className="flex flex-wrap items-start justify-between mb-4">
+                {/* Enhanced Title and Badges */}
+                <div className="flex flex-wrap items-start justify-between mb-6">
                   <div className="flex-1">
-                    <h1 className="text-3xl font-bold mb-3">{product.title}</h1>
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      <Badge variant="outline">{product.category}</Badge>
+                    <h1 className={`text-4xl font-bold mb-4 bg-gradient-to-r ${
+                      darkmode 
+                        ? 'from-blue-400 via-purple-400 to-pink-400' 
+                        : 'from-blue-600 via-purple-600 to-pink-600'
+                    } bg-clip-text text-transparent transition-all duration-300 hover:from-blue-500 hover:via-purple-500 hover:to-pink-500`}>
+                      {product.title}
+                    </h1>
+                    <div className="flex flex-wrap gap-3">
+                      <div className={`px-4 py-2 rounded-full text-sm font-bold uppercase tracking-wider shadow-lg backdrop-blur-md border ${
+                        darkmode 
+                          ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white border-blue-400/30' 
+                          : 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white border-indigo-400/30'
+                      }`}>
+                        {product.category}
+                      </div>
                       {product.trending && (
-                        <Badge className="bg-orange-500 hover:bg-orange-600">
-                          <TrendingUp className="w-3 h-3 mr-1" />
+                        <div className={`px-4 py-2 rounded-full text-sm font-bold shadow-lg backdrop-blur-md flex items-center gap-2 ${
+                          darkmode 
+                            ? 'bg-gradient-to-r from-orange-600 to-red-600 text-white border-orange-400/30' 
+                            : 'bg-gradient-to-r from-orange-500 to-red-500 text-white border-orange-200/30'
+                        }`}>
+                          <TrendingUp className="w-4 h-4" />
                           Trending
-                        </Badge>
+                        </div>
                       )}
                       {product.fresh && (
-                        <Badge className="bg-green-500 hover:bg-green-600">
-                          <Sparkles className="w-3 h-3 mr-1" />
+                        <div className={`px-4 py-2 rounded-full text-sm font-bold shadow-lg backdrop-blur-md flex items-center gap-2 ${
+                          darkmode 
+                            ? 'bg-gradient-to-r from-emerald-600 to-green-600 text-white border-emerald-400/30' 
+                            : 'bg-gradient-to-r from-emerald-500 to-green-500 text-white border-emerald-200/30'
+                        }`}>
+                          <Sparkles className="w-4 h-4" />
                           Fresh
-                        </Badge>
+                        </div>
                       )}
                     </div>
                   </div>
                 </div>
 
-                {/* Pitch */}
-                <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg p-4 mb-6">
-                  <p className="text-lg font-medium text-blue-900 dark:text-blue-100">
+                {/* Enhanced Pitch */}
+                <div className={`relative rounded-2xl p-6 mb-8 backdrop-blur-md border shadow-lg ${
+                  darkmode 
+                    ? 'bg-gradient-to-r from-blue-900/40 to-purple-900/40 border-blue-700/50' 
+                    : 'bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200/50'
+                }`}>
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-t-2xl"></div>
+                  <p className={`text-xl font-medium leading-relaxed ${
+                    darkmode ? 'text-blue-100' : 'text-blue-900'
+                  }`}>
                     "{product.pitch}"
                   </p>
                 </div>
 
-                {/* Description */}
-                <div className="mb-6">
-                  <h3 className="font-semibold mb-3">About this product</h3>
-                  <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-                    {product.description}
-                  </p>
+                {/* Enhanced Description */}
+                <div className="mb-8">
+                  <h3 className={`text-2xl font-bold mb-4 bg-gradient-to-r ${
+                    darkmode 
+                      ? 'from-gray-200 to-gray-400' 
+                      : 'from-gray-700 to-gray-900'
+                  } bg-clip-text text-transparent`}>
+                    About this product
+                  </h3>
+                  <div className={`rounded-2xl p-6 backdrop-blur-md border ${
+                    darkmode 
+                      ? 'bg-gray-800/50 border-gray-700/50' 
+                      : 'bg-white/50 border-gray-200/50'
+                  }`}>
+                    <p className={`text-lg leading-relaxed ${
+                      darkmode ? 'text-gray-300' : 'text-gray-700'
+                    }`}>
+                      {product.description}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Enhanced Tags */}
+                <div className="mb-8">
+                  <h3 className={`text-2xl font-bold mb-4 bg-gradient-to-r ${
+                    darkmode 
+                      ? 'from-gray-200 to-gray-400' 
+                      : 'from-gray-700 to-gray-900'
+                  } bg-clip-text text-transparent`}>
+                    Tags
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {product.autoTags.map((tag, index) => (
+                      <div
+                        key={tag}
+                        className={`px-3 py-1.5 rounded-xl text-sm font-medium transition-all duration-300 hover:scale-105 shadow-md backdrop-blur-sm border ${
+                          darkmode 
+                            ? 'bg-blue-700/50 text-blue-300 border-blue-600/30 hover:bg-blue-600/50' 
+                            : 'bg-indigo-100/70 text-indigo-700 border-indigo-200/50 hover:bg-indigo-100'
+                        }`}
+                        style={{ animationDelay: `${index * 50}ms` }}
+                      >
+                        #{tag}
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Tags */}
-                <div className="mb-6">
+                {/* <div className="mb-6">
                   <h3 className="font-semibold mb-3">Tags</h3>
                   <div className="flex flex-wrap gap-2">
                     {product.autoTags.map(tag => (
@@ -497,7 +604,7 @@ const handleReportComment = async () => {
                       </Badge>
                     ))}
                   </div>
-                </div>
+                </div> */}
 
                 {/* Action Buttons */}
                 <div className="flex flex-wrap gap-3">
@@ -540,58 +647,86 @@ const handleReportComment = async () => {
                     </Button>
                   )}
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
-            {/* Reviews Section */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
+            {/* Reviews Section - Redesigned */}
+            <Card className="overflow-hidden border-0 shadow-lg bg-gradient-to-br from-green-50 to-emerald-100 dark:from-gray-800 dark:to-gray-900">
+              <div className="bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4">
+                <CardTitle className="text-white flex items-center">
                   <MessageCircle className="w-5 h-5 mr-2" />
-                  Emoji Feedback Tags ({productComments.length})
+                  Community Feedback ({productComments.length})
                 </CardTitle>
-              </CardHeader>
-              <CardContent>
+              </div>
+              <CardContent className="p-6">
                 <Tabs defaultValue="reviews" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="reviews">All Reviews</TabsTrigger>
-                    <TabsTrigger value="write">Write Review</TabsTrigger>
+                  <TabsList className="grid w-full grid-cols-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-white/20 dark:border-gray-700/20">
+                    <TabsTrigger value="reviews" className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-md transition-all duration-300">
+                      <Eye className="w-4 h-4 mr-2" />
+                      All Reviews
+                    </TabsTrigger>
+                    <TabsTrigger value="write" className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-md transition-all duration-300">
+                      <Send className="w-4 h-4 mr-2" />
+                      Write Review
+                    </TabsTrigger>
                   </TabsList>
                   
                   <TabsContent value="reviews" className="mt-6">
-                    <div className="space-y-6">
+                    <div className="space-y-4">
                       {productComments.length === 0 ? (
-                        <p>No reviews yet.</p>
+                        <div className="text-center py-12 bg-white/30 dark:bg-gray-800/30 backdrop-blur-sm rounded-xl border border-white/20 dark:border-gray-700/20">
+                          <MessageCircle className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                          <p className="text-gray-600 dark:text-gray-400 font-medium">No reviews yet.</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">Be the first to share your thoughts!</p>
+                        </div>
                       ) : (
                         productComments.map(review => (
-                          <div key={review._id.$oid} className="border-b border-gray-200 dark:border-gray-700 pb-6 last:border-b-0">
+                          <div key={review._id.$oid} className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-white/20 dark:border-gray-700/20 transition-all duration-300 hover:shadow-md hover:scale-[1.01]">
                             <div className="flex items-start space-x-4">
-                              <Avatar>
-                                <AvatarImage src={review.profilePicture} />
-                              <AvatarFallback>{review.username.charAt(0)}</AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1">
-                              <div className="flex items-center justify-between mb-2">
-                                <div>
-                                  <h4 className="font-medium">{review.username}</h4>
-                                  {/* <p className="text-sm text-gray-600 dark:text-gray-400">{review.author.role}</p> */}
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                  <span className="text-2xl">{review.emoji}</span>
-                                  <div className="flex">
-                                    {[...Array(5)].map((_, i) => (
-                                      <Star
-                                        key={i}
-                                        className={`w-4 h-4 ${i < review.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
-                                      />
-                                    ))}
+                              <div className="relative">
+                                <Avatar className="h-12 w-12 ring-2 ring-white/30 dark:ring-gray-700/30">
+                                  <AvatarImage src={review.profilePicture} />
+                                  <AvatarFallback className="bg-gradient-to-br from-green-500 to-emerald-600 text-white font-bold">
+                                    {review.username?.charAt(0) || 'U'}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border border-white dark:border-gray-800"></div>
+                              </div>
+                              <div className="flex-1">
+                                <div className="flex items-center justify-between mb-3">
+                                  <div>
+                                    <h4 className="font-bold text-gray-900 dark:text-white">{review.username || 'Anonymous User'}</h4>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Verified Reviewer</p>
+                                  </div>
+                                  <div className="flex items-center space-x-3">
+                                    <div className="text-3xl bg-white/70 dark:bg-gray-700/70 px-3 py-1 rounded-lg border border-white/30 dark:border-gray-600/30">
+                                      {review.emoji}
+                                    </div>
+                                    <div className="flex flex-col items-end">
+                                      <div className="flex">
+                                        {[...Array(5)].map((_, i) => (
+                                          <Star
+                                            key={i}
+                                            className={`w-4 h-4 ${i < review.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
+                                          />
+                                        ))}
+                                      </div>
+                                      <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">{review.rating}/5</span>
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                              <p className="text-gray-700 dark:text-gray-300 mb-3">{review.comment}</p>
-                              <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
-                                <span>{review.createdAt.$date}</span>
-                                <div className="flex items-center gap-2">
+                                <div className="bg-white/30 dark:bg-gray-700/30 rounded-lg p-4 mb-4 border border-white/20 dark:border-gray-600/20">
+                                  <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{review.comment}</p>
+                                </div>
+                                <div className="flex items-center justify-between text-sm">
+                                  <div className="flex items-center text-gray-500 dark:text-gray-400">
+                                    <Calendar className="w-3 h-3 mr-1" />
+                                    <span>{new Date(review.createdAt.$date).toLocaleDateString("en-GB", {
+                                      day: "2-digit",
+                                      month: "short",
+                                      year: "numeric"
+                                    })}</span>
+                                  </div>
                                   <Button
                                     variant="ghost"
                                     size="sm"
@@ -599,123 +734,162 @@ const handleReportComment = async () => {
                                       setSelectedComment(review);
                                       setShowReportDialog(true);
                                     }}
-                                    className="text-red-600 hover:text-red-700"
+                                    className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200"
                                   >
-                                    <Flag className="w-3 h-3" />
+                                    <Flag className="w-3 h-3 mr-1" />
                                     Report
                                   </Button>
                                 </div>
                               </div>
                             </div>
                           </div>
-                        </div>  
-                      )))}
+                        ))
+                      )}
                     </div>
                   </TabsContent>
                   
                   <TabsContent value="write" className="mt-6">
                     {currentUser ? (
-                      <div className="space-y-4">
-                        <div className="flex items-center space-x-4 mb-4">
-                          <Avatar>
-                            {/* <AvatarImage src={currentUser.profilePicture} />
-                            <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback> */}
-                          </Avatar>
-                          <div>
-                            <h4 className="font-medium">{currentUser.name}</h4>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">Writing as yourself</p>
+                      <div className="space-y-6">
+                        <div className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-white/20 dark:border-gray-700/20">
+                          <div className="flex items-center space-x-4 mb-6">
+                            <Avatar className="h-12 w-12 ring-2 ring-white/30 dark:ring-gray-700/30">
+                              <AvatarFallback className="bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-bold">
+                                {currentUser?.name?.charAt(0) || 'U'}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <h4 className="font-bold text-gray-900 dark:text-white">{currentUser?.name || 'Anonymous User'}</h4>
+                              <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center">
+                                <Sparkles className="w-3 h-3 mr-1" />
+                                Writing your review
+                              </p>
+                            </div>
                           </div>
-                        </div>
 
-                        <div>
-                          <label className="block text-sm font-medium mb-2">Choose an emoji tag</label>
-                          <div className="flex flex-wrap gap-2 mb-4">
-                            {emojiOptions.map(emoji => (
-                              <Button
-                                key={emoji}
-                                variant={selectedEmoji === emoji ? "default" : "outline"}
-                                size="sm"
-                                onClick={() => setSelectedEmoji(emoji)}
-                                className="text-lg"
-                              >
-                                {emoji}
-                              </Button>
-                            ))}
-                          </div>
-                        </div>
-                        <div className="mb-2">
-  <label className="block text-sm font-medium mb-2">Your rating</label>
-  <div className="flex items-center gap-1">
-    {[1, 2, 3, 4, 5].map((starValue) => (
-      <button
-        key={starValue}
-        type="button"
-        onClick={() => setRating(starValue)}
-        onMouseEnter={() => setHoverRating(starValue)}
-        onMouseLeave={() => setHoverRating(null)}
-        className="focus:outline-none"
-      >
-        <Star
-          className={`w-6 h-6 ${
-            (hoverRating ?? rating) >= starValue
-              ? 'text-yellow-400 fill-current'
-              : 'text-gray-300'
-          }`}
-        />
-      </button>
-    ))}
-    {rating > 0 && (
-      <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">
-        {rating} / 5
-      </span>
-    )}
-  </div>
-</div>
-                        <Textarea
-                          placeholder="Share your thoughts about this product... (50 words max for micro-review)"
-                          value={reviewText}
-                          onChange={(e) => setReviewText(e.target.value)}
-                          className="min-h-[100px]"
-                        />
-                        
-                        {/* Real-time content checking */}
-                        <ContentChecker 
-                          content={reviewText}
-                          contentType="comment"
-                          onWarning={(warning) => setContentWarning(warning)}
-                        />
-                        
-                        {/* Show content warning if any */}
-                        {contentWarning && (
-                          <div className="mt-2">
-                            <ContentWarning
-                              warning={contentWarning}
-                              variant="inline"
-                              showDismiss={false}
+                          <div className="space-y-6">
+                            <div>
+                              <label className="block text-sm font-bold mb-3 text-gray-700 dark:text-gray-300">
+                                <span className="flex items-center">
+                                  <MessageCircle className="w-4 h-4 mr-2" />
+                                  Choose your emoji tag
+                                </span>
+                              </label>
+                              <div className="flex flex-wrap gap-3">
+                                {emojiOptions.map(emoji => (
+                                  <Button
+                                    key={emoji}
+                                    variant={selectedEmoji === emoji ? "default" : "outline"}
+                                    size="lg"
+                                    onClick={() => setSelectedEmoji(emoji)}
+                                    className={`text-2xl transition-all duration-300 ${
+                                      selectedEmoji === emoji 
+                                        ? 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 shadow-lg scale-110' 
+                                        : 'hover:scale-105 hover:shadow-md'
+                                    }`}
+                                  >
+                                    {emoji}
+                                  </Button>
+                                ))}
+                              </div>
+                            </div>
+                            
+                            <div>
+                              <label className="block text-sm font-bold mb-3 text-gray-700 dark:text-gray-300">
+                                <span className="flex items-center">
+                                  <Star className="w-4 h-4 mr-2" />
+                                  Your rating
+                                </span>
+                              </label>
+                              <div className="flex items-center gap-2">
+                                {[1, 2, 3, 4, 5].map((starValue) => (
+                                  <button
+                                    key={starValue}
+                                    type="button"
+                                    onClick={() => setRating(starValue)}
+                                    onMouseEnter={() => setHoverRating(starValue)}
+                                    onMouseLeave={() => setHoverRating(null)}
+                                    className="focus:outline-none transition-all duration-200 hover:scale-110"
+                                  >
+                                    <Star
+                                      className={`w-8 h-8 ${
+                                        (hoverRating ?? rating) >= starValue
+                                          ? 'text-yellow-400 fill-current'
+                                          : 'text-gray-300'
+                                      }`}
+                                    />
+                                  </button>
+                                ))}
+                                {rating > 0 && (
+                                  <span className="ml-3 text-sm font-medium text-gray-600 dark:text-gray-400 bg-white/50 dark:bg-gray-700/50 px-3 py-1 rounded-full border border-white/20 dark:border-gray-600/20">
+                                    {rating} / 5 stars
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-bold mb-3 text-gray-700 dark:text-gray-300">
+                                <span className="flex items-center">
+                                  <Send className="w-4 h-4 mr-2" />
+                                  Your review
+                                </span>
+                              </label>
+                              <Textarea
+                                placeholder="Share your thoughts about this product... What did you love? What could be improved?"
+                                value={reviewText}
+                                onChange={(e) => setReviewText(e.target.value)}
+                                className="min-h-[120px] bg-white/30 dark:bg-gray-700/30 border-white/20 dark:border-gray-600/20 resize-none focus:ring-2 focus:ring-green-500/50"
+                              />
+                              
+                              <div className="flex justify-between items-center mt-3">
+                                <span className="text-sm text-gray-600 dark:text-gray-400">
+                                  {reviewText.length}/280 characters
+                                </span>
+                                <div className="text-xs text-gray-500 dark:text-gray-500">
+                                  💡 Be specific and helpful
+                                </div>
+                              </div>
+                            </div>
+                            
+                            {/* Real-time content checking */}
+                            <ContentChecker 
+                              content={reviewText}
+                              contentType="comment"
+                              onWarning={(warning) => setContentWarning(warning)}
                             />
+                            
+                            {/* Show content warning if any */}
+                            {contentWarning && (
+                              <div className="mt-2">
+                                <ContentWarning
+                                  warning={contentWarning}
+                                  variant="inline"
+                                  showDismiss={false}
+                                />
+                              </div>
+                            )}
+                            
+                            <Button 
+                              onClick={handleSubmitReview} 
+                              disabled={!reviewText.trim() || !selectedEmoji || isSubmitting || isChecking}
+                              className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 shadow-lg transition-all duration-300 hover:scale-[1.02]"
+                            >
+                              <Send className="w-4 h-4 mr-2" />
+                              {isSubmitting ? 'Submitting Review...' : 'Submit Review'}
+                            </Button>
                           </div>
-                        )}
-                        
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-600 dark:text-gray-400">
-                            {reviewText.length}/280 characters
-                          </span>
-                          <Button 
-                            onClick={handleSubmitReview} 
-                            disabled={!reviewText.trim() || !selectedEmoji || isSubmitting || isChecking}
-                          >
-                            <Send className="w-4 h-4 mr-2" />
-                            {isSubmitting ? 'Submitting...' : 'Submit Review'}
-                          </Button>
                         </div>
-
                       </div>
                     ) : (
-                      <div className="text-center py-8">
-                        <p className="text-gray-600 dark:text-gray-400 mb-4">
+                      <div className="text-center py-12 bg-white/30 dark:bg-gray-800/30 backdrop-blur-sm rounded-xl border border-white/20 dark:border-gray-700/20">
+                        <Users className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                        <p className="text-gray-600 dark:text-gray-400 font-medium mb-4">
                           Please sign in to write a review
                         </p>
-                        <Button>Sign In</Button>
+                        <Button className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700">
+                          Sign In to Review
+                        </Button>
                       </div>
                     )}
                   </TabsContent>
@@ -726,61 +900,120 @@ const handleReportComment = async () => {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Maker Info */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Made by</CardTitle>
-              </CardHeader>
-              <CardContent>
+            {/* Maker Info - Redesigned */}
+            <Card className="overflow-hidden border-0 shadow-lg bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-800 dark:to-gray-900">
+              <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
+                <CardTitle className="text-white flex items-center">
+                  <Users className="w-5 h-5 mr-2" />
+                  Creator Profile
+                </CardTitle>
+              </div>
+              <CardContent className="p-6">
                 <div 
-                  className="flex items-center space-x-3 mb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 p-2 rounded-lg transition-colors"
+                  className="group cursor-pointer"
                   onClick={() => navigate(`/product-owner/${product.author_id}`)}
                 >
-                                    <Avatar style={{ height: '50px', width: '50px' }}>
-                 {product.author_profile &&
-
-                   <img
-                   src={product.author_profile}
-                   alt={product.author_name}
-                   style={{objectFit:'cover',width:'100%'}}
-                   referrerPolicy="no-referrer"
-                   loading="lazy"
-                   />
-                  }{!product.author_profile  && <AvatarFallback>{product.author_name.charAt(0)}</AvatarFallback>}
-                </Avatar>
-                   <div>
-                    <h4 className="font-medium hover:text-blue-600 transition-colors">{product.author_name}</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">View Profile</p>
-                  </div> 
+                  <div className="flex items-center space-x-4 p-4 rounded-xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-white/20 dark:border-gray-700/20 transition-all duration-300 hover:shadow-md hover:scale-[1.02]">
+                    <div className="relative">
+                      <Avatar className="h-16 w-16 ring-4 ring-white/30 dark:ring-gray-700/30">
+                        {product.author_profile ? (
+                          <img
+                            src={product.author_profile}
+                            alt={product.author_name}
+                            className="object-cover w-full h-full"
+                            referrerPolicy="no-referrer"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <AvatarFallback className="bg-gradient-to-br from-blue-500 to-indigo-600 text-white text-xl font-bold">
+                            {product.author_name?.charAt(0) || 'A'}
+                          </AvatarFallback>
+                        )}
+                      </Avatar>
+                      <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white dark:border-gray-800"></div>
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-bold text-lg text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                        {product.author_name || 'Anonymous Creator'}
+                      </h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center mt-1">
+                        <ExternalLink className="w-3 h-3 mr-1" />
+                        View Full Profile
+                      </p>
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
+                  </div>
                 </div>
-                {/* <Button variant="outline" className="w-full">
+                
+                <Button 
+                  variant="outline" 
+                  className="w-full mt-4 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border-white/20 dark:border-gray-700/20 hover:bg-white dark:hover:bg-gray-800 transition-all duration-300"
+                  onClick={() => navigate(`/product-owner/${product.author_id}`)}
+                >
                   <Users className="w-4 h-4 mr-2" />
                   Connect & Collaborate
-                </Button> */}
+                </Button>
               </CardContent>
             </Card>
 
-            {/* Product Stats */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Product Stats</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Total Upvotes</span>
-                  <span className="font-medium">{productUpvotes}</span>
+            {/* Product Stats - Redesigned */}
+            <Card className="overflow-hidden border-0 shadow-lg bg-gradient-to-br from-purple-50 to-pink-100 dark:from-gray-800 dark:to-gray-900">
+              <div className="bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-4">
+                <CardTitle className="text-white flex items-center">
+                  <BarChart3 className="w-5 h-5 mr-2" />
+                  Product Analytics
+                </CardTitle>
+              </div>
+              <CardContent className="p-6 space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 border border-white/20 dark:border-gray-700/20">
+                    <div className="flex items-center justify-between mb-2">
+                      <Heart className="w-5 h-5 text-red-500" />
+                      <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">TOTAL</span>
+                    </div>
+                    <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                      {productUpvotes}
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                      Upvotes
+                    </div>
+                  </div>
+                  
+                  <div className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 border border-white/20 dark:border-gray-700/20">
+                    <div className="flex items-center justify-between mb-2">
+                      <Calendar className="w-5 h-5 text-blue-500" />
+                      <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">SINCE</span>
+                    </div>
+                    <div className="text-lg font-bold text-gray-900 dark:text-white">
+                      {new Date(product.createdAt).toLocaleDateString("en-GB", {
+                        day: "2-digit",
+                        month: "short",
+                      })}
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                      {new Date(product.createdAt).getFullYear()}
+                    </div>
+                  </div>
                 </div>
-              
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Created</span>
-                  <span className="font-medium">{new Date(product.createdAt).toLocaleDateString("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  })}</span>
-                </div>
-                <Separator />
                 
+                <div className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 border border-white/20 dark:border-gray-700/20">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <TrendingUp className="w-4 h-4 text-green-500" />
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Performance</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          className={`w-3 h-3 ${
+                            i < 3 ? 'text-yellow-400 fill-current' : 'text-gray-300'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </CardContent>
             </Card>
 
@@ -869,6 +1102,7 @@ const handleReportComment = async () => {
           </Dialog>
         </div>
       </div>
-    </div> </div>
+    </div>
+  </div>
   );
 };

@@ -552,57 +552,157 @@ export function PublicUserProfile() {
                   {products.map(project => (
                     <div 
                       key={project._id} 
-                      className={`rounded-2xl shadow-xl border overflow-hidden hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:-translate-y-2 ${
+                      className={`group relative overflow-hidden rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-500 cursor-pointer transform hover:-translate-y-3 ${
                         darkmode 
-                          ? 'bg-blue-800 border-blue-600' 
-                          : 'bg-white/80 backdrop-blur-lg border-white/20'
-                      }`}
+                          ? 'bg-gradient-to-br from-blue-900/80 via-purple-900/60 to-indigo-900/80 border-blue-500/30' 
+                          : 'bg-gradient-to-br from-white/90 via-indigo-50/80 to-purple-50/90 border-white/50'
+                      } border backdrop-blur-xl`}
                     >
-                      <div className={`relative h-48 overflow-hidden ${
-                        darkmode ? 'bg-blue-700' : 'bg-gradient-to-br from-slate-100 to-slate-200'
-                      }`}>
+                      {/* Gradient Overlay */}
+                      <div className={`absolute inset-0 bg-gradient-to-br ${
+                        darkmode 
+                          ? 'from-blue-600/20 via-purple-600/20 to-pink-600/20' 
+                          : 'from-indigo-500/10 via-purple-500/10 to-pink-500/10'
+                      } opacity-0 group-hover:opacity-100 transition-opacity duration-500`}></div>
+                      
+                      {/* Image Section with Enhanced Styling */}
+                      <div className="relative h-52 overflow-hidden">
+                        <div className={`absolute inset-0 bg-gradient-to-br ${
+                          darkmode 
+                            ? 'from-blue-800 via-purple-800 to-indigo-800' 
+                            : 'from-indigo-200 via-purple-200 to-pink-200'
+                        } opacity-50`}></div>
+                        
                         <ImageWithFallback
                           src={project.media[0]}
                           alt={project.title}
-                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
                         />
-                        <div className={`absolute top-3 right-3 rounded-full px-3 py-1 text-sm font-medium shadow-lg ${
-                          darkmode 
-                            ? 'bg-gray-800/90 text-gray-200 border-gray-600' 
-                            : 'bg-white/90 text-slate-700 border-white/20'
-                        }`}>
-                          <Heart className="w-3 h-3 inline mr-1 text-red-500" />
-                          {project.upvotes?.length || 0}
+                        
+                        {/* Floating Badge */}
+                        <div className="absolute top-4 right-4">
+                          <div className={`px-4 py-2 rounded-full shadow-2xl backdrop-blur-md border ${
+                            darkmode 
+                              ? 'bg-blue-800/90 text-gray-200 border-blue-400/50' 
+                              : 'bg-white/90 text-slate-700 border-white/50'
+                          }`}>
+                            <div className="flex items-center gap-2">
+                              <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                              <span className="text-sm font-semibold">{project.upvotes?.length || 0}</span>
+                            </div>
+                          </div>
                         </div>
+
+                        {/* Category Tag */}
+                        {project.category && (
+                          <div className="absolute top-4 left-4">
+                            <div className={`px-3 py-1.5 rounded-full shadow-xl backdrop-blur-md text-xs font-bold uppercase tracking-wider ${
+                              darkmode 
+                                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white border-purple-400/30' 
+                                : 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white border-indigo-400/30'
+                            }`}>
+                              {project.category}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Hover Gradient Overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                       </div>
-                      <div className="p-6">
-                        <h3 className={`text-lg font-semibold mb-2 transition-colors ${
+
+                      {/* Content Section */}
+                      <div className="relative p-6 space-y-4">
+                        {/* Title with Enhanced Typography */}
+                        <h3 className={`text-xl font-bold mb-3 transition-all duration-300 group-hover:text-transparent group-hover:bg-clip-text ${
                           darkmode 
-                            ? 'text-white hover:text-blue-400' 
-                            : 'text-slate-900 hover:text-indigo-600'
+                            ? 'text-white group-hover:bg-gradient-to-r group-hover:from-blue-400 group-hover:to-purple-400' 
+                            : 'text-slate-900 group-hover:bg-gradient-to-r group-hover:from-indigo-600 group-hover:to-purple-600'
                         }`}>
                           {project.title}
                         </h3>
-                        <p className={`text-sm mb-4 line-clamp-2 ${
-                          darkmode ? 'text-gray-400' : 'text-slate-600'
+
+                        {/* Description with Better Readability */}
+                        <p className={`text-sm leading-relaxed line-clamp-3 transition-all duration-300 ${
+                          darkmode 
+                            ? 'text-gray-300 group-hover:text-gray-200' 
+                            : 'text-slate-600 group-hover:text-slate-700'
                         }`}>
                           {project.description}
                         </p>
-                        <div className="flex items-center justify-between">
-                          <div className={`flex items-center gap-3 text-sm ${
-                            darkmode ? 'text-gray-400' : 'text-slate-500'
-                          }`}>
-                            <span className="flex items-center gap-1">
-                              <Heart className="w-4 h-4 text-red-500" />
-                              {project.upvotes?.length || 0}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <MessageCircle className="w-4 h-4 text-blue-500" />
-                              {project.reviews?.length || 0}
-                            </span>
+
+                        {/* Tags */}
+                        {project.autoTags && project.autoTags.length > 0 && (
+                          <div className="flex flex-wrap gap-2">
+                            {project.autoTags.slice(0, 3).map((tag, index) => (
+                              <span
+                                key={index}
+                                className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all duration-300 hover:scale-105 ${
+                                  darkmode 
+                                    ? 'bg-blue-700/50 text-blue-300 border border-blue-600/30' 
+                                    : 'bg-indigo-100/70 text-indigo-700 border border-indigo-200/50'
+                                }`}
+                              >
+                                #{tag}
+                              </span>
+                            ))}
+                            {project.autoTags.length > 3 && (
+                              <span className={`px-2.5 py-1 rounded-lg text-xs font-medium ${
+                                darkmode 
+                                  ? 'text-gray-400' 
+                                  : 'text-slate-500'
+                              }`}>
+                                +{project.autoTags.length - 3}
+                              </span>
+                            )}
                           </div>
+                        )}
+
+                        {/* Stats Bar with Enhanced Design */}
+                        <div className={`flex items-center justify-between pt-4 border-t ${
+                          darkmode 
+                            ? 'border-blue-700/50' 
+                            : 'border-indigo-200/50'
+                        }`}>
+                          <div className="flex items-center gap-4">
+                            {/* Upvotes with Icon */}
+                            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl transition-all duration-300 hover:scale-105 ${
+                              darkmode 
+                                ? 'bg-red-900/30 text-red-400 border border-red-700/30' 
+                                : 'bg-red-50 text-red-600 border border-red-200/50'
+                            }`}>
+                              <Heart className="w-4 h-4 fill-current" />
+                              <span className="text-sm font-semibold">{project.upvotes?.length || 0}</span>
+                            </div>
+
+                            {/* Comments with Icon */}
+                            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl transition-all duration-300 hover:scale-105 ${
+                              darkmode 
+                                ? 'bg-blue-900/30 text-blue-400 border border-blue-700/30' 
+                                : 'bg-blue-50 text-blue-600 border border-blue-200/50'
+                            }`}>
+                              <MessageCircle className="w-4 h-4" />
+                              <span className="text-sm font-semibold">{project.reviews?.length || 0}</span>
+                            </div>
+                          </div>
+
+                          {/* View Button */}
+                          <button className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-300 transform hover:scale-105 ${
+                            darkmode 
+                              ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-500 hover:to-purple-500 shadow-lg' 
+                              : 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white hover:from-indigo-600 hover:to-purple-600 shadow-lg'
+                          }`}>
+                            View
+                          </button>
                         </div>
                       </div>
+
+                      {/* Decorative Elements */}
+                      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                      
+                      {/* Corner Accent */}
+                      <div className={`absolute top-4 right-4 w-2 h-2 rounded-full ${
+                        darkmode ? 'bg-purple-400' : 'bg-indigo-500'
+                      } opacity-0 group-hover:opacity-100 transition-all duration-500 group-hover:animate-pulse`}></div>
                     </div>
                   ))}
                 </div>

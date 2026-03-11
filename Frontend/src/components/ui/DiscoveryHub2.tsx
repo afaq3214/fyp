@@ -627,93 +627,210 @@ export function DiscoveryHub() {
                 <div className="text-center py-8 text-slate-500">No products in this feed yet.</div>
               )}
               {!displayLoading && displayProducts.map((product, index) => (
-                <Card
+                <div
                   key={product._id}
-                  className="group cursor-pointer rounded-2xl border border-slate-200/80 dark:border-slate-700 bg-white dark:bg-slate-900/95 shadow-sm hover:shadow-xl hover:border-indigo-200 dark:hover:border-indigo-800 transition-all duration-300 overflow-hidden"
+                  className={`group relative overflow-hidden rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-500 cursor-pointer transform hover:-translate-y-2 ${
+                    darkmode 
+                      ? 'bg-gradient-to-br from-blue-900/80 via-purple-900/60 to-indigo-900/80 border-blue-500/30' 
+                      : 'bg-gradient-to-br from-white/90 via-indigo-50/80 to-purple-50/90 border-white/50'
+                  } border backdrop-blur-xl`}
                   onClick={() => handleProductClick(product)}
                 >
-                  <CardContent className="p-0">
-                    <div className="flex gap-0">
-                      {/* Product Image */}
-                      <div className="w-28 sm:w-32 shrink-0 rounded-l-2xl overflow-hidden bg-slate-100 dark:bg-slate-800">
-                        <ImageWithFallback
-                          src={product.media && product.media[0]}
-                          alt={product.title}
-                          className="w-full h-full min-h-[100px] object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                      </div>
+                  {/* Gradient Overlay */}
+                  <div className={`absolute inset-0 bg-gradient-to-br ${
+                    darkmode 
+                      ? 'from-blue-600/20 via-purple-600/20 to-pink-600/20' 
+                      : 'from-indigo-500/10 via-purple-500/10 to-pink-500/10'
+                  } opacity-0 group-hover:opacity-0 transition-opacity duration-500 pointer-events-none`}></div>
+                  
+                  <div className="relative flex gap-0">
+                    {/* Product Image Section */}
+                    <div className="relative w-48 sm:w-56 shrink-0 overflow-hidden">
+                      <ImageWithFallback
+                        src={product.media && product.media[0]}
+                        alt={product.title}
+                        className="w-full h-full min-h-[180px] object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                      />
 
-                      {/* Product Info */}
-                      <div className="flex-1 min-w-0 p-5">
-                        <div className="flex items-start justify-between gap-3 mb-2">
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate">
-                              {product.title}
-                            </h3>
-                            <p className="text-sm text-slate-600 dark:text-slate-400 mt-1 line-clamp-2">
-                              {product.description}
-                            </p>
+                      {/* Category Tag */}
+                      {product.category && (
+                        <div className="absolute top-3 left-3">
+                          <div className={`px-2 py-1 rounded-lg shadow-xl backdrop-blur-md text-xs font-bold uppercase tracking-wider ${
+                            darkmode 
+                              ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white border-purple-400/30' 
+                              : 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white border-indigo-400/30'
+                          }`}>
+                            {product.category}
                           </div>
-                          <button className="flex flex-col items-center justify-center gap-0.5 w-12 h-12 shrink-0 rounded-xl border-2 border-slate-200 dark:border-slate-600 hover:border-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all duration-200">
-                            <ArrowUp className="w-4 h-4 text-slate-600 dark:text-slate-400" />
-                            <span className="text-xs font-bold text-slate-900 dark:text-white">{product.upvotes?.length ?? 0}</span>
-                          </button>
+                        </div>
+                      )}
+
+                      {/* Hover Gradient Overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    </div>
+
+                    {/* Product Info Section */}
+                    <div className="flex-1 min-w-0 p-5 space-y-3">
+                      {/* Header with Title and Upvote Button */}
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1 min-w-0">
+                          <h3 className={`text-lg font-bold mb-2 transition-all duration-300 group-hover:text-transparent group-hover:bg-clip-text ${
+                            darkmode 
+                              ? 'text-white group-hover:bg-gradient-to-r group-hover:from-blue-400 group-hover:to-purple-400' 
+                              : 'text-slate-900 group-hover:bg-gradient-to-r group-hover:from-indigo-600 group-hover:to-purple-600'
+                          }`}>
+                            {product.title}
+                          </h3>
+                          <p className={`text-sm leading-relaxed line-clamp-2 transition-all duration-300 ${
+                            darkmode 
+                              ? 'text-gray-300 group-hover:text-gray-200' 
+                              : 'text-slate-600 group-hover:text-slate-700'
+                          }`}>
+                            {product.description}
+                          </p>
                         </div>
 
-                        {/* Meta Info */}
-                        <div className="flex items-center justify-between mt-3">
-                          <div className="flex items-center gap-3">
-                            <div className="flex items-center gap-2">
-                              {product.author_profile ? (
+                        {/* Enhanced Upvote Button */}
+                        <div className={`flex flex-col items-center justify-center gap-1 w-14 h-14 shrink-0 rounded-2xl border-2 transition-all duration-300 transform hover:scale-110 ${
+                          darkmode 
+                            ? 'bg-gradient-to-br from-red-900/30 to-pink-900/30 border-red-700/50 hover:border-red-500 hover:from-red-800/40 hover:to-pink-800/40' 
+                            : 'bg-gradient-to-br from-red-50 to-pink-50 border-red-200/50 hover:border-red-400 hover:from-red-100 hover:to-pink-100'
+                        }`}>
+                          <ArrowUp className={`w-5 h-5 transition-colors ${
+                            darkmode ? 'text-red-400' : 'text-red-600'
+                          }`} />
+                          <span className={`text-sm font-bold ${
+                            darkmode ? 'text-red-300' : 'text-red-700'
+                          }`}>
+                            {product.upvotes?.length ?? 0}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Tags */}
+                      {product.autoTags && product.autoTags.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5">
+                          {product.autoTags.slice(0, 2).map((tag, index) => (
+                            <span
+                              key={index}
+                              className={`px-2 py-1 rounded-lg text-xs font-medium transition-all duration-300 hover:scale-105 ${
+                                darkmode 
+                                  ? 'bg-blue-700/50 text-blue-300 border border-blue-600/30' 
+                                  : 'bg-indigo-100/70 text-indigo-700 border border-indigo-200/50'
+                              }`}
+                            >
+                              #{tag}
+                            </span>
+                          ))}
+                          {product.autoTags.length > 2 && (
+                            <span className={`px-2 py-1 rounded-lg text-xs font-medium ${
+                              darkmode 
+                                ? 'text-gray-400' 
+                                : 'text-slate-500'
+                            }`}>
+                              +{product.autoTags.length - 2}
+                            </span>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Meta Info Bar */}
+                      <div className={`flex items-center justify-between pt-3 border-t ${
+                        darkmode 
+                          ? 'border-blue-700/50' 
+                          : 'border-indigo-200/50'
+                      }`}>
+                        {/* Author and Date */}
+                        <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-2">
+                            {product.author_profile ? (
+                              <div className="relative">
                                 <img 
                                   src={product.author_profile} 
                                   alt={product.author_name} 
-                                  className="w-6 h-6 rounded-full object-cover"
+                                  className="w-7 h-7 rounded-full object-cover ring-2 ring-offset-2 ring-offset-transparent hover:ring-indigo-400 transition-all"
                                   referrerPolicy="no-referrer"
                                   loading="lazy"
                                 />
-                              ) : (
-                                <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center">
-                                  <span className="text-xs font-medium text-gray-700">
-                                    {product.author_name ? product.author_name.charAt(0).toUpperCase() : 'U'}
-                                  </span>
-                                </div>
-                              )}
-                              <span className="text-sm text-slate-600 dark:text-slate-400">{product.author_name}</span>
+                                <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-green-500 rounded-full border-2 border-current"></div>
+                              </div>
+                            ) : (
+                              <div className={`w-7 h-7 rounded-full flex items-center justify-center ring-2 ring-offset-2 ring-offset-transparent ${
+                                darkmode 
+                                  ? 'bg-gradient-to-br from-blue-600 to-purple-600 ring-blue-700/50' 
+                                  : 'bg-gradient-to-br from-indigo-500 to-purple-500 ring-indigo-200/50'
+                              }`}>
+                                <span className="text-xs font-bold text-white">
+                                  {product.author_name ? product.author_name.charAt(0).toUpperCase() : 'U'}
+                                </span>
+                              </div>
+                            )}
+                            <div>
+                              <span className={`text-sm font-medium ${
+                                darkmode ? 'text-gray-200' : 'text-slate-700'
+                              }`}>
+                                {product.author_name}
+                              </span>
+                              <div className={`text-xs ${
+                                darkmode ? 'text-gray-400' : 'text-slate-500'
+                              }`}>
+                                {new Date(product.createdAt).toLocaleDateString("en-GB", {
+                                  day: "2-digit",
+                                  month: "short",
+                                  year: "numeric",
+                                })}
+                              </div>
                             </div>
-                            <span className="text-slate-300">•</span>
-                            <span className="text-sm text-slate-500 dark:text-slate-400">
-                              {new Date(product.createdAt).toLocaleDateString("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  })}
-                            </span>
+                          </div>
+                        </div>
+
+                        {/* Engagement Stats */}
+                        <div className="flex items-center gap-3">
+                          {/* Comments */}
+                          <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl transition-all duration-300 hover:scale-105 ${
+                            darkmode 
+                              ? 'bg-blue-900/30 text-blue-400 border border-blue-700/30' 
+                              : 'bg-blue-50 text-blue-600 border border-blue-200/50'
+                          }`}>
+                            <MessageSquare className="w-3.5 h-3.5" />
+                            <span className="text-xs font-semibold">{getReviewCount(product)}</span>
                           </div>
 
-                          {/* Engagement Stats */}
-                          <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
-                            <div className="flex items-center gap-1">
-                              <MessageSquare className="w-4 h-4" />
-                              <span>{getReviewCount(product)}</span>
-                            </div>
+                          {/* Status Badges */}
+                          <div className="flex items-center gap-1.5">
                             {product.trending && (
-                              <Badge variant="secondary" className="bg-orange-50 text-orange-700 border-0">
-                                <Flame className="w-3 h-3 mr-1" />
+                              <div className={`px-2 py-1 rounded-lg text-xs font-bold shadow-lg backdrop-blur-md ${
+                                darkmode 
+                                  ? 'bg-gradient-to-r from-orange-600 to-red-600 text-white border-orange-400/30' 
+                                  : 'bg-gradient-to-r from-orange-500 to-red-500 text-white border-orange-200/30'
+                              }`}>
+                                <Flame className="w-3 h-3 inline mr-1" />
                                 Trending
-                              </Badge>
+                              </div>
                             )}
                             {product.fresh && (
-                              <Badge variant="secondary" className="bg-green-50 text-green-700 border-0">
+                              <div className={`px-2 py-1 rounded-lg text-xs font-bold shadow-lg backdrop-blur-md ${
+                                darkmode 
+                                  ? 'bg-gradient-to-r from-emerald-600 to-green-600 text-white border-emerald-400/30' 
+                                  : 'bg-gradient-to-r from-emerald-500 to-green-500 text-white border-emerald-200/30'
+                              }`}>
                                 Fresh
-                              </Badge>
+                              </div>
                             )}
                           </div>
                         </div>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+
+                  {/* Decorative Elements */}
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  
+                  {/* Corner Accent */}
+                  <div className={`absolute top-3 right-3 w-2 h-2 rounded-full ${
+                    darkmode ? 'bg-purple-400' : 'bg-indigo-500'
+                  } opacity-0 group-hover:opacity-100 transition-all duration-500 group-hover:animate-pulse`}></div>
+                </div>
               ))}
             </div>
           </div>
