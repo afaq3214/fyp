@@ -1,30 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TrendingUp, Flame, Clock, Filter, Grid3X3, List, ArrowUp, Trophy, Users, Star, Activity, Award, Zap, Sparkles } from 'lucide-react';
-import { Button } from './ui/button';
-import { Badge } from './ui/badge';
-import { Card, CardContent, CardFooter, CardHeader } from './ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
+import {
+  TrendingUp, Flame, Clock, Grid3X3, List, ArrowUp,
+  Trophy, Users, Star, Award, Zap, Sparkles, MessageSquare
+} from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from './ui/select';
 import type { Product } from '../App';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import { WishlistButton } from './WishlistButton';
-import { TrendPulses } from './DiscoveryHub/TrendPulses/TrendPulses';
 import { HiddenGemsFeed } from './DiscoveryHub/HiddenGemsFeed/HiddenGemsFeed';
 import { HoverPreview } from './DiscoveryHub/HoverPreviews/HoverPreviews';
-import { SmartFilters } from './DiscoveryHub/SmartFilters/SmartFilters';
 
 interface DiscoveryHubProps {
   products: Product[];
   onProductClick: (product: Product) => void;
 }
+
 export interface User {
   id: string;
   name: string;
@@ -42,10 +36,6 @@ export interface User {
   createdAt: string;
 }
 
-
-
-
-
 interface TopUser {
   id: string;
   name: string;
@@ -61,613 +51,470 @@ export function DiscoveryHub() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState('All Categories');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
   const [sortBy, setSortBy] = useState('upvotes');
   const [topUsers, setTopUsers] = useState<TopUser[]>([]);
-  const [activeTab, setActiveTab] = useState('discover');
-const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
+  const [activeTab, setActiveTab] = useState<'discover' | 'trending' | 'fresh' | 'gems'>('discover');
+  const url = import.meta.env.VITE_API_URL || 'https://fyp-1ejm.vercel.app';
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        
-        // Fetch products
-        const productsResponse = await fetch(`${url}/api/products`);
-        if (!productsResponse.ok) throw new Error('Failed to fetch products');
-        const productsData = await productsResponse.json();
+        const [productsRes, usersRes] = await Promise.all([
+          fetch(`${url}/api/products`),
+          fetch(`${url}/api/users/top-users?limit=10`),
+        ]);
+        if (!productsRes.ok) throw new Error('Failed to fetch products');
+        const productsData = await productsRes.json();
         setProducts(productsData);
         setFilteredProducts(productsData);
-        
-        // Fetch top users by points
-        const usersResponse = await fetch(`${url}/api/users/top-users?limit=10`);
-        if (usersResponse.ok) {
-          const usersData = await usersResponse.json();
-          setTopUsers(usersData);
-        }
+        if (usersRes.ok) setTopUsers(await usersRes.json());
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
         setIsLoading(false);
       }
     };
-
     fetchData();
   }, []);
 
-  const handleProductClick = (product: Product) => {
-    navigate(`/product/${product._id}`);
+  const handleProductClick = (product: Product) => navigate(`/product/${product._id}`);
+
+  const categories = ['All Categories', ...Array.from(new Set(products.map(p => p.category).filter(Boolean)))];
+
+  const sorted = [...filteredProducts]
+    .filter(p => selectedCategory === 'All Categories' || p.category === selectedCategory)
+    .sort((a, b) => {
+      if (sortBy === 'upvotes') return b.upvotes.length - a.upvotes.length;
+      if (sortBy === 'trending') return (b.trending ? 1 : 0) - (a.trending ? 1 : 0);
+      if (sortBy === 'fresh') return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      if (sortBy === 'reviews') return b.reviews - a.reviews;
+      return 0;
+    });
+
+  const tabProducts = {
+    discover: sorted,
+    trending: sorted.filter(p => p.trending),
+    fresh: sorted.filter(p => p.fresh),
+    gems: sorted,
   };
 
-  const handleFiltersChange = (filtered: Product[]) => {
-    setFilteredProducts(filtered);
-  };
-
-  const handleSortChange = (sortOption: string) => {
-    setSortBy(sortOption);
-  };
-
-  const filteredProducts = products.filter(product => 
-    selectedCategory === 'All Categories' || product.category === selectedCategory
+  if (isLoading) return (
+    <div className="flex items-center justify-center min-h-[60vh] bg-black">
+      <div className="w-8 h-8 border-2 border-zinc-700 border-t-white rounded-full animate-spin" />
+    </div>
+  );
+  if (error) return (
+    <div className="flex items-center justify-center min-h-[60vh] bg-black text-zinc-400">
+      {error}
+    </div>
   );
 
-  const sortedProducts = [...filteredProducts].sort((a, b) => {
-    switch (sortBy) {
-      case 'upvotes':
-        return b.upvotes.length - a.upvotes.length;
-      case 'trending':
-        return (b.trending ? 1 : 0) - (a.trending ? 1 : 0);
-      case 'fresh':
-        return (b.fresh ? 1 : 0) - (a.fresh ? 1 : 0);
-      case 'reviews':
-        return b.reviews - a.reviews;
-      default:
-        return 0;
-    }
-  });
-
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
- 
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="flex flex-col lg:flex-row gap-8">
-        {/* Main Content */}
-        <div className="flex-1">
-      {/* Hero Section */}
-          <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-b border-slate-700">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="text-center mb-8">
-            <h1 className="text-5xl text-white mb-3">
-              Discovery Hub
-            </h1>
-            <p className="text-slate-300 text-lg max-w-2xl mx-auto">
-              Explore innovative products ranked by genuine peer feedback, not paid promotions
+    <div className="min-h-screen bg-black text-white">
+      {/* Page header */}
+      <div className="border-b border-zinc-900 bg-zinc-950 px-6 py-6">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div>
+            <h1 className="text-xl font-bold tracking-tight">Discovery Hub</h1>
+            <p className="text-zinc-500 text-sm mt-0.5">
+              Ranked by genuine peer feedback
             </p>
           </div>
-          
-          {/* Stats Bar */}
-          <div className="flex items-center justify-center gap-8 mb-8">
+          <div className="flex items-center gap-6 text-sm">
             <div className="text-center">
-              <div className="text-3xl text-white mb-1">{products.length}</div>
-              <div className="text-sm text-slate-400">Active Products</div>
+              <div className="font-bold text-white">{products.length}</div>
+              <div className="text-zinc-600 text-xs">Products</div>
             </div>
-            <div className="w-px h-12 bg-slate-700" />
+            <div className="w-px h-8 bg-zinc-800" />
             <div className="text-center">
-              <div className="text-3xl text-white mb-1">{topUsers.length}</div>
-              <div className="text-sm text-slate-400">Top Makers</div>
-            </div>
-            <div className="w-px h-12 bg-slate-700" />
-            <div className="text-center">
-              <div className="text-3xl text-white mb-1">12K+</div>
-              <div className="text-sm text-slate-400">Community Members</div>
-            </div>
-          </div>
-
-          {/* About Section */}
-          <div className="max-w-4xl mx-auto bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 mb-8">
-            <div className="flex items-start gap-4">
-              <div className="flex-shrink-0 w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
-                <Sparkles className="w-6 h-6 text-white" />
-              </div>
-              <div className="flex-1">
-                <h2 className="text-white mb-2">Equal Opportunity Platform</h2>
-                <p className="text-slate-300 leading-relaxed mb-4">
-                  A community-driven platform where students, indie makers, and entrepreneurs showcase their projects with equal opportunity. 
-                  Discover innovative products ranked by genuine peer feedback. Upvote products you love, write reviews, 
-                  and connect with makers building the future.
-                </p>
-                <div className="flex flex-wrap items-center gap-6">
-                  <div className="flex items-center gap-2 text-sm text-slate-300">
-                    <Award className="w-4 h-4 text-blue-400" />
-                    No Paid Promotions
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-slate-300">
-                    <Zap className="w-4 h-4 text-blue-400" />
-                    AI-Powered Discovery
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-slate-300">
-                    <Users className="w-4 h-4 text-blue-400" />
-                    Peer-Driven Rankings
-                  </div>
-                  <Button variant="link" className="text-blue-400 hover:text-blue-300 p-0 h-auto">
-                    Learn More →
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* TREND PULSES - Real-time metrics dashboard */}
-          <TrendPulses products={products} />
-          <div className="max-w-6xl mx-auto">
-            <div className="flex items-center gap-2 mb-4">
-              <Activity className="w-5 h-5 text-blue-400" />
-              <h3 className="text-white">Trend Pulses</h3>
-              <Badge className="bg-blue-600 text-white border-0">Live</Badge>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {/* Trending Now */}
-              {/* <div className="bg-gradient-to-br from-orange-600/20 to-orange-800/20 backdrop-blur-sm border border-orange-500/30 rounded-lg p-5">
-                <div className="flex items-center gap-2 mb-3">
-                  <Flame className="w-5 h-5 text-orange-400" />
-                  <span className="text-sm text-orange-200">Trending Now</span>
-                </div>
-                <div className="text-3xl text-white mb-2">{trendingProducts.length}</div>
-                <div className="text-sm text-orange-200">
-                  {trendingProducts.length > 0 && (
-                    <span className="flex items-center gap-1">
-                      <TrendingUp className="w-3 h-3" />
-                      +{Math.round(trendingProducts.length / products.length * 100)}% of total
-                    </span>
-                  )}
-                </div>
-              </div> */}
-
-              {/* Fresh Launches */}
-              {/* <div className="bg-gradient-to-br from-green-600/20 to-green-800/20 backdrop-blur-sm border border-green-500/30 rounded-lg p-5">
-                <div className="flex items-center gap-2 mb-3">
-                  <Rocket className="w-5 h-5 text-green-400" />
-                  <span className="text-sm text-green-200">Fresh Launches</span>
-                </div>
-                <div className="text-3xl text-white mb-2">{freshProducts.length}</div>
-                <div className="text-sm text-green-200">Last 24 hours</div>
-              </div> */}
-
-              {/* Hidden Gems */}
-              {/* <div className="bg-gradient-to-br from-purple-600/20 to-purple-800/20 backdrop-blur-sm border border-purple-500/30 rounded-lg p-5">
-                <div className="flex items-center gap-2 mb-3">
-                  <Gem className="w-5 h-5 text-purple-400" />
-                  <span className="text-sm text-purple-200">Hidden Gems</span>
-                </div>
-                <div className="text-3xl text-white mb-2">{hiddenGems.length}</div>
-                <div className="text-sm text-purple-200">Quality with low visibility</div>
-              </div> */}
-
-              {/* Rising Stars */}
-              {/* <div className="bg-gradient-to-br from-blue-600/20 to-blue-800/20 backdrop-blur-sm border border-blue-500/30 rounded-lg p-5">
-                <div className="flex items-center gap-2 mb-3">
-                  <Target className="w-5 h-5 text-blue-400" />
-                  <span className="text-sm text-blue-200">Rising Stars</span>
-                </div>
-                <div className="text-3xl text-white mb-2">{risingProducts.length}</div>
-                <div className="text-sm text-blue-200">Gaining momentum</div>
-              </div> */}
+              <div className="font-bold text-white">{topUsers.length}</div>
+              <div className="text-zinc-600 text-xs">Makers</div>
             </div>
           </div>
         </div>
       </div>
 
-
-      {/* Smart Filters */}
-      <SmartFilters 
-        products={products} 
-        onFiltersChange={handleFiltersChange}
-        onSortChange={handleSortChange}
-      />
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 space-y-4 md:space-y-0">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
-          <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Sort by..." />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="upvotes">
-                <div className="flex items-center">
-                  <ArrowUp className="w-4 h-4 mr-2" />
-                  Most Upvotes
-                </div>
-              </SelectItem>
-              <SelectItem value="trending">
-                <div className="flex items-center">
-                  <Flame className="w-4 h-4 mr-2" />
-                  Trending
-                </div>
-              </SelectItem>
-              <SelectItem value="fresh">
-                <div className="flex items-center">
-                  <Clock className="w-4 h-4 mr-2" />
-                  Fresh
-                </div>
-              </SelectItem>
-              <SelectItem value="reviews">
-                <div className="flex items-center">
-                  <Star className="w-4 h-4 mr-2" />
-                  Most Reviews
-                </div>
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="flex items-center space-x-2">
-          <Button
-            variant={viewMode === 'grid' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => setViewMode('grid')}
-          >
-            <Grid3X3 className="w-4 h-4" />
-          </Button>
-          <Button
-            variant={viewMode === 'list' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => setViewMode('list')}
-          >
-            <List className="w-4 h-4" />
-          </Button>
-        </div>
-      </div>
-
-      {/* Main Content Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full max-w-md mx-auto grid-cols-4 mb-8">
-          <TabsTrigger value="discover">Discover</TabsTrigger>
-          <TabsTrigger value="trending">
-            <Flame className="w-4 h-4 mr-2" />
-            Trending
-          </TabsTrigger>
-          <TabsTrigger value="gems">
-            <Sparkles className="w-4 h-4 mr-2" />
-            Hidden Gems
-          </TabsTrigger>
-          <TabsTrigger value="fresh">
-            <Clock className="w-4 h-4 mr-2" />
-            Fresh
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="discover">
-          <ProductGrid 
-            products={sortedProducts} 
-            viewMode={viewMode} 
-            onProductClick={handleProductClick}
-          />
-        </TabsContent>
-        
-        <TabsContent value="trending">
-          <ProductGrid 
-            products={sortedProducts.filter(p => p.trending)} 
-            viewMode={viewMode} 
-            onProductClick={handleProductClick}
-          />
-        </TabsContent>
-
-        <TabsContent value="gems">
-          <HiddenGemsFeed 
-            products={products}
-            onProductClick={handleProductClick}
-          />
-        </TabsContent>
-        
-        <TabsContent value="fresh">
-          <ProductGrid 
-            products={sortedProducts.filter(p => p.fresh)} 
-            viewMode={viewMode} 
-            onProductClick={handleProductClick}
-          />
-        </TabsContent>
-      </Tabs>
-
-      {/* Hidden Gems Section */}
-      {/* <div className="mt-16">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold mb-4">Hidden Gems</h2>
-          <p className="text-gray-600 dark:text-gray-400">
-            Promising products with high growth potential, discovered by our AI
-          </p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {products.slice(0, 3).map(product => (
-            <Card 
-              key={product.id} 
-              className="group cursor-pointer hover:shadow-lg transition-all duration-200 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border-purple-200 dark:border-purple-700"
-              onClick={() => onProductClick(product)}
-            >
-              <CardHeader className="pb-3">
-                <Badge className="w-fit mb-2 bg-purple-600 hover:bg-purple-700">
-                  💎 Hidden Gem
-                </Badge>
-                <h3 className="font-semibold group-hover:text-purple-600 transition-colors">
-                  {product.title}
-                </h3>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
-                  {product.description}
-                </p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div> */}
-        </div>
-
-        {/* Sidebar - Top Users by Points */}
-        <div className="lg:w-80">
-          <Card className="sticky top-8">
-            <CardHeader className="pb-4">
-              <div className="flex items-center space-x-2">
-                <Trophy className="w-5 h-5 text-yellow-500" />
-                <h3 className="font-semibold">Top Contributors</h3>
-              </div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Users with the most points this week
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+        <div className="flex gap-6">
+          {/* Left sidebar – Leaderboard */}
+          <div className="hidden lg:block w-56 shrink-0">
+            <div className="sticky top-24">
+              <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                <Trophy className="w-3.5 h-3.5" /> Leaderboard
               </p>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {topUsers.length > 0 ? (
-                topUsers.map((user, index) => (
-                  <div key={user.id} className="flex items-center space-x-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                    <div className="flex-shrink-0">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                        index === 0 ? 'bg-yellow-500 text-white' :
-                        index === 1 ? 'bg-gray-400 text-white' :
-                        index === 2 ? 'bg-orange-600 text-white' :
-                        'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300'
-                      }`}>
-                        {index + 1}
-                      </div>
+              <div className="space-y-1">
+                {topUsers.slice(0, 10).map((user, index) => (
+                  <div
+                    key={user.id}
+                    className="flex items-center gap-2.5 p-2.5 rounded-xl hover:bg-zinc-900 transition-colors cursor-pointer group"
+                    onClick={() => navigate(`/profile/${user.id}`)}
+                  >
+                    <span className={`w-5 text-xs font-bold text-center shrink-0 ${
+                      index === 0 ? 'text-white' :
+                      index === 1 ? 'text-zinc-400' :
+                      index === 2 ? 'text-zinc-500' :
+                      'text-zinc-600'
+                    }`}>
+                      {index + 1}
+                    </span>
+                    <div className="relative shrink-0">
+                      {user.profilePicture ? (
+                        <img
+                          src={user.profilePicture}
+                          alt={user.name}
+                          className="w-7 h-7 rounded-full object-cover"
+                          referrerPolicy="no-referrer"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="w-7 h-7 rounded-full bg-zinc-800 flex items-center justify-center">
+                          <span className="text-xs font-bold text-zinc-400">
+                            {user.name?.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center space-x-2">
-                        {user.profilePicture ? (
-                          <img 
-                            src={user.profilePicture} 
-                            alt={user.name} 
-                            className="w-6 h-6 rounded-full object-cover"
-                            referrerPolicy="no-referrer"
-                            loading="lazy"
-                          />
-                        ) : (
-                          <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                            <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
-                              {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
-                            </span>
-                          </div>
-                        )}
-                        <p className="text-sm font-medium truncate">
-                          {user.name}
-                        </p>
-                      </div>
-                      <div className="flex items-center space-x-2 mt-1">
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
-                          {user.points} points
-                        </span>
-                        {user.badges && user.badges.length > 0 && (
-                          <div className="flex items-center space-x-1">
-                            {user.badges.slice(0, 2).map((badge, badgeIndex) => (
-                              <span key={badgeIndex} className="text-xs">
-                                🏆
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
+                      <p className="text-xs font-medium text-zinc-300 group-hover:text-white truncate transition-colors">
+                        {user.name}
+                      </p>
+                      <p className="text-[10px] text-zinc-600">{user.points} pts</p>
                     </div>
                   </div>
-                ))
-              ) : (
-                <div className="text-center py-8">
-                  <Users className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    No top contributors yet
-                  </p>
+                ))}
+                {topUsers.length === 0 && (
+                  <div className="text-center py-8">
+                    <Users className="w-6 h-6 text-zinc-700 mx-auto mb-2" />
+                    <p className="text-xs text-zinc-600">No contributors yet</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Center – Product list */}
+          <div className="flex-1 min-w-0">
+            {/* Filter bar */}
+            <div className="flex items-center gap-3 mb-5 flex-wrap">
+              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <SelectTrigger className="w-40 bg-zinc-900 border-zinc-800 text-white text-sm h-9">
+                  <SelectValue placeholder="All Categories" />
+                </SelectTrigger>
+                <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
+                  {categories.map(c => (
+                    <SelectItem key={c} value={c}>{c}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-40 bg-zinc-900 border-zinc-800 text-white text-sm h-9">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
+                  <SelectItem value="upvotes">
+                    <div className="flex items-center gap-2"><ArrowUp className="w-3.5 h-3.5" />Most Upvotes</div>
+                  </SelectItem>
+                  <SelectItem value="trending">
+                    <div className="flex items-center gap-2"><Flame className="w-3.5 h-3.5" />Trending</div>
+                  </SelectItem>
+                  <SelectItem value="fresh">
+                    <div className="flex items-center gap-2"><Clock className="w-3.5 h-3.5" />Newest</div>
+                  </SelectItem>
+                  <SelectItem value="reviews">
+                    <div className="flex items-center gap-2"><Star className="w-3.5 h-3.5" />Most Reviews</div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+
+              <div className="ml-auto flex items-center gap-1 bg-zinc-900 border border-zinc-800 rounded-lg p-1">
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`p-1.5 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-white text-black' : 'text-zinc-500 hover:text-white'}`}
+                >
+                  <Grid3X3 className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`p-1.5 rounded-md transition-colors ${viewMode === 'list' ? 'bg-white text-black' : 'text-zinc-500 hover:text-white'}`}
+                >
+                  <List className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Tabs */}
+            <div className="flex border-b border-zinc-900 mb-5">
+              {([
+                { id: 'discover', label: 'All' },
+                { id: 'trending', label: 'Trending', icon: <Flame className="w-3.5 h-3.5" /> },
+                { id: 'fresh', label: 'Newest', icon: <Clock className="w-3.5 h-3.5" /> },
+                { id: 'gems', label: 'Hidden Gems', icon: <Sparkles className="w-3.5 h-3.5" /> },
+              ] as const).map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center gap-1.5 pb-3 px-4 text-sm font-medium border-b-2 -mb-px transition-colors ${
+                    activeTab === tab.id
+                      ? 'border-white text-white'
+                      : 'border-transparent text-zinc-500 hover:text-zinc-300'
+                  }`}
+                >
+                  {tab.icon}{tab.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Product grid/list */}
+            {activeTab === 'gems' ? (
+              <HiddenGemsFeed products={products} onProductClick={handleProductClick} />
+            ) : viewMode === 'list' ? (
+              <ProductListView
+                products={tabProducts[activeTab]}
+                onProductClick={handleProductClick}
+              />
+            ) : (
+              <ProductGridView
+                products={tabProducts[activeTab]}
+                onProductClick={handleProductClick}
+              />
+            )}
+          </div>
+
+          {/* Right sidebar */}
+          <div className="hidden xl:block w-64 shrink-0">
+            <div className="sticky top-24 space-y-4">
+              {/* Stats card */}
+              <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
+                <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-4">Platform Stats</p>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-zinc-500 flex items-center gap-1.5">
+                      <Zap className="w-3.5 h-3.5" />Products
+                    </span>
+                    <span className="text-sm font-bold text-white">{products.length}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-zinc-500 flex items-center gap-1.5">
+                      <Users className="w-3.5 h-3.5" />Makers
+                    </span>
+                    <span className="text-sm font-bold text-white">{topUsers.length}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-zinc-500 flex items-center gap-1.5">
+                      <TrendingUp className="w-3.5 h-3.5" />Trending
+                    </span>
+                    <span className="text-sm font-bold text-white">
+                      {products.filter(p => p.trending).length}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-zinc-500 flex items-center gap-1.5">
+                      <Award className="w-3.5 h-3.5" />Fresh
+                    </span>
+                    <span className="text-sm font-bold text-white">
+                      {products.filter(p => p.fresh).length}
+                    </span>
+                  </div>
                 </div>
-              )}
-            </CardContent>
-          </Card>
+              </div>
+
+              {/* Daily Quests teaser */}
+              <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
+                <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">Daily Quests</p>
+                <p className="text-xs text-zinc-600 mb-3">Complete quests to earn points and badges</p>
+                <button
+                  onClick={() => navigate('/quests')}
+                  className="w-full bg-white text-black text-xs font-semibold py-2 rounded-lg hover:bg-zinc-200 transition-colors"
+                >
+                  View Quests
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-interface ProductGridProps {
-  products: Product[];
-  viewMode: 'grid' | 'list';
-  onProductClick: (product: Product) => void;
-}
-
-function ProductGrid({ products, viewMode, onProductClick }: ProductGridProps) {
-  if (viewMode === 'list') {
-    return (
-      <div className="space-y-4">
-        {products.map(product => (
-          <HoverPreview key={product._id} product={product} onProductClick={onProductClick}>
-            <Card 
-              className="group cursor-pointer hover:shadow-md transition-all duration-200"
-              onClick={() => onProductClick(product)}
-            >
-              <CardContent className="p-6">
-              <div className="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-6">
-                <div className="w-full md:w-32 h-20 md:h-44 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 flex-shrink-0" style={{width:'300px',height:'150px'}}>
-                  <ImageWithFallback
-                    src={product.media[0]}
-                    alt={product.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                  />
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-start justify-between mb-2">
-                    <h3 className="font-semibold group-hover:text-blue-600 transition-colors">
-                      {product.title}
-                    </h3>
-                    <div className="flex items-center space-x-2 ml-4">
-                      {product.trending && (
-                        <Badge variant="secondary" className="bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200">
-                          <Flame className="w-3 h-3 mr-1" />
-                          Trending
-                        </Badge>
-                      )}
-                      {product.fresh && (
-                        <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                          <Clock className="w-3 h-3 mr-1" />
-                          Fresh
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-3 line-clamp-2">
-                    {product.description}
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <div className="flex items-center space-x-2">
-                           {product.author_profile ? (
-                   <img 
-                     src={product.author_profile} 
-                     alt={product.author_name} 
-                     className="w-6 h-6 rounded-full object-cover"
-                     referrerPolicy="no-referrer"
-                     loading="lazy"
-                   />
-                 ) : (
-                   <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                     <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
-                       {product.author_name ? product.author_name.charAt(0).toUpperCase() : 'U'}
-                     </span>
-                   </div>
-                 )}
-                        {/* <Avatar className="w-6 h-6">
-                          <AvatarImage src={product.author_profile} />
-                          <AvatarFallback>{product.author_name.charAt(0)}</AvatarFallback>
-                        </Avatar> */}
-                        <span className="text-sm text-gray-600 dark:text-gray-400">
-                          {product.author_name}
-                        </span>
-                      </div>
-                      <span className="text-sm text-gray-500">•</span>
-                      <span className="text-sm text-gray-500">{product.createdAt}</span>
-                    </div>
-                    <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
-                      <span>↑ {product.upvotes.length}</span>
-                      <span>💬 {product.reviews}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    );
-  }
-
+/* ─── Product List View (PH-style rows) ─── */
+function ProductListView({ products, onProductClick }: { products: Product[]; onProductClick: (p: Product) => void }) {
+  if (products.length === 0) return <EmptyState />;
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {products.map(product => (
+    <div className="space-y-2">
+      {products.map((product, idx) => (
         <HoverPreview key={product._id} product={product} onProductClick={onProductClick}>
-          <Card 
-            className="group cursor-pointer hover:shadow-lg transition-all duration-200 overflow-hidden"
+          <div
+            className="group flex items-center gap-4 bg-zinc-900 border border-zinc-800 hover:border-zinc-700 rounded-xl px-4 py-3.5 cursor-pointer transition-all"
             onClick={() => onProductClick(product)}
           >
-          <div className="relative">
-            <div className="w-full h-48 bg-gray-100 dark:bg-gray-800 overflow-hidden">
+            {/* Rank */}
+            <span className="text-xs text-zinc-700 font-mono w-4 text-right shrink-0">{idx + 1}</span>
+
+            {/* Thumbnail */}
+            <div className="w-20 h-14 rounded-xl overflow-hidden bg-zinc-800 shrink-0">
               <ImageWithFallback
-               src={product.media[0]}
+                src={product.media?.[0]}
                 alt={product.title}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
               />
             </div>
-            <div className="absolute top-3 left-3 flex space-x-2">
-              {product.trending && (
-                <Badge className="bg-orange-500 hover:bg-orange-600">
-                  <Flame className="w-3 h-3 mr-1" />
-                  Trending
-                </Badge>
-              )}
-              {product.fresh && (
-                <Badge className="bg-green-500 hover:bg-green-600">
-                  <Clock className="w-3 h-3 mr-1" />
-                  Fresh
-                </Badge>
-              )}
+
+            {/* Main content */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-start gap-2 mb-0.5">
+                <h3 className="font-semibold text-white text-sm leading-snug group-hover:text-zinc-200 transition-colors">
+                  {product.title}
+                </h3>
+                {product.trending && (
+                  <span className="shrink-0 text-[10px] border border-zinc-700 text-zinc-500 px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
+                    <Flame className="w-2.5 h-2.5" />Hot
+                  </span>
+                )}
+                {product.fresh && (
+                  <span className="shrink-0 text-[10px] border border-zinc-700 text-zinc-500 px-1.5 py-0.5 rounded-full">
+                    New
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-zinc-500 line-clamp-1 mb-1.5">{product.pitch || product.description}</p>
+              <div className="flex items-center gap-2 flex-wrap">
+                {product.category && (
+                  <span className="text-[10px] font-medium border border-zinc-800 text-zinc-600 px-2 py-0.5 rounded-full">
+                    {product.category}
+                  </span>
+                )}
+                {product.autoTags?.slice(0, 3).map((tag, i) => (
+                  <span key={i} className="text-[10px] text-zinc-600">#{tag}</span>
+                ))}
+              </div>
             </div>
-            <div className="absolute top-3 right-3 flex space-x-2">
-              <Button size="sm" variant="ghost" className="bg-white/80 hover:bg-white/90 text-gray-700">
-                ↑ {product.upvotes.length}
-              </Button>
-              <div onClick={(e) => e.stopPropagation()}>
-                <WishlistButton productId={product._id} size="sm" className="bg-white/80 hover:bg-white/90" />
+
+            {/* Author + date */}
+            <div className="hidden sm:flex items-center gap-2 shrink-0">
+              {product.author_profile ? (
+                <img
+                  src={product.author_profile}
+                  alt={product.author_name}
+                  className="w-5 h-5 rounded-full object-cover"
+                  referrerPolicy="no-referrer"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="w-5 h-5 rounded-full bg-zinc-700 flex items-center justify-center">
+                  <span className="text-[10px] text-zinc-400">
+                    {product.author_name?.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+              )}
+              <span className="text-xs text-zinc-500 max-w-[80px] truncate">{product.author_name}</span>
+            </div>
+
+            {/* Comments */}
+            <div className="hidden sm:flex items-center gap-1 text-zinc-600 shrink-0">
+              <MessageSquare className="w-3.5 h-3.5" />
+              <span className="text-xs">{product.reviews}</span>
+            </div>
+
+            {/* Upvote button */}
+            <div className="shrink-0 flex flex-col items-center border border-zinc-700 rounded-lg px-3 py-2 min-w-[48px] hover:border-zinc-500 transition-colors">
+              <TrendingUp className="w-3.5 h-3.5 text-zinc-500 mb-0.5" />
+              <span className="text-xs font-bold text-white">{product.upvotes.length}</span>
+            </div>
+          </div>
+        </HoverPreview>
+      ))}
+    </div>
+  );
+}
+
+/* ─── Product Grid View ─── */
+function ProductGridView({ products, onProductClick }: { products: Product[]; onProductClick: (p: Product) => void }) {
+  if (products.length === 0) return <EmptyState />;
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {products.map(product => (
+        <HoverPreview key={product._id} product={product} onProductClick={onProductClick}>
+          <div
+            className="group bg-zinc-900 border border-zinc-800 hover:border-zinc-700 rounded-xl overflow-hidden cursor-pointer transition-all"
+            onClick={() => onProductClick(product)}
+          >
+            {/* Thumbnail */}
+            <div className="relative h-44 bg-zinc-800 overflow-hidden">
+              <ImageWithFallback
+                src={product.media?.[0]}
+                alt={product.title}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+              {product.category && (
+                <span className="absolute top-3 left-3 text-[10px] font-semibold bg-black/70 text-white border border-white/10 px-2 py-0.5 rounded-full uppercase tracking-wide">
+                  {product.category}
+                </span>
+              )}
+              <div className="absolute top-3 right-3">
+                <WishlistButton productId={product._id} size="sm" />
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="p-4">
+              <h3 className="font-semibold text-white text-sm mb-1 group-hover:text-zinc-200 transition-colors line-clamp-1">
+                {product.title}
+              </h3>
+              <p className="text-xs text-zinc-500 line-clamp-2 mb-3">{product.pitch || product.description}</p>
+
+              {/* Tags */}
+              <div className="flex flex-wrap gap-1 mb-3">
+                {product.autoTags?.slice(0, 3).map((tag, i) => (
+                  <span key={i} className="text-[10px] bg-zinc-800 text-zinc-400 px-1.5 py-0.5 rounded-full">
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+
+              {/* Footer */}
+              <div className="flex items-center justify-between pt-3 border-t border-zinc-800">
+                <div className="flex items-center gap-2">
+                  {product.author_profile ? (
+                    <img
+                      src={product.author_profile}
+                      alt={product.author_name}
+                      className="w-5 h-5 rounded-full object-cover"
+                      referrerPolicy="no-referrer"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="w-5 h-5 rounded-full bg-zinc-700 flex items-center justify-center">
+                      <span className="text-[10px] text-zinc-400">{product.author_name?.charAt(0)}</span>
+                    </div>
+                  )}
+                  <span className="text-xs text-zinc-500 truncate max-w-[80px]">{product.author_name}</span>
+                </div>
+                <div className="flex items-center gap-3 text-xs text-zinc-600">
+                  <span className="flex items-center gap-1">
+                    <MessageSquare className="w-3 h-3" />{product.reviews}
+                  </span>
+                  <span className="flex items-center gap-1 font-bold text-white">
+                    <TrendingUp className="w-3 h-3 text-zinc-500" />{product.upvotes.length}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
-
-          <CardHeader className="pb-3">
-            <div className="flex items-start justify-between">
-              <h3 className="font-semibold group-hover:text-blue-600 transition-colors line-clamp-1">
-                {product.title}
-              </h3>
-            </div>
-            <Badge variant="outline" className="w-fit">
-              {product.category}
-            </Badge>
-          </CardHeader>
-
-          <CardContent className="pb-4">
-            <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-2 mb-4">
-              {product.description}
-            </p>
-            <div className="flex flex-wrap gap-1 mb-4">
-              {product.autoTags.slice(0, 3).map(tag => (
-                <Badge key={tag} variant="secondary" className="text-xs">
-                  {tag}
-                </Badge>
-              ))}
-            </div>
-          </CardContent>
-
-          <CardFooter className="pt-0">
-            <div className="flex items-center justify-between w-full">
-               <div className="flex items-center space-x-2">
-                 {product.author_profile ? (
-                   <img 
-                     src={product.author_profile} 
-                     alt={product.author_name} 
-                     className="w-6 h-6 rounded-full object-cover"
-                     referrerPolicy="no-referrer"
-                     loading="lazy"
-                   />
-                 ) : (
-                   <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                     <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
-                       {product.author_name ? product.author_name.charAt(0).toUpperCase() : 'U'}
-                     </span>
-                   </div>
-                 )}
-                <span className="text-sm text-gray-600 dark:text-gray-400">
-                  {product.author_name}
-                </span>
-              </div> 
-              <div className="flex items-center space-x-3 text-sm text-gray-600 dark:text-gray-400">
-                <span>💬 {product.reviews}</span>
-                <span>{product.createdAt}</span>
-              </div>
-            </div>
-          </CardFooter>
-          </Card>
         </HoverPreview>
       ))}
+    </div>
+  );
+}
+
+function EmptyState() {
+  return (
+    <div className="border border-dashed border-zinc-800 rounded-2xl p-16 text-center">
+      <Sparkles className="w-8 h-8 text-zinc-700 mx-auto mb-3" />
+      <p className="text-zinc-500 text-sm">No products found</p>
     </div>
   );
 }

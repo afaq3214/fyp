@@ -321,30 +321,94 @@ const handleReportComment = async () => {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Back Button */}
-        <button
-          onClick={handleBack}
-          className="flex items-center gap-2 text-zinc-400 hover:text-white text-sm mb-8 transition-colors group"
-        >
-          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-          Back to Discovery
-        </button>
+      {/* PH-style product header bar */}
+      <div className="border-b border-zinc-900 bg-zinc-950">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <button
+            onClick={handleBack}
+            className="flex items-center gap-2 text-zinc-400 hover:text-white text-sm mb-6 transition-colors group"
+          >
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+            Back to Discovery
+          </button>
 
+          {/* Product identity row */}
+          <div className="flex items-start gap-5">
+            {/* Product logo / thumbnail */}
+            <div className="w-16 h-16 rounded-2xl overflow-hidden bg-zinc-800 border border-zinc-700 shrink-0">
+              {product.media?.[0] ? (
+                <ImageWithFallback
+                  src={product.media[0]}
+                  alt={product.title}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <Sparkles className="w-7 h-7 text-zinc-600" />
+                </div>
+              )}
+            </div>
+
+            {/* Title + meta */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-3 flex-wrap mb-1">
+                <h1 className="text-2xl font-bold text-white leading-tight">{product.title}</h1>
+                {product.fresh && (
+                  <span className="text-xs font-semibold bg-zinc-800 border border-zinc-700 text-zinc-300 px-2.5 py-1 rounded-full">
+                    Launching today
+                  </span>
+                )}
+                {product.trending && (
+                  <span className="text-xs font-semibold bg-zinc-800 border border-zinc-700 text-zinc-300 px-2.5 py-1 flex items-center gap-1 rounded-full">
+                    <TrendingUp className="w-3 h-3" /> Trending
+                  </span>
+                )}
+              </div>
+              {/* Category tags row (PH style: Productivity · Unified API · LLM Memory) */}
+              <div className="flex items-center gap-2 text-sm text-zinc-500 flex-wrap">
+                {product.category && <span>{product.category}</span>}
+                {product.autoTags?.slice(0, 3).map((tag, i) => (
+                  <React.Fragment key={tag}>
+                    <span className="text-zinc-700">·</span>
+                    <span>{tag}</span>
+                  </React.Fragment>
+                ))}
+              </div>
+              {product.pitch && (
+                <p className="text-sm text-zinc-400 mt-2 max-w-2xl line-clamp-2">{product.pitch}</p>
+              )}
+            </div>
+
+            {/* Visit website button */}
+            {product.demoUrl && (
+              <a
+                href={product.demoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="shrink-0 flex items-center gap-2 border border-zinc-700 text-sm text-zinc-300 hover:text-white hover:border-white/40 px-4 py-2 rounded-xl transition-colors"
+              >
+                <ExternalLink className="w-4 h-4" />
+                Visit website
+              </a>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Product Header */}
+            {/* Media + Content card */}
             <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
               <div className="p-6">
                 {/* Media Carousel */}
-                <div className="relative w-full h-80 bg-zinc-800 rounded-xl overflow-hidden mb-6 group">
+                <div className="relative w-full h-80 bg-zinc-800 rounded-xl overflow-hidden mb-4 group">
                   {product.media && product.media.length > 0 ? (
                     <>
-                      {/* Current Media Display */}
                       <div className="w-full h-full">
-                        {product.media[currentMediaIndex]?.endsWith('.mp4') || 
-                         product.media[currentMediaIndex]?.endsWith('.webm') || 
+                        {product.media[currentMediaIndex]?.endsWith('.mp4') ||
+                         product.media[currentMediaIndex]?.endsWith('.webm') ||
                          product.media[currentMediaIndex]?.endsWith('.mov') ? (
                           <video
                             src={product.media[currentMediaIndex]}
@@ -356,16 +420,15 @@ const handleReportComment = async () => {
                           <ImageWithFallback
                             src={product.media[currentMediaIndex]}
                             alt={`${product.title} - ${currentMediaIndex + 1}`}
-                            className="w-full h-full object-contain bg-white/50"
+                            className="w-full h-full object-contain bg-zinc-900"
                           />
                         )}
                       </div>
 
-                      {/* Enhanced Navigation Arrows */}
                       {product.media.length > 1 && (
                         <>
                           <button
-                            onClick={() => setCurrentMediaIndex(prev => 
+                            onClick={() => setCurrentMediaIndex(prev =>
                               prev === 0 ? product.media.length - 1 : prev - 1
                             )}
                             className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/60 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:bg-black/80"
@@ -380,7 +443,6 @@ const handleReportComment = async () => {
                           >
                             <ChevronRight className="w-5 h-5" />
                           </button>
-
                           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 bg-black/40 px-3 py-1.5 rounded-full">
                             {product.media.map((_, index) => (
                               <button
@@ -434,41 +496,15 @@ const handleReportComment = async () => {
                   </div>
                 )}
 
-                {/* Title and Badges */}
-                <div className="mb-4">
-                  <h1 className="text-3xl font-bold text-white mb-3">{product.title}</h1>
-                  <div className="flex flex-wrap gap-2">
-                    <span className="text-xs border border-zinc-700 text-zinc-400 px-3 py-1 rounded-full uppercase tracking-wider">
-                      {product.category}
-                    </span>
-                    {product.trending && (
-                      <span className="text-xs border border-zinc-700 text-zinc-400 px-3 py-1 rounded-full flex items-center gap-1">
-                        <TrendingUp className="w-3 h-3" />Trending
-                      </span>
-                    )}
-                    {product.fresh && (
-                      <span className="text-xs border border-zinc-700 text-zinc-400 px-3 py-1 rounded-full flex items-center gap-1">
-                        <Sparkles className="w-3 h-3" />Fresh
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Pitch */}
-                <div className="relative border-l-2 border-zinc-700 pl-4 mb-6">
-                  <p className="text-zinc-300 leading-relaxed italic">"{product.pitch}"</p>
-                </div>
-
                 {/* Description */}
                 <div className="mb-6">
-                  <h3 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3">About this product</h3>
+                  <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">About</h3>
                   <p className="text-zinc-300 leading-relaxed">{product.description}</p>
                 </div>
 
                 {/* Tags */}
                 {product.autoTags?.length > 0 && (
                   <div className="mb-6">
-                    <h3 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3">Tags</h3>
                     <div className="flex flex-wrap gap-1.5">
                       {product.autoTags.map(tag => (
                         <span key={tag} className="text-xs bg-zinc-800 text-zinc-400 border border-zinc-700 px-2.5 py-1 rounded-full hover:border-zinc-600 transition-colors">
@@ -479,20 +515,8 @@ const handleReportComment = async () => {
                   </div>
                 )}
 
-                {/* Tags */}
-                {/* <div className="mb-6">
-                  <h3 className="font-semibold mb-3">Tags</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {product.autoTags.map(tag => (
-                      <Badge key={tag} variant="secondary">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                </div> */}
-
                 {/* Action Buttons */}
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 pt-4 border-t border-zinc-800">
                   <button
                     onClick={handleUpvote}
                     className={`flex items-center gap-2 text-sm px-4 py-2 rounded-lg border transition-colors ${

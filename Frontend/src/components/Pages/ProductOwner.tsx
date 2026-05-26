@@ -1,52 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import {
-  ArrowLeft,
-  MapPin,
-  Calendar,
-  Star,
-  Trophy,
-  Users,
-  Briefcase,
-  Github,
-  Twitter,
-  Globe,
-  ExternalLink,
-  Heart,
-  MessageCircle,
-  Linkedin,
-  Award,
-  TrendingUp,
-  Zap,
-  Target
+  ArrowLeft, Globe, Github, Twitter, Linkedin, Heart, MessageCircle,
+  ExternalLink, Briefcase, Award, TrendingUp, Trophy, Zap
 } from 'lucide-react';
-import { Button } from '../ui/button';
-import { Badge } from '../ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import { ImageWithFallback } from '../figma/ImageWithFallback';
 import { useParams, useNavigate } from 'react-router-dom';
 
 interface APIUser {
   _id: string;
   name: string;
   email: string;
-  badges: {
-    badge: string;
-    awardedAt: string;
-    _id?: string;
-  }[];
+  badges: { badge: string; awardedAt: string; _id?: string }[];
   role: string;
-  portfolio: {
-    title: string;
-    demoUrl: string;
-    media: string[];
-    _id: string;
-  }[];
-  achievements: {
-    title: string;
-    earnedAt: string;
-    _id: string;
-  }[];
+  portfolio: { title: string; demoUrl: string; media: string[]; _id: string }[];
+  achievements: { title: string; earnedAt: string; _id: string }[];
   bio: string;
   github: string;
   linkedin: string;
@@ -72,7 +39,6 @@ interface Product {
   upvotes: string[];
   reviews: any[];
   createdAt: string;
-  updatedAt: string;
   author_id: string | { _id: string };
 }
 
@@ -80,360 +46,414 @@ export default function ProductOwner() {
   const [user, setUser] = useState<APIUser | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'about' | 'products' | 'portfolio'>('about');
   const { ownerId } = useParams<{ ownerId: string }>();
   const navigate = useNavigate();
- const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
+  const url = import.meta.env.VITE_API_URL || 'https://fyp-1ejm.vercel.app';
+
   useEffect(() => {
     const fetchOwnerProfile = async () => {
       const token = localStorage.getItem('token');
-      if (!token) {
-        navigate('/');
-        return;
-      }
-
+      if (!token) { navigate('/'); return; }
       try {
         setIsLoading(true);
         const response = await fetch(`${url}/api/auth/${ownerId}`, {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
-
-        if (response.ok) {
-          const data = await response.json();
-          setUser(data);
-          console.log('Fetched owner profile:', data);
-        }
-      } catch (err) {
-        console.log('Could not fetch owner profile');
-      } finally {
-        setIsLoading(false);
-      }
+        if (response.ok) setUser(await response.json());
+      } catch { /* silent */ } finally { setIsLoading(false); }
     };
-
     fetchOwnerProfile();
   }, [ownerId, navigate]);
- 
-  // Fetch owner's products
+
   useEffect(() => {
     const fetchOwnerProducts = async () => {
       const token = localStorage.getItem('token');
       if (!token || !ownerId) return;
-
       try {
-        // Since we need products by specific user, we'll fetch all and filter
-        // Or you can create a new backend endpoint for this
         const response = await fetch(`${url}/api/products`, {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
-
         if (response.ok) {
           const data = await response.json();
-          // Filter products by owner
-          const ownerProducts = data.filter((p: Product) => 
+          setProducts(data.filter((p: Product) =>
             p.author_id === ownerId || (p as any).author_id?._id === ownerId
-          );
-          setProducts(ownerProducts);
+          ));
         }
-      } catch (err) {
-        console.log('Could not fetch owner products');
-      }
+      } catch { /* silent */ }
     };
-
-    if (ownerId) {
-      fetchOwnerProducts();
-    }
+    if (ownerId) fetchOwnerProducts();
   }, [ownerId]);
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading profile...</p>
-        </div>
-      </div>
-    );
-  }
+  if (isLoading) return (
+    <div className="flex items-center justify-center min-h-screen bg-black">
+      <div className="w-8 h-8 border-2 border-zinc-700 border-t-white rounded-full animate-spin" />
+    </div>
+  );
 
-  if (!user) return <div>User not found</div>;
+  if (!user) return (
+    <div className="flex items-center justify-center min-h-screen bg-black text-zinc-400">
+      User not found
+    </div>
+  );
+
+  const tabs = [
+    { id: 'about', label: 'About' },
+    { id: 'products', label: `Products (${products.length})` },
+    { id: 'portfolio', label: `Portfolio (${user.portfolio?.length || 0})` },
+  ] as const;
 
   return (
-    <div className="min-h-screen relative bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30">
-      {/* Enhanced Cover Section */}
-      <div className="absolute w-full h-80 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 ">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNnoiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLW9wYWNpdHk9Ii4wNSIgc3Ryb2tlLXdpZHRoPSIyIi8+PC9nPjwvc3ZnPg==')] opacity-20"></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
-        
-        {/* Back Button */}
-        <div className="relative max-w-7xl mx-auto px-6 pt-8">
-          <Button
-            variant="secondary"
+    <div className="min-h-screen bg-black text-white">
+      {/* Profile Header */}
+      <div className="border-b border-zinc-900 bg-zinc-950">
+        <div className="max-w-4xl mx-auto px-6 pt-8 pb-0">
+          <button
             onClick={() => navigate(-1)}
-            className="bg-white/10 backdrop-blur-md hover:bg-white/20 text-white border-white/20"
+            className="flex items-center gap-2 text-zinc-400 hover:text-white text-sm mb-8 transition-colors"
           >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
-          </Button>
+            <ArrowLeft className="w-4 h-4" /> Back
+          </button>
+
+          {/* Profile row */}
+          <div className="flex items-start gap-6">
+            {/* Avatar */}
+            <div className="relative shrink-0">
+              <Avatar style={{ width: 96, height: 96 }} className="border-2 border-zinc-800">
+                {user.profilePicture && (
+                  <AvatarImage
+                    src={user.profilePicture}
+                    alt={user.name}
+                    referrerPolicy="no-referrer"
+                    style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+                  />
+                )}
+                <AvatarFallback className="bg-zinc-800 text-white text-3xl">
+                  {user.name.charAt(0)}
+                </AvatarFallback>
+              </Avatar>
+              <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-white text-black text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap capitalize">
+                {user.role || 'Maker'}
+              </span>
+            </div>
+
+            {/* Info */}
+            <div className="flex-1 min-w-0">
+              <h1 className="text-2xl font-bold tracking-tight">{user.name}</h1>
+              {user.bio && (
+                <p className="text-zinc-400 text-sm mt-1 line-clamp-2">{user.bio}</p>
+              )}
+
+              {/* Stats */}
+              <div className="flex items-center gap-3 mt-2 text-sm text-zinc-500 flex-wrap">
+                <span className="font-mono">#{user._id?.slice(-6).toUpperCase()}</span>
+                <span className="text-zinc-700">·</span>
+                <span>0 followers</span>
+                <span className="text-zinc-700">·</span>
+                <span>0 following</span>
+              </div>
+
+              {/* Points + Streak */}
+              <div className="flex items-center gap-3 mt-3 flex-wrap">
+                <div className="inline-flex items-center gap-3 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2">
+                  <Zap className="w-4 h-4 text-zinc-500" />
+                  <div>
+                    <p className="text-[10px] text-zinc-500 uppercase tracking-wider leading-none">All time</p>
+                    <p className="font-bold text-white text-sm leading-snug">
+                      {user.totalUpvotes || 0} pts
+                    </p>
+                  </div>
+                </div>
+
+                <div className="inline-flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2">
+                  <Trophy className="w-4 h-4 text-zinc-500" />
+                  <div>
+                    <p className="text-[10px] text-zinc-500 uppercase tracking-wider leading-none">Badges</p>
+                    <p className="font-bold text-white text-sm leading-snug">{user.badges?.length || 0}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Social links */}
+              {(user.github || user.twitter || user.linkedin || user.website) && (
+                <div className="flex items-center gap-2 mt-4 flex-wrap">
+                  {user.website && (
+                    <a href={user.website} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 text-xs border border-zinc-700 text-zinc-400 hover:text-white hover:border-white/30 px-3 py-1.5 rounded-lg transition-colors">
+                      <Globe className="w-3.5 h-3.5" /> Website
+                    </a>
+                  )}
+                  {user.twitter && (
+                    <a href={user.twitter} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 text-xs border border-zinc-700 text-zinc-400 hover:text-white hover:border-white/30 px-3 py-1.5 rounded-lg transition-colors">
+                      <Twitter className="w-3.5 h-3.5" /> Twitter
+                    </a>
+                  )}
+                  {user.linkedin && (
+                    <a href={user.linkedin} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 text-xs border border-zinc-700 text-zinc-400 hover:text-white hover:border-white/30 px-3 py-1.5 rounded-lg transition-colors">
+                      <Linkedin className="w-3.5 h-3.5" /> LinkedIn
+                    </a>
+                  )}
+                  {user.github && (
+                    <a href={user.github} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 text-xs border border-zinc-700 text-zinc-400 hover:text-white hover:border-white/30 px-3 py-1.5 rounded-lg transition-colors">
+                      <Github className="w-3.5 h-3.5" /> GitHub
+                    </a>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Follow button */}
+            <button className="shrink-0 border border-zinc-700 text-sm text-zinc-300 hover:text-white hover:border-white/40 px-5 py-2 rounded-full transition-colors">
+              Follow
+            </button>
+          </div>
+
+          {/* Tab navigation - PH underline style */}
+          <div className="flex mt-8">
+            {tabs.map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`pb-3 px-4 text-sm font-medium border-b-2 -mb-px transition-colors ${
+                  activeTab === tab.id
+                    ? 'border-white text-white'
+                    : 'border-transparent text-zinc-500 hover:text-zinc-300'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 mt-32 pb-12 z-10 absolute" style={{marginTop:"130px"}}>
-        {/* Enhanced Profile Card */}
-        <Card className="bg-white  border-2 border-white/50 shadow-2xl mb-8 overflow-hidden">
-          <div className="bg-gradient-to-r from-blue-600/5 via-purple-600/5 to-indigo-600/5 p-8">
-            <div className="flex flex-col lg:flex-row gap-8 items-start">
-              {/* Avatar Section */}
-              <div className="flex flex-col  lg:items-start space-y-4">
-                <div className="relative group">
-                  <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 rounded-full blur opacity-25 group-hover:opacity-75 transition duration-1000"></div>
-                                    <Avatar style={{ height: '100px', width: '100px' }}>
-                                    {user.profilePicture &&
+      {/* Content */}
+      <div className="max-w-4xl mx-auto px-6 py-8">
+        {/* About tab */}
+        {activeTab === 'about' && (
+          <div className="space-y-8 max-w-2xl">
+            {user.bio && (
+              <div>
+                <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">About</h2>
+                <p className="text-zinc-300 leading-relaxed">{user.bio}</p>
+              </div>
+            )}
 
-                   <img
-                   src={user.profilePicture}
-                   alt={user.name}
-                   style={{width:'100%',objectFit:'cover'}}
-                   referrerPolicy="no-referrer"
-                   loading="lazy"
-                   />
-                  }
-                                   {!user.profilePicture && <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>}
-                                  </Avatar>
-                </div>
-                <div className="text-center lg:text-left">
-                  <div className="flex items-center gap-2 mb-2">
-                    <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                      {user.name}
-                    </h1>
-                  </div>
-                  <div className="flex items-center gap-2 text-gray-600 mb-3">
-                    <Briefcase className="w-4 h-4" />
-                    <span className="capitalize font-medium">{user.role}</span>
-                  </div>
-                  <div className="flex flex-wrap gap-2 justify-center lg:justify-start">
-                    {user.badges.map((badgeItem) => (
-                      <Badge key={badgeItem._id || badgeItem.badge} className="bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:shadow-lg transition-shadow">
-                        <Award className="w-3 h-3 mr-1" />
-                        {badgeItem.badge}
-                      </Badge>
-                    ))}
-                  </div>
+            {user.makerStory && (
+              <div>
+                <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">Maker Story</h2>
+                <p className="text-zinc-300 leading-relaxed">{user.makerStory}</p>
+              </div>
+            )}
+
+            {/* Links section - PH style list */}
+            {(user.github || user.twitter || user.linkedin || user.website) && (
+              <div>
+                <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">Links</h2>
+                <div className="space-y-1">
+                  {user.website && (
+                    <a href={user.website} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-3 p-3 rounded-xl hover:bg-zinc-900 group transition-colors">
+                      <Globe className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400" />
+                      <span className="text-sm text-zinc-300 group-hover:text-white flex-1 truncate">
+                        {user.website.replace(/^https?:\/\//, '')}
+                      </span>
+                      <ExternalLink className="w-3.5 h-3.5 text-zinc-700 group-hover:text-zinc-500" />
+                    </a>
+                  )}
+                  {user.twitter && (
+                    <a href={user.twitter} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-3 p-3 rounded-xl hover:bg-zinc-900 group transition-colors">
+                      <Twitter className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400" />
+                      <span className="text-sm text-zinc-300 group-hover:text-white flex-1">Twitter</span>
+                      <ExternalLink className="w-3.5 h-3.5 text-zinc-700 group-hover:text-zinc-500" />
+                    </a>
+                  )}
+                  {user.linkedin && (
+                    <a href={user.linkedin} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-3 p-3 rounded-xl hover:bg-zinc-900 group transition-colors">
+                      <Linkedin className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400" />
+                      <span className="text-sm text-zinc-300 group-hover:text-white flex-1">LinkedIn</span>
+                      <ExternalLink className="w-3.5 h-3.5 text-zinc-700 group-hover:text-zinc-500" />
+                    </a>
+                  )}
+                  {user.github && (
+                    <a href={user.github} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-3 p-3 rounded-xl hover:bg-zinc-900 group transition-colors">
+                      <Github className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400" />
+                      <span className="text-sm text-zinc-300 group-hover:text-white flex-1">GitHub</span>
+                      <ExternalLink className="w-3.5 h-3.5 text-zinc-700 group-hover:text-zinc-500" />
+                    </a>
+                  )}
                 </div>
               </div>
+            )}
 
-              {/* Profile Info */}
-              <div className="flex-1 space-y-6">
-                {/* Quick Stats */}
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="text-center p-3 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
-                    <div className="text-2xl font-bold text-blue-600">{products.length}</div>
-                    <div className="text-xs text-gray-600 mt-1">Products</div>
-                  </div>
-                
-                  <div className="text-center p-3 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
-                    <div className="text-2xl font-bold text-orange-600">{user.totalUpvotes}</div>
-                    <div className="text-xs text-gray-600 mt-1">Upvotes</div>
-                  </div>
-                    <div className="text-center p-3 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
-                    <div className="text-2xl font-bold text-orange-600">0</div>
-                    <div className="text-xs text-gray-600 mt-1">Followers</div>
-                  </div>
-                  <div className="text-center p-3 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
-                    <div className="text-2xl font-bold text-orange-600">0</div>
-                    <div className="text-xs text-gray-600 mt-1">Following</div>
-                  </div>
+            {/* Badges */}
+            {user.badges && user.badges.length > 0 && (
+              <div>
+                <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">Badges</h2>
+                <div className="flex flex-wrap gap-2">
+                  {user.badges.map((badgeItem) => (
+                    <div
+                      key={badgeItem._id || badgeItem.badge}
+                      className="flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2"
+                    >
+                      <Award className="w-4 h-4 text-zinc-500" />
+                      <span className="text-sm text-zinc-300">{badgeItem.badge}</span>
+                    </div>
+                  ))}
                 </div>
-
-                {/* Bio */}
-                {user.bio && (
-                  <div className="bg-white p-4 rounded-xl shadow-sm">
-                    <p className="text-gray-700 leading-relaxed">{user.bio}</p>
-                  </div>
-                )}
-
-                {/* Meta Info */}
-                <div className="flex flex-wrap gap-4 text-sm text-gray-600">
-                  {/* <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4" />
-<span>Joined {new Date(user.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</span>
-                  </div> */}
-                  <div className="flex items-center gap-2">
-                    <Star className="w-4 h-4 text-yellow-500" />
-                    <span>{user.badges.length} Achievement Badges</span>
-                  </div>
-                </div>
-
-                {/* Social Links */}
-                {(user.github || user.twitter || user.linkedin || user.website) && (
-                  <div className="flex flex-wrap gap-2">
-                    {user.github && (
-                      <Button variant="outline" size="sm" className="hover:bg-gray-900 hover:text-white transition-colors" asChild>
-                        <a href={user.github} target="_blank" rel="noopener noreferrer">
-                          <Github className="w-4 h-4 mr-2" />GitHub
-                        </a>
-                      </Button>
-                    )}
-                    {user.twitter && (
-                      <Button variant="outline" size="sm" className="hover:bg-blue-400 hover:text-white transition-colors" asChild>
-                        <a href={user.twitter} target="_blank" rel="noopener noreferrer">
-                          <Twitter className="w-4 h-4 mr-2" />Twitter
-                        </a>
-                      </Button>
-                    )}
-                    {user.linkedin && (
-                      <Button variant="outline" size="sm" className="hover:bg-blue-700 hover:text-white transition-colors" asChild>
-                        <a href={user.linkedin} target="_blank" rel="noopener noreferrer">
-                          <Linkedin className="w-4 h-4 mr-2" />LinkedIn
-                        </a>
-                      </Button>
-                    )}
-                    {user.website && (
-                      <Button variant="outline" size="sm" className="hover:bg-indigo-600 hover:text-white transition-colors" asChild>
-                        <a href={user.website} target="_blank" rel="noopener noreferrer">
-                          <Globe className="w-4 h-4 mr-2" />Website
-                        </a>
-                      </Button>
-                    )}
-                  </div>
-                )}
-                {/* View Wishlist Button */}
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors"
-                  onClick={() => navigate(`/wishlist/public/${user._id}`)}
-                >
-                  <Heart className="w-4 h-4 mr-2" />
-                  View Wishlist
-                </Button>
               </div>
-            </div>
+            )}
+
+            {/* Achievements */}
+            {user.achievements && user.achievements.length > 0 && (
+              <div>
+                <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">Achievements</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {user.achievements.map((achievement, index) => (
+                    <div key={index} className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center shrink-0">
+                        <Trophy className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-sm text-white">{achievement.title}</p>
+                        <p className="text-xs text-zinc-500 mt-0.5">
+                          {new Date(achievement.earnedAt).toLocaleDateString('en-US', {
+                            month: 'short', day: 'numeric', year: 'numeric'
+                          })}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {!user.bio && !user.makerStory && (!user.badges || user.badges.length === 0) && (
+              <div className="border border-dashed border-zinc-800 rounded-xl p-16 text-center">
+                <p className="text-zinc-500 text-sm">No information yet</p>
+              </div>
+            )}
           </div>
-        </Card>
-
-        {/* Achievements Section */}
-        {user.achievements && user.achievements.length > 0 && (
-          <Card className="mb-8 border-2 border-purple-100 bg-gradient-to-br from-purple-50/50 to-white">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-purple-900">
-                <Trophy className="w-5 h-5 text-purple-600" />
-                Achievements
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {user.achievements.map((achievement, index) => (
-                  <div key={index} className="flex items-start gap-3 p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center flex-shrink-0">
-                      <Trophy className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-gray-900">{achievement.title}</h4>
-                      <p className="text-xs text-gray-500 mt-1">
-                        {new Date(achievement.earnedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
         )}
 
-        {/* Products Section */}
-        <Card className="mb-8 border-2 border-blue-100">
-          <CardHeader className="bg-gradient-to-r from-blue-50 to-purple-50" style={{padding:"26px"}}>
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
-                  <Briefcase className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-3xl font-bold">Products by {user.name}</h3>
-                  <p className="text-sm text-gray-600 font-normal mt-1">{products.length} {products.length === 1 ? 'product' : 'products'} created</p>
-                </div>
-              </CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent>
+        {/* Products tab */}
+        {activeTab === 'products' && (
+          <div>
             {products.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {products.map(product => (
-                  <Card 
-                    key={product._id} 
-                    className="group overflow-hidden hover:shadow-xl transition-all duration-300 border-2 border-gray-100 hover:border-blue-200 cursor-pointer"
+              <div className="space-y-3">
+                {products.map((product, idx) => (
+                  <div
+                    key={product._id}
                     onClick={() => navigate(`/product/${product._id}`)}
+                    className="group flex items-center gap-4 bg-zinc-900 border border-zinc-800 hover:border-zinc-700 rounded-xl p-4 cursor-pointer transition-all"
                   >
-                    <div className="relative h-48 bg-gradient-to-br from-blue-50 to-purple-50 overflow-hidden">
-                      {product.media[0] && (
-                        <ImageWithFallback
+                    {/* Rank */}
+                    <div className="text-zinc-700 font-mono text-sm w-5 text-center shrink-0">{idx + 1}</div>
+
+                    {/* Thumbnail */}
+                    <div className="w-16 h-12 rounded-lg overflow-hidden bg-zinc-800 shrink-0">
+                      {product.media[0] ? (
+                        <img
                           src={product.media[0]}
                           alt={product.title}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
                         />
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                      <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button size="sm" className="bg-white hover:bg-gray-100 text-gray-900" asChild>
-                          <a href={product.demoUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
-                            <ExternalLink className="w-4 h-4" />
-                          </a>
-                        </Button>
-                      </div>
-                      {product.category && (
-                        <div className="absolute top-3 left-3">
-                          <Badge className="bg-white/90 text-gray-900 hover:bg-white">
-                            {product.category}
-                          </Badge>
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Briefcase className="w-5 h-5 text-zinc-700" />
                         </div>
                       )}
                     </div>
-                    <CardContent className="p-5" style={{padding:'20px'}}>
-                      <h3 className="text-lg mb-2 group-hover:text-blue-600 transition-colors">
-                        {product.title}
-                      </h3>
-                      <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                        {product.pitch}
-                      </p>
-                      <div className="flex items-center gap-4 text-sm text-gray-600" style={{marginTop:'10px',marginBottom:'10px'}}>
-                        <span className="flex items-center gap-1">
-                          <Heart className="w-4 h-4" />
-                          {product.upvotes.length}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <MessageCircle className="w-4 h-4" />
-                          {product.reviews.length}
+
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <h3 className="font-semibold text-white text-sm">{product.title}</h3>
+                        {product.category && (
+                          <span className="text-[10px] border border-zinc-800 text-zinc-600 px-1.5 py-0.5 rounded-full shrink-0">
+                            {product.category}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-zinc-500 line-clamp-1">{product.pitch}</p>
+                      <div className="flex items-center gap-3 mt-1.5">
+                        {product.autoTags?.slice(0, 3).map((tag, i) => (
+                          <span key={i} className="text-[10px] text-zinc-600">#{tag}</span>
+                        ))}
+                        <span className="text-[10px] text-zinc-600 flex items-center gap-1">
+                          <MessageCircle className="w-3 h-3" />{product.reviews.length}
                         </span>
                       </div>
-                      {product.autoTags.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-3">
-                          {product.autoTags.slice(0, 3).map((tag, index) => (
-                            <Badge key={index} variant="secondary" className="text-xs">
-                              {tag}
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
+                    </div>
+
+                    {/* Upvote */}
+                    <div className="shrink-0 flex flex-col items-center border border-zinc-700 rounded-lg px-3 py-2 min-w-[48px]">
+                      <TrendingUp className="w-3.5 h-3.5 text-zinc-500 mb-0.5" />
+                      <span className="text-xs font-bold text-white">{product.upvotes.length}</span>
+                    </div>
+                  </div>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-12">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Briefcase className="w-8 h-8 text-gray-400" />
-                </div>
-                <h3 className="text-xl mb-2 text-gray-900">No Products Yet</h3>
-                <p className="text-gray-600">This user hasn't submitted any products yet.</p>
+              <div className="border border-dashed border-zinc-800 rounded-xl p-16 text-center">
+                <Briefcase className="w-8 h-8 text-zinc-700 mx-auto mb-3" />
+                <p className="text-zinc-500 text-sm">No products yet</p>
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        )}
+
+        {/* Portfolio tab */}
+        {activeTab === 'portfolio' && (
+          <div>
+            {user.portfolio && user.portfolio.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {user.portfolio.map((item) => (
+                  <div
+                    key={item._id}
+                    className="group bg-zinc-900 border border-zinc-800 hover:border-zinc-700 rounded-xl overflow-hidden cursor-pointer transition-all"
+                    onClick={() => item.demoUrl && window.open(item.demoUrl, '_blank')}
+                  >
+                    {item.media && item.media[0] && (
+                      <div className="h-40 overflow-hidden bg-zinc-800">
+                        <img
+                          src={item.media[0]}
+                          alt={item.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      </div>
+                    )}
+                    <div className="p-4">
+                      <h3 className="font-semibold text-sm text-white mb-1">{item.title}</h3>
+                      {item.demoUrl && (
+                        <a
+                          href={item.demoUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="flex items-center gap-1 text-xs text-zinc-500 hover:text-white transition-colors"
+                        >
+                          <ExternalLink className="w-3 h-3" />
+                          {item.demoUrl.replace(/^https?:\/\//, '').slice(0, 40)}
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="border border-dashed border-zinc-800 rounded-xl p-16 text-center">
+                <p className="text-zinc-500 text-sm">No portfolio items yet</p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
