@@ -104,22 +104,27 @@ export default function ProductOwner() {
   ] as const;
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      {/* Profile Header */}
-      <div className="border-b border-zinc-900 bg-zinc-950">
-        <div className="max-w-4xl mx-auto px-6 pt-8 pb-0">
+    <div className="min-h-screen bg-white text-gray-900">
+      {/* Top Navigation */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-5xl mx-auto px-6 py-4">
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-zinc-400 hover:text-white text-sm mb-8 transition-colors"
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors"
           >
             <ArrowLeft className="w-4 h-4" /> Back
           </button>
+        </div>
+      </div>
 
-          {/* Profile row */}
+      {/* Main Content */}
+      <div className="max-w-5xl mx-auto px-6 py-12">
+        {/* Profile Header Card - Gradient */}
+        <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-3xl p-8 mb-8 text-white">
           <div className="flex items-start gap-6">
             {/* Avatar */}
-            <div className="relative shrink-0">
-              <Avatar style={{ width: 96, height: 96 }} className="border-2 border-zinc-800">
+            <div className="relative">
+              <Avatar style={{ width: 100, height: 100 }} className="border-4 border-white">
                 {user.profilePicture && (
                   <AvatarImage
                     src={user.profilePicture}
@@ -128,164 +133,168 @@ export default function ProductOwner() {
                     style={{ objectFit: 'cover', width: '100%', height: '100%' }}
                   />
                 )}
-                <AvatarFallback className="bg-zinc-800 text-white text-3xl">
+                <AvatarFallback className="bg-purple-700 text-white text-3xl">
                   {user.name.charAt(0)}
                 </AvatarFallback>
               </Avatar>
-              <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-white text-black text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap capitalize">
-                {user.role || 'Maker'}
+              <span className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-green-400 border-2 border-white flex items-center justify-center text-xs font-bold text-white">
+                ✓
               </span>
             </div>
 
             {/* Info */}
-            <div className="flex-1 min-w-0">
-              <h1 className="text-2xl font-bold tracking-tight">{user.name}</h1>
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-2">
+                <h1 className="text-4xl font-bold">{user.name}</h1>
+                <span className="bg-white/30 backdrop-blur text-xs font-bold px-3 py-1 rounded-full">PRO</span>
+              </div>
               {user.bio && (
-                <p className="text-zinc-400 text-sm mt-1 line-clamp-2">{user.bio}</p>
+                <p className="text-white/90 mb-4">{user.bio}</p>
               )}
 
               {/* Stats */}
-              <div className="flex items-center gap-3 mt-2 text-sm text-zinc-500 flex-wrap">
-                <span className="font-mono">#{user._id?.slice(-6).toUpperCase()}</span>
-                <span className="text-zinc-700">·</span>
-                <span>0 followers</span>
-                <span className="text-zinc-700">·</span>
-                <span>0 following</span>
-              </div>
-
-              {/* Points + Streak */}
-              <div className="flex items-center gap-3 mt-3 flex-wrap">
-                <div className="inline-flex items-center gap-3 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2">
-                  <Zap className="w-4 h-4 text-zinc-500" />
-                  <div>
-                    <p className="text-[10px] text-zinc-500 uppercase tracking-wider leading-none">All time</p>
-                    <p className="font-bold text-white text-sm leading-snug">
-                      {user.totalUpvotes || 0} pts
-                    </p>
-                  </div>
+              <div className="flex items-center gap-8">
+                <div>
+                  <p className="text-4xl font-bold">{products.length}</p>
+                  <p className="text-white/80 text-sm">Projects</p>
                 </div>
-
-                <div className="inline-flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2">
-                  <Trophy className="w-4 h-4 text-zinc-500" />
-                  <div>
-                    <p className="text-[10px] text-zinc-500 uppercase tracking-wider leading-none">Badges</p>
-                    <p className="font-bold text-white text-sm leading-snug">{user.badges?.length || 0}</p>
-                  </div>
+                <div>
+                  <p className="text-4xl font-bold">{user.totalUpvotes || 0}</p>
+                  <p className="text-white/80 text-sm">Upvotes</p>
+                </div>
+                <div>
+                  <p className="text-4xl font-bold">{user.badges?.length || 0}</p>
+                  <p className="text-white/80 text-sm">Badges</p>
                 </div>
               </div>
-
-              {/* Social links */}
-              {(user.github || user.twitter || user.linkedin || user.website) && (
-                <div className="flex items-center gap-2 mt-4 flex-wrap">
-                  {user.website && (
-                    <a href={user.website} target="_blank" rel="noopener noreferrer"
-                      className="flex items-center gap-1.5 text-xs border border-zinc-700 text-zinc-400 hover:text-white hover:border-white/30 px-3 py-1.5 rounded-lg transition-colors">
-                      <Globe className="w-3.5 h-3.5" /> Website
-                    </a>
-                  )}
-                  {user.twitter && (
-                    <a href={user.twitter} target="_blank" rel="noopener noreferrer"
-                      className="flex items-center gap-1.5 text-xs border border-zinc-700 text-zinc-400 hover:text-white hover:border-white/30 px-3 py-1.5 rounded-lg transition-colors">
-                      <Twitter className="w-3.5 h-3.5" /> Twitter
-                    </a>
-                  )}
-                  {user.linkedin && (
-                    <a href={user.linkedin} target="_blank" rel="noopener noreferrer"
-                      className="flex items-center gap-1.5 text-xs border border-zinc-700 text-zinc-400 hover:text-white hover:border-white/30 px-3 py-1.5 rounded-lg transition-colors">
-                      <Linkedin className="w-3.5 h-3.5" /> LinkedIn
-                    </a>
-                  )}
-                  {user.github && (
-                    <a href={user.github} target="_blank" rel="noopener noreferrer"
-                      className="flex items-center gap-1.5 text-xs border border-zinc-700 text-zinc-400 hover:text-white hover:border-white/30 px-3 py-1.5 rounded-lg transition-colors">
-                      <Github className="w-3.5 h-3.5" /> GitHub
-                    </a>
-                  )}
-                </div>
-              )}
             </div>
 
-            {/* Follow button */}
-            <button className="shrink-0 border border-zinc-700 text-sm text-zinc-300 hover:text-white hover:border-white/40 px-5 py-2 rounded-full transition-colors">
-              Follow
-            </button>
-          </div>
-
-          {/* Tab navigation - PH underline style */}
-          <div className="flex mt-8">
-            {tabs.map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`pb-3 px-4 text-sm font-medium border-b-2 -mb-px transition-colors ${
-                  activeTab === tab.id
-                    ? 'border-white text-white'
-                    : 'border-transparent text-zinc-500 hover:text-zinc-300'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
+            {/* Badge indicator */}
+            <div className="shrink-0">
+              <span className="bg-white/30 backdrop-blur text-white text-xs font-bold px-3 py-1.5 rounded-full">
+                🏆 firstLogin
+              </span>
+            </div>
           </div>
         </div>
-      </div>
+
+        {/* Stat Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          {/* Upvotes Given */}
+          <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-8 text-white">
+            <div className="flex items-end justify-between">
+              <div>
+                <p className="text-5xl font-bold">{user.totalUpvotes || 0}</p>
+                <p className="text-blue-100 text-sm mt-2">Upvotes Given</p>
+              </div>
+              <TrendingUp className="w-8 h-8 text-blue-200" />
+            </div>
+          </div>
+
+          {/* Projects */}
+          <div className="bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl p-8 text-white">
+            <div className="flex items-end justify-between">
+              <div>
+                <p className="text-5xl font-bold">{products.length}</p>
+                <p className="text-purple-100 text-sm mt-2">Projects</p>
+              </div>
+              <Briefcase className="w-8 h-8 text-purple-200" />
+            </div>
+          </div>
+
+          {/* Badges Earned */}
+          <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl p-8 text-white md:col-span-2">
+            <div className="flex items-end justify-between">
+              <div>
+                <p className="text-5xl font-bold">{user.badges?.length || 0}</p>
+                <p className="text-orange-100 text-sm mt-2">Badges Earned</p>
+              </div>
+              <Award className="w-8 h-8 text-orange-200" />
+            </div>
+          </div>
+        </div>
+
+        {/* Tab Navigation */}
+        <div className="flex items-center gap-8 border-b border-gray-200 mb-8">
+          {tabs.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`pb-4 text-sm font-medium transition-colors whitespace-nowrap ${
+                activeTab === tab.id
+                  ? 'text-purple-600 border-b-2 border-purple-600 -mb-px'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
 
       {/* Content */}
-      <div className="max-w-4xl mx-auto px-6 py-8">
+      <div className="max-w-5xl mx-auto px-6 py-8">
         {/* About tab */}
         {activeTab === 'about' && (
-          <div className="space-y-8 max-w-2xl">
+          <div className="space-y-8 max-w-3xl">
             {user.bio && (
               <div>
-                <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">About</h2>
-                <p className="text-zinc-300 leading-relaxed">{user.bio}</p>
+                <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-4">About</h2>
+                <p className="text-base text-gray-700 leading-relaxed">{user.bio}</p>
               </div>
             )}
 
             {user.makerStory && (
               <div>
-                <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">Maker Story</h2>
-                <p className="text-zinc-300 leading-relaxed">{user.makerStory}</p>
+                <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-4">Maker Story</h2>
+                <p className="text-base text-gray-700 leading-relaxed">{user.makerStory}</p>
               </div>
             )}
 
-            {/* Links section - PH style list */}
+            {/* Links section */}
             {(user.github || user.twitter || user.linkedin || user.website) && (
               <div>
-                <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">Links</h2>
-                <div className="space-y-1">
+                <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-4">Links</h2>
+                <div className="space-y-3">
                   {user.website && (
                     <a href={user.website} target="_blank" rel="noopener noreferrer"
-                      className="flex items-center gap-3 p-3 rounded-xl hover:bg-zinc-900 group transition-colors">
-                      <Globe className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400" />
-                      <span className="text-sm text-zinc-300 group-hover:text-white flex-1 truncate">
-                        {user.website.replace(/^https?:\/\//, '')}
-                      </span>
-                      <ExternalLink className="w-3.5 h-3.5 text-zinc-700 group-hover:text-zinc-500" />
+                      className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 group transition-colors">
+                      <div className="flex items-center gap-3">
+                        <Globe className="w-5 h-5 text-gray-600" />
+                        <span className="text-base text-gray-700">
+                          {user.website.replace(/^https?:\/\//, '').slice(0, 50)}
+                        </span>
+                      </div>
+                      <ExternalLink className="w-4 h-4 text-gray-500" />
                     </a>
                   )}
                   {user.twitter && (
                     <a href={user.twitter} target="_blank" rel="noopener noreferrer"
-                      className="flex items-center gap-3 p-3 rounded-xl hover:bg-zinc-900 group transition-colors">
-                      <Twitter className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400" />
-                      <span className="text-sm text-zinc-300 group-hover:text-white flex-1">Twitter</span>
-                      <ExternalLink className="w-3.5 h-3.5 text-zinc-700 group-hover:text-zinc-500" />
+                      className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 group transition-colors">
+                      <div className="flex items-center gap-3">
+                        <Twitter className="w-5 h-5 text-gray-600" />
+                        <span className="text-base text-gray-700">Twitter</span>
+                      </div>
+                      <ExternalLink className="w-4 h-4 text-gray-500" />
                     </a>
                   )}
                   {user.linkedin && (
                     <a href={user.linkedin} target="_blank" rel="noopener noreferrer"
-                      className="flex items-center gap-3 p-3 rounded-xl hover:bg-zinc-900 group transition-colors">
-                      <Linkedin className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400" />
-                      <span className="text-sm text-zinc-300 group-hover:text-white flex-1">LinkedIn</span>
-                      <ExternalLink className="w-3.5 h-3.5 text-zinc-700 group-hover:text-zinc-500" />
+                      className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 group transition-colors">
+                      <div className="flex items-center gap-3">
+                        <Linkedin className="w-5 h-5 text-gray-600" />
+                        <span className="text-base text-gray-700">LinkedIn</span>
+                      </div>
+                      <ExternalLink className="w-4 h-4 text-gray-500" />
                     </a>
                   )}
                   {user.github && (
                     <a href={user.github} target="_blank" rel="noopener noreferrer"
-                      className="flex items-center gap-3 p-3 rounded-xl hover:bg-zinc-900 group transition-colors">
-                      <Github className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400" />
-                      <span className="text-sm text-zinc-300 group-hover:text-white flex-1">GitHub</span>
-                      <ExternalLink className="w-3.5 h-3.5 text-zinc-700 group-hover:text-zinc-500" />
+                      className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 group transition-colors">
+                      <div className="flex items-center gap-3">
+                        <Github className="w-5 h-5 text-gray-600" />
+                        <span className="text-base text-gray-700">GitHub</span>
+                      </div>
+                      <ExternalLink className="w-4 h-4 text-gray-500" />
                     </a>
                   )}
                 </div>
@@ -295,15 +304,15 @@ export default function ProductOwner() {
             {/* Badges */}
             {user.badges && user.badges.length > 0 && (
               <div>
-                <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">Badges</h2>
-                <div className="flex flex-wrap gap-2">
+                <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-4">Badges</h2>
+                <div className="flex flex-wrap gap-3">
                   {user.badges.map((badgeItem) => (
                     <div
                       key={badgeItem._id || badgeItem.badge}
-                      className="flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2"
+                      className="flex items-center gap-2 bg-gradient-to-r from-orange-400 to-orange-500 text-white rounded-lg px-4 py-2.5"
                     >
-                      <Award className="w-4 h-4 text-zinc-500" />
-                      <span className="text-sm text-zinc-300">{badgeItem.badge}</span>
+                      <Award className="w-4 h-4" />
+                      <span className="text-sm font-medium">{badgeItem.badge}</span>
                     </div>
                   ))}
                 </div>
@@ -313,16 +322,16 @@ export default function ProductOwner() {
             {/* Achievements */}
             {user.achievements && user.achievements.length > 0 && (
               <div>
-                <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">Achievements</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-4">Achievements</h2>
+                <div className="space-y-3">
                   {user.achievements.map((achievement, index) => (
-                    <div key={index} className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center shrink-0">
-                        <Trophy className="w-5 h-5 text-white" />
+                    <div key={index} className="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-100 rounded-lg p-4 flex items-start gap-4">
+                      <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shrink-0">
+                        <Trophy className="w-6 h-6 text-white" />
                       </div>
                       <div>
-                        <p className="font-medium text-sm text-white">{achievement.title}</p>
-                        <p className="text-xs text-zinc-500 mt-0.5">
+                        <p className="font-semibold text-gray-900">{achievement.title}</p>
+                        <p className="text-sm text-gray-600 mt-1">
                           {new Date(achievement.earnedAt).toLocaleDateString('en-US', {
                             month: 'short', day: 'numeric', year: 'numeric'
                           })}
@@ -335,8 +344,8 @@ export default function ProductOwner() {
             )}
 
             {!user.bio && !user.makerStory && (!user.badges || user.badges.length === 0) && (
-              <div className="border border-dashed border-zinc-800 rounded-xl p-16 text-center">
-                <p className="text-zinc-500 text-sm">No information yet</p>
+              <div className="border border-dashed border-gray-300 rounded-lg p-16 text-center">
+                <p className="text-gray-500 text-base">No information yet</p>
               </div>
             )}
           </div>
@@ -346,18 +355,18 @@ export default function ProductOwner() {
         {activeTab === 'products' && (
           <div>
             {products.length > 0 ? (
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {products.map((product, idx) => (
                   <div
                     key={product._id}
                     onClick={() => navigate(`/product/${product._id}`)}
-                    className="group flex items-center gap-4 bg-zinc-900 border border-zinc-800 hover:border-zinc-700 rounded-xl p-4 cursor-pointer transition-all"
+                    className="group flex items-start gap-5 bg-white border border-gray-200 hover:border-gray-300 hover:shadow-md rounded-xl p-5 cursor-pointer transition-all"
                   >
                     {/* Rank */}
-                    <div className="text-zinc-700 font-mono text-sm w-5 text-center shrink-0">{idx + 1}</div>
+                    <div className="text-gray-400 font-mono text-lg font-bold w-6 shrink-0 pt-1">{idx + 1}</div>
 
                     {/* Thumbnail */}
-                    <div className="w-16 h-12 rounded-lg overflow-hidden bg-zinc-800 shrink-0">
+                    <div className="w-20 h-20 rounded-lg overflow-hidden bg-gray-100 shrink-0">
                       {product.media[0] ? (
                         <img
                           src={product.media[0]}
@@ -366,44 +375,44 @@ export default function ProductOwner() {
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
-                          <Briefcase className="w-5 h-5 text-zinc-700" />
+                          <Briefcase className="w-6 h-6 text-gray-400" />
                         </div>
                       )}
                     </div>
 
                     {/* Content */}
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-0.5">
-                        <h3 className="font-semibold text-white text-sm">{product.title}</h3>
+                      <div className="flex items-center gap-3 mb-1.5 flex-wrap">
+                        <h3 className="font-bold text-base text-gray-900 group-hover:text-gray-700">{product.title}</h3>
                         {product.category && (
-                          <span className="text-[10px] border border-zinc-800 text-zinc-600 px-1.5 py-0.5 rounded-full shrink-0">
+                          <span className="text-xs border border-blue-200 bg-blue-50 text-blue-700 px-2 py-1 rounded-full shrink-0">
                             {product.category}
                           </span>
                         )}
                       </div>
-                      <p className="text-xs text-zinc-500 line-clamp-1">{product.pitch}</p>
-                      <div className="flex items-center gap-3 mt-1.5">
+                      <p className="text-sm text-gray-600 line-clamp-1 mb-2">{product.pitch || product.description}</p>
+                      <div className="flex items-center gap-4">
                         {product.autoTags?.slice(0, 3).map((tag, i) => (
-                          <span key={i} className="text-[10px] text-zinc-600">#{tag}</span>
+                          <span key={i} className="text-xs text-gray-500">#{tag}</span>
                         ))}
-                        <span className="text-[10px] text-zinc-600 flex items-center gap-1">
-                          <MessageCircle className="w-3 h-3" />{product.reviews.length}
+                        <span className="text-xs text-gray-500 flex items-center gap-1.5">
+                          <MessageCircle className="w-3.5 h-3.5" />{product.reviews.length}
                         </span>
                       </div>
                     </div>
 
                     {/* Upvote */}
-                    <div className="shrink-0 flex flex-col items-center border border-zinc-700 rounded-lg px-3 py-2 min-w-[48px]">
-                      <TrendingUp className="w-3.5 h-3.5 text-zinc-500 mb-0.5" />
-                      <span className="text-xs font-bold text-white">{product.upvotes.length}</span>
+                    <div className="shrink-0 flex flex-col items-center justify-center border border-purple-200 rounded-lg px-4 py-3 min-w-[60px] bg-gradient-to-br from-purple-50 to-pink-50 hover:from-purple-100 hover:to-pink-100">
+                      <TrendingUp className="w-4 h-4 text-purple-600 mb-1" />
+                      <span className="text-lg font-bold text-purple-600">{product.upvotes.length}</span>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="border border-dashed border-zinc-800 rounded-xl p-16 text-center">
-                <Briefcase className="w-8 h-8 text-zinc-700 mx-auto mb-3" />
-                <p className="text-zinc-500 text-sm">No products yet</p>
+              <div className="border border-dashed border-gray-300 rounded-lg p-16 text-center">
+                <Briefcase className="w-10 h-10 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-500 text-base">No products yet</p>
               </div>
             )}
           </div>
@@ -413,15 +422,15 @@ export default function ProductOwner() {
         {activeTab === 'portfolio' && (
           <div>
             {user.portfolio && user.portfolio.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {user.portfolio.map((item) => (
                   <div
                     key={item._id}
-                    className="group bg-zinc-900 border border-zinc-800 hover:border-zinc-700 rounded-xl overflow-hidden cursor-pointer transition-all"
+                    className="group bg-white border border-gray-200 hover:border-gray-300 hover:shadow-lg rounded-xl overflow-hidden cursor-pointer transition-all"
                     onClick={() => item.demoUrl && window.open(item.demoUrl, '_blank')}
                   >
                     {item.media && item.media[0] && (
-                      <div className="h-40 overflow-hidden bg-zinc-800">
+                      <div className="h-48 overflow-hidden bg-gray-100">
                         <img
                           src={item.media[0]}
                           alt={item.title}
@@ -429,18 +438,18 @@ export default function ProductOwner() {
                         />
                       </div>
                     )}
-                    <div className="p-4">
-                      <h3 className="font-semibold text-sm text-white mb-1">{item.title}</h3>
+                    <div className="p-5">
+                      <h3 className="font-bold text-base text-gray-900 mb-3">{item.title}</h3>
                       {item.demoUrl && (
                         <a
                           href={item.demoUrl}
                           target="_blank"
                           rel="noopener noreferrer"
                           onClick={(e) => e.stopPropagation()}
-                          className="flex items-center gap-1 text-xs text-zinc-500 hover:text-white transition-colors"
+                          className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 transition-colors"
                         >
-                          <ExternalLink className="w-3 h-3" />
-                          {item.demoUrl.replace(/^https?:\/\//, '').slice(0, 40)}
+                          <ExternalLink className="w-4 h-4" />
+                          {item.demoUrl.replace(/^https?:\/\//, '').slice(0, 50)}
                         </a>
                       )}
                     </div>
@@ -448,8 +457,8 @@ export default function ProductOwner() {
                 ))}
               </div>
             ) : (
-              <div className="border border-dashed border-zinc-800 rounded-xl p-16 text-center">
-                <p className="text-zinc-500 text-sm">No portfolio items yet</p>
+              <div className="border border-dashed border-gray-300 rounded-lg p-16 text-center">
+                <p className="text-gray-500 text-base">No portfolio items yet</p>
               </div>
             )}
           </div>

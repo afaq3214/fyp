@@ -1,10 +1,6 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { 
-  ArrowLeft, 
-  MapPin, 
-  Calendar, 
-  Users, 
-  Briefcase,
+import {
+  ArrowLeft,
   Github,
   Twitter,
   Globe,
@@ -15,95 +11,24 @@ import {
   Award,
   TrendingUp,
   Zap,
-  Eye   
+  Users,
+  Briefcase,
+  Star,
+  Activity
 } from 'lucide-react';
-import { Button } from '../ui/button';
-import { Badge } from '../ui/badge';
-import { Card, CardContent } from '../ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import { Avatar, AvatarFallback } from '../ui/avatar';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
 import { UserContext } from '../../context/UserContext';
-
-interface PublicUserProfileProps {
-  user: {
-    id: string;
-    name: string;
-    email: string;
-    avatar?: string;
-    bio: string;
-    badges: string[];
-    projects: number;
-    collaborations: number;
-    engagementScore?: number;
-    upvotesGiven?: number;
-    reviewsWritten?: number;
-    productsShared?: number;
-  };
-  onBack: () => void;
-}
-
-const mockProjects = [
-  {
-    id: '1',
-    title: 'AI Writing Assistant',
-    description: 'Transform your writing with AI-powered suggestions and grammar corrections',
-    image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&h=250&fit=crop',
-    upvotes: 124,
-    comments: 32,
-    views: 1240
-  },
-  {
-    id: '2',
-    title: 'TaskFlow Pro',
-    description: 'Visual project management tool designed for creative teams',
-    image: 'https://images.unsplash.com/photo-1700561570982-5f845601c505?w=400&h=250&fit=crop',
-    upvotes: 89,
-    comments: 18,
-    views: 856
-  },
-  {
-    id: '3',
-    title: 'CodeSnap',
-    description: 'Beautiful code screenshots with syntax highlighting and themes',
-    image: 'https://images.unsplash.com/photo-1555949963-ff9fe382dcfd?w=400&h=250&fit=crop',
-    upvotes: 156,
-    comments: 45,
-    views: 2103
-  }
-];
-
-const mockActivity = [
-  { action: 'Launched', target: 'AI Writing Assistant', time: '2 hours ago', type: 'launch' },
-  { action: 'Updated', target: 'TaskFlow Pro', time: '1 day ago', type: 'update' },
-  { action: 'Received 50+ upvotes on', target: 'CodeSnap', time: '2 days ago', type: 'milestone' },
-  { action: 'Collaborated on', target: 'DesignKit Pro', time: '3 days ago', type: 'collab' },
-  { action: 'Earned badge', target: 'Top Reviewer', time: '1 week ago', type: 'badge' }
-];
-
 import { useParams, useNavigate } from 'react-router-dom';
 
 interface APIUser {
   _id: string;
   name: string;
   email: string;
-  badges: {
-    badge: string;
-    awardedAt: string;
-    _id?: string;
-  }[];
+  badges: { badge: string; awardedAt: string; _id?: string }[];
   role: string;
-  portfolio: {
-    title: string;
-    demoUrl: string;
-    media: string[];
-    _id: string;
-  }[];
-  achievements: {
-    title: string;
-    earnedAt: string;
-    _id: string;
-  }[];
+  portfolio: { title: string; demoUrl: string; media: string[]; _id: string }[];
+  achievements: { title: string; earnedAt: string; _id: string }[];
   bio: string;
   github: string;
   linkedin: string;
@@ -113,7 +38,7 @@ interface APIUser {
   profilePicture: string;
   createdAt: string;
   totalUpvotes: number;
-  totalpoints:number
+  totalpoints: number;
 }
 
 interface Product {
@@ -134,6 +59,8 @@ interface Product {
   author_id: string | { _id: string };
 }
 
+type TabId = 'about' | 'projects' | 'wishlist' | 'activity';
+
 export function PublicUserProfile() {
   const { darkmode } = useContext(UserContext);
   const [user, setUser] = useState<APIUser | null>(null);
@@ -141,719 +68,555 @@ export function PublicUserProfile() {
   const [wishlist, setWishlist] = useState<any[]>([]);
   const [activities, setActivities] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('projects');
+  const [activeTab, setActiveTab] = useState<TabId>('about');
   const { ownerId } = useParams<{ ownerId: string }>();
   const navigate = useNavigate();
-  const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
-    useEffect(() => {
-      const fetchOwnerProfile = async () => {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          navigate('/');
-          return;
+  const url = import.meta.env.VITE_API_URL || 'https://fyp-1ejm.vercel.app';
+
+  useEffect(() => {
+    const fetchOwnerProfile = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) { navigate('/'); return; }
+      try {
+        setIsLoading(true);
+        const response = await fetch(`${url}/api/auth/${ownerId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (response.ok) setUser(await response.json());
+      } catch { } finally { setIsLoading(false); }
+    };
+    fetchOwnerProfile();
+  }, [ownerId, navigate]);
+
+  useEffect(() => {
+    const fetchOwnerProducts = async () => {
+      const token = localStorage.getItem('token');
+      if (!token || !ownerId) return;
+      try {
+        const response = await fetch(`${url}/api/products`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setProducts(data.filter((p: Product) =>
+            p.author_id === ownerId || (p as any).author_id?._id === ownerId
+          ));
         }
-  
-        try {
-          setIsLoading(true);
-          const response = await fetch(`${url}/api/auth/${ownerId}`, {
-            method: 'GET',
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-  
-          if (response.ok) {
-            const data = await response.json();
-            setUser(data);
-            console.log('Fetched owner profile:', data);
-          }
-        } catch (err) {
-          console.log('Could not fetch owner profile');
-        } finally {
-          setIsLoading(false);
+      } catch { }
+    };
+    if (ownerId) fetchOwnerProducts();
+  }, [ownerId]);
+
+  useEffect(() => {
+    const fetchOwnerWishlist = async () => {
+      const token = localStorage.getItem('token');
+      if (!token || !ownerId) return;
+      try {
+        const response = await fetch(`${url}/api/wishlist/public/${ownerId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setWishlist(data.items || []);
         }
-      };
-  
-      fetchOwnerProfile();
-    }, [ownerId, navigate]);
-   
-    // Fetch owner's products
-    useEffect(() => {
-      const fetchOwnerProducts = async () => {
-        const token = localStorage.getItem('token');
-        if (!token || !ownerId) return;
-  
-        try {
-          // Since we need products by specific user, we'll fetch all and filter
-          // Or you can create a new backend endpoint for this
-          const response = await fetch(`${url}/api/products`, {
-            method: 'GET',
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-  
-          if (response.ok) {
-            const data = await response.json();
-            // Filter products by owner
-            const ownerProducts = data.filter((p: Product) => 
-              p.author_id === ownerId || (p as any).author_id?._id === ownerId
-            );
-            setProducts(ownerProducts);
-          }
-        } catch (err) {
-          console.log('Could not fetch owner products');
+      } catch { }
+    };
+    if (ownerId) fetchOwnerWishlist();
+  }, [ownerId]);
+
+  useEffect(() => {
+    const fetchUserActivity = async () => {
+      const token = localStorage.getItem('token');
+      if (!token || !ownerId) return;
+      try {
+        const response = await fetch(`${url}/api/activity/user/${ownerId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setActivities(data.activities || data || []);
         }
-      };
-  
-      if (ownerId) {
-        fetchOwnerProducts();
-      }
-    }, [ownerId]);
+      } catch { }
+    };
+    if (ownerId) fetchUserActivity();
+  }, [ownerId]);
 
-    // Fetch owner's wishlist
-    useEffect(() => {
-      const fetchOwnerWishlist = async () => {
-        const token = localStorage.getItem('token');
-        if (!token || !ownerId) return;
+  if (isLoading) return (
+    <div className="flex items-center justify-center min-h-screen bg-black">
+      <div className="w-8 h-8 border-2 border-zinc-700 border-t-white rounded-full animate-spin" />
+    </div>
+  );
+  if (!user) return (
+    <div className="min-h-screen bg-black text-zinc-400 flex items-center justify-center text-base">
+      User not found
+    </div>
+  );
 
-        try {
-          const response = await fetch(`${url}/api/wishlist/public/${ownerId}`, {
-            method: 'GET',
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
+  const rankHex = '#' + (user._id?.slice(-6).toUpperCase() ?? '------');
+  const joinYear = new Date(user.createdAt).getFullYear();
 
-          if (response.ok) {
-            const data = await response.json();
-            setWishlist(data.items || []);
-          }
-        } catch (err) {
-          console.log('Could not fetch owner wishlist');
-        }
-      };
+  const tabs: { id: TabId; label: string; count?: number }[] = [
+    { id: 'about', label: 'About' },
+    { id: 'projects', label: 'Products', count: products.length },
+    { id: 'wishlist', label: 'Wishlist', count: wishlist.length },
+    { id: 'activity', label: 'Activity' },
+  ];
 
-      if (ownerId) {
-        fetchOwnerWishlist();
-      }
-    }, [ownerId]);
-
-    // Fetch user's activity
-    useEffect(() => {
-      const fetchUserActivity = async () => {
-        const token = localStorage.getItem('token');
-        if (!token || !ownerId) return;
-
-        try {
-          const response = await fetch(`${url}/api/activity/user/${ownerId}`, {
-            method: 'GET',
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-
-          if (response.ok) {
-            const data = await response.json();
-            setActivities(data.activities || data || []);
-          }
-        } catch (err) {
-          console.log('Could not fetch user activity');
-        }
-      };
-
-      if (ownerId) {
-        fetchUserActivity();
-      }
-    }, [ownerId]);
-  
-    if (isLoading) {
-      return (
-        <div className={`min-h-screen flex items-center justify-center ${darkmode ? 'bg-gray-900' : 'bg-slate-50'}`}>
-          <div className="text-center">
-            <div className={`animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4 ${darkmode ? 'border-blue-400' : 'border-slate-600'}`}></div>
-            <p className={darkmode ? 'text-gray-300' : 'text-slate-600'}>Loading profile...</p>
-          </div>
-        </div>
-      );
-    }
-  
-    if (!user) return <div className={`min-h-screen ${darkmode ? 'bg-gray-900 text-white' : 'bg-white text-black'}`}>User not found</div>;
+  const activityIcon: Record<string, React.ReactNode> = {
+    launch: <Zap className="w-4 h-4" />,
+    update: <TrendingUp className="w-4 h-4" />,
+    upvote: <Heart className="w-4 h-4" />,
+    review: <MessageCircle className="w-4 h-4" />,
+    comment: <MessageCircle className="w-4 h-4" />,
+    badge: <Award className="w-4 h-4" />,
+    collab: <Users className="w-4 h-4" />,
+  };
 
   return (
-    <div className={`min-h-screen ${darkmode ? 'bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900' : 'bg-gradient-to-br from-indigo-50 via-white to-purple-50'}`}>
-      {/* Header */}
-      <div className={`sticky top-0 z-10 shadow-lg ${darkmode ? 'bg-blue-800/90 border-blue-600' : 'bg-white/80 backdrop-blur-lg border-slate-200/50'} border-b`}>
-        <div className="max-w-6xl mx-auto px-6 py-4">
-          <Button 
-            variant="ghost"
-            className={`transition-all rounded-xl ${darkmode ? 'text-gray-300 hover:text-white hover:bg-blue-700' : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'}`}
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
-          </Button>
-        </div>
-      </div>
+    <div className="min-h-screen bg-black text-white">
 
-      <div className="max-w-6xl mx-auto px-6 py-12">
-        {/* Profile Header with Gradient Background */}
-        <div className={`relative ${darkmode ? 'bg-gradient-to-br from-blue-800 to-indigo-800' : 'bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500'} rounded-3xl shadow-2xl p-8 mb-8 overflow-hidden text-white`}>
-          <div className="absolute inset-0 bg-black/10"></div>
-          
-          <div className="relative z-10">
-            <div className="flex flex-col md:flex-row gap-8 mb-8">
-              {/* Avatar with Glow Effect */}
-              <div className="flex-shrink-0">
-                <div className="relative">
-                  <div className="absolute inset-0 bg-white/30 rounded-full blur-2xl"></div>
-                  <Avatar className="relative border-4 border-white shadow-2xl" style={{ height: '120px', width: '120px' }}>
-                    {user.profilePicture && (
-                      <img
-                        src={user.profilePicture}
-                        alt={user.name}
-                        style={{width:'100%',objectFit:'cover'}}
-                        referrerPolicy="no-referrer"
-                        loading="lazy"
-                      />
-                    )}
-                    {!user.profilePicture && <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white text-2xl font-bold">{user.name.charAt(0)}</AvatarFallback>}
-                  </Avatar>
-                  <div className="absolute bottom-0 right-0 w-6 h-6 bg-emerald-400 border-3 border-white rounded-full shadow-lg animate-pulse"></div>
+      {/* ── Profile header ── */}
+      <div className="border-b border-zinc-900 bg-zinc-950">
+        <div className="max-w-4xl mx-auto px-6 py-8">
+
+          {/* Back button */}
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2 text-zinc-500 hover:text-white text-sm mb-8 transition-colors group"
+          >
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+            Back
+          </button>
+
+          {/* Avatar + info row */}
+          <div className="flex items-start gap-6">
+            {/* Avatar */}
+            <div className="relative shrink-0">
+              <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-zinc-800">
+                {user.profilePicture ? (
+                  <img
+                    src={user.profilePicture}
+                    alt={user.name}
+                    className="w-full h-full object-cover"
+                    referrerPolicy="no-referrer"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-zinc-800 flex items-center justify-center">
+                    <span className="text-3xl font-bold text-zinc-400">
+                      {user.name?.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                )}
+              </div>
+              {/* Role badge */}
+              <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-white text-black text-[10px] font-bold px-2.5 py-0.5 rounded-full whitespace-nowrap capitalize">
+                {user.role || 'Maker'}
+              </span>
+            </div>
+
+            {/* Name + meta */}
+            <div className="flex-1 min-w-0 pt-1">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h1 className="text-2xl font-bold text-white leading-tight">{user.name}</h1>
+                  {user.makerStory && (
+                    <p className="text-base text-zinc-400 mt-0.5">{user.makerStory}</p>
+                  )}
+                </div>
+                {/* Follow button */}
+                <button className="shrink-0 border border-zinc-700 text-zinc-300 hover:text-white hover:border-white/40 text-sm font-medium px-5 py-2 rounded-full transition-colors">
+                  Follow
+                </button>
+              </div>
+
+              {/* Rank + followers row */}
+              <div className="flex items-center gap-4 mt-3 text-sm text-zinc-500 flex-wrap">
+                <span className="font-mono font-medium text-zinc-400">{rankHex}</span>
+                <span>0 followers</span>
+                <span>0 following</span>
+                <span className="flex items-center gap-1">
+                  <Star className="w-3.5 h-3.5" />
+                  Member since {joinYear}
+                </span>
+              </div>
+
+              {/* Points + badges stat cards */}
+              <div className="flex flex-wrap gap-3 mt-4">
+                {user.totalpoints != null && (
+                  <div className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2">
+                    <div className="text-lg font-bold text-white leading-none">
+                      {user.totalpoints.toLocaleString()}
+                    </div>
+                    <div className="text-xs text-zinc-500 mt-0.5">Points</div>
+                  </div>
+                )}
+                <div className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2">
+                  <div className="text-lg font-bold text-white leading-none">{products.length}</div>
+                  <div className="text-xs text-zinc-500 mt-0.5">Products</div>
+                </div>
+                <div className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2">
+                  <div className="text-lg font-bold text-white leading-none">{user.totalUpvotes ?? 0}</div>
+                  <div className="text-xs text-zinc-500 mt-0.5">Upvotes</div>
+                </div>
+                <div className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2">
+                  <div className="text-lg font-bold text-white leading-none">{user.badges?.length ?? 0}</div>
+                  <div className="text-xs text-zinc-500 mt-0.5">Badges</div>
                 </div>
               </div>
 
-              {/* Info */}
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-3">
-                  <h1 className="text-4xl font-bold text-white drop-shadow-lg">{user.name}</h1>
-                  <div className="px-3 py-1 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold rounded-full shadow-lg">PRO</div>
-                </div>
-              
-                {/* Badges */}
-                {user.badges.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {user.badges.map(badgeObj => (
-                      <div 
-                        key={badgeObj._id || badgeObj.badge} 
-                        className="px-3 py-1 bg-white/20 backdrop-blur-sm text-white text-sm font-bold rounded-full border border-white/30 shadow-lg"
-                      >
-                        <Award className="w-3 h-3 mr-1 inline" />
-                        {badgeObj.badge}
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Bio */}
-                {user.bio && (
-                  <p className="text-white/90 text-lg mb-6 leading-relaxed max-w-2xl drop-shadow">
-                    {user.bio}
-                  </p>
-                )}
-
-                {/* Social Links */}
-                <div className="flex flex-wrap gap-3 mb-6">
+              {/* Social links */}
+              {(user.github || user.twitter || user.linkedin || user.website) && (
+                <div className="flex flex-wrap gap-2 mt-4">
                   {user.github && (
-                    <a 
-                      href={`https://github.com/${user.github}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 px-4 py-2 text-sm text-white bg-white/20 backdrop-blur-sm hover:bg-white/30 rounded-xl transition-all shadow-lg border border-white/20"
-                    >
-                      <Github className="w-4 h-4" />
-                      GitHub
+                    <a href={`https://github.com/${user.github}`} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-600 text-sm px-3 py-1.5 rounded-full transition-colors">
+                      <Github className="w-3.5 h-3.5" />GitHub
                     </a>
                   )}
                   {user.twitter && (
-                    <a 
-                      href={`https://twitter.com/${user.twitter}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 px-4 py-2 text-sm text-white bg-white/20 backdrop-blur-sm hover:bg-white/30 rounded-xl transition-all shadow-lg border border-white/20"
-                    >
-                      <Twitter className="w-4 h-4" />
-                      Twitter
+                    <a href={`https://twitter.com/${user.twitter}`} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-600 text-sm px-3 py-1.5 rounded-full transition-colors">
+                      <Twitter className="w-3.5 h-3.5" />Twitter
                     </a>
                   )}
                   {user.linkedin && (
-                    <a 
-                      href={`https://linkedin.com/in/${user.linkedin}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 px-4 py-2 text-sm text-white bg-white/20 backdrop-blur-sm hover:bg-white/30 rounded-xl transition-all shadow-lg border border-white/20"
-                    >
-                      <Linkedin className="w-4 h-4" />
-                      LinkedIn
+                    <a href={`https://linkedin.com/in/${user.linkedin}`} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-600 text-sm px-3 py-1.5 rounded-full transition-colors">
+                      <Linkedin className="w-3.5 h-3.5" />LinkedIn
                     </a>
                   )}
                   {user.website && (
-                    <a 
-                      href={user.website.startsWith('http') ? user.website : `https://${user.website}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 px-4 py-2 text-sm text-white bg-white/20 backdrop-blur-sm hover:bg-white/30 rounded-xl transition-all shadow-lg border border-white/20"
-                    >
-                      <Globe className="w-4 h-4" />
-                      Website
+                    <a href={user.website.startsWith('http') ? user.website : `https://${user.website}`}
+                      target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-600 text-sm px-3 py-1.5 rounded-full transition-colors">
+                      <Globe className="w-3.5 h-3.5" />Website
                     </a>
                   )}
                 </div>
-
-                {/* Stats */}
-                <div className="flex flex-wrap gap-8 mb-6">
-                  <div className="text-center">
-                    <div className="text-3xl font-bold text-white drop-shadow">{products.length}</div>
-                    <div className="text-sm text-white/80">Projects</div>
-                  </div>
-                  {user.totalpoints && (
-                    <div className="text-center">
-                      <div className="text-3xl font-bold text-white drop-shadow">{user.totalpoints.toLocaleString()}</div>
-                      <div className="text-sm text-white/80">Engagement</div>
-                    </div>
-                  )}
-                  <div className="text-center">
-                    <div className="text-3xl font-bold text-white drop-shadow">{user.totalUpvotes || 0}</div>
-                    <div className="text-sm text-white/80">Upvotes</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-3xl font-bold text-white drop-shadow">{user.badges.length}</div>
-                    <div className="text-sm text-white/80">Badges</div>
-                  </div>
-                </div>
+              )}
             </div>
           </div>
         </div>
-        </div>
 
-        {/* Stats Cards with Gradient */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
-            <div className="flex items-center justify-between mb-2">
-              <TrendingUp className="w-5 h-5 text-white/80" />
-              <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                <span className="text-sm font-bold text-white">↑</span>
-              </div>
-            </div>
-            <div className="text-2xl font-bold text-white mb-1">
-              {user.totalUpvotes || 0}
-            </div>
-            <div className="text-sm text-white/80">Upvotes Given</div>
-          </div>
-
-          <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
-            <div className="flex items-center justify-between mb-2">
-              <Briefcase className="w-5 h-5 text-white/80" />
-              <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                <span className="text-sm font-bold text-white">P</span>
-              </div>
-            </div>
-            <div className="text-2xl font-bold text-white mb-1">
-              {products.length}
-            </div>
-            <div className="text-sm text-white/80">Projects</div>
-          </div>
-
-          <div className="bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
-            <div className="flex items-center justify-between mb-2">
-              <Award className="w-5 h-5 text-white/80" />
-              <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                <span className="text-sm font-bold text-white">★</span>
-              </div>
-            </div>
-            <div className="text-2xl font-bold text-white mb-1">
-              {user.badges.length}
-            </div>
-            <div className="text-sm text-white/80">Badges Earned</div>
-          </div>
-
-          {user.totalpoints && (
-            <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
-              <div className="flex items-center justify-between mb-2">
-                <Zap className="w-5 h-5 text-white/80" />
-                <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                  <span className="text-sm font-bold text-white">⚡</span>
-                </div>
-              </div>
-              <div className="text-2xl font-bold text-white mb-1">
-                {user.totalpoints.toLocaleString()}
-              </div>
-              <div className="text-sm text-white/80">Engagement</div>
-            </div>
-          )}
-        </div>
-
-        {/* Modern Tabs with Glass Effect */}
-        <div className={`rounded-2xl shadow-xl border mb-8 ${darkmode ? 'bg-blue-800/60 border-blue-600' : 'bg-white/60 backdrop-blur-lg border-white/20'}`}>
-          <div className={`flex flex-col sm:flex-row border-b ${darkmode ? 'border-blue-600' : 'border-white/20'}`}>
-            <button
-              onClick={() => setActiveTab('projects')}
-              className={`flex-1 px-6 py-4 text-sm font-medium transition-all relative rounded-tl-2xl ${
-                activeTab === 'projects'
-                  ? darkmode ? 'text-white bg-blue-700 shadow-lg' : 'text-slate-900 bg-white/80 shadow-lg'
-                  : darkmode ? 'text-gray-300 hover:text-white hover:bg-blue-700' : 'text-slate-600 hover:text-slate-800 hover:bg-white/40'
-              }`}
-            >
-              <div className="flex items-center justify-center gap-2">
-                <Briefcase className="w-4 h-4" />
-                <span>Projects</span>
-                <span className="px-2 py-0.5 bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-xs rounded-full">
-                  {products.length}
-                </span>
-              </div>
-              {activeTab === 'projects' && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-indigo-500 to-purple-500"></div>
-              )}
-            </button>
-            
-            <button
-              onClick={() => setActiveTab('wishlist')}
-              className={`flex-1 px-6 py-4 text-sm font-medium transition-all relative ${
-                activeTab === 'wishlist'
-                  ? darkmode ? 'text-white bg-blue-700 shadow-lg' : 'text-slate-900 bg-white/80 shadow-lg'
-                  : darkmode ? 'text-gray-300 hover:text-white hover:bg-blue-700' : 'text-slate-600 hover:text-slate-800 hover:bg-white/40'
-              }`}
-            >
-              <div className="flex items-center justify-center gap-2">
-                <Heart className="w-4 h-4" />
-                <span>Wishlist</span>
-                <span className="px-2 py-0.5 bg-gradient-to-r from-pink-500 to-red-500 text-white text-xs rounded-full">
-                  {wishlist.length}
-                </span>
-              </div>
-              {activeTab === 'wishlist' && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-pink-500 to-red-500"></div>
-              )}
-            </button>
-            
-            <button
-              onClick={() => setActiveTab('activity')}
-              className={`flex-1 px-6 py-4 text-sm font-medium transition-all relative rounded-tr-2xl ${
-                activeTab === 'activity'
-                  ? darkmode ? 'text-white bg-blue-700 shadow-lg' : 'text-slate-900 bg-white/80 shadow-lg'
-                  : darkmode ? 'text-gray-300 hover:text-white hover:bg-blue-700' : 'text-slate-600 hover:text-slate-800 hover:bg-white/40'
-              }`}
-            >
-              <div className="flex items-center justify-center gap-2">
-                <Zap className="w-4 h-4" />
-                <span>Activity</span>
-              </div>
-              {activeTab === 'activity' && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-500 to-teal-500"></div>
-              )}
-            </button>
-          </div>
-        </div>
-
-          {/* Projects Tab Content */}
-          {activeTab === 'projects' && (
-            <div className="space-y-6">
-              {products.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {products.map(project => (
-                    <div 
-                      key={project._id} 
-                      className={`group relative overflow-hidden rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-500 cursor-pointer transform hover:-translate-y-3 ${
-                        darkmode 
-                          ? 'bg-gradient-to-br from-blue-900/80 via-purple-900/60 to-indigo-900/80 border-blue-500/30' 
-                          : 'bg-gradient-to-br from-white/90 via-indigo-50/80 to-purple-50/90 border-white/50'
-                      } border backdrop-blur-xl`}
-                    >
-                      {/* Gradient Overlay */}
-                      <div className={`absolute inset-0 bg-gradient-to-br ${
-                        darkmode 
-                          ? 'from-blue-600/20 via-purple-600/20 to-pink-600/20' 
-                          : 'from-indigo-500/10 via-purple-500/10 to-pink-500/10'
-                      } opacity-0 group-hover:opacity-100 transition-opacity duration-500`}></div>
-                      
-                      {/* Image Section with Enhanced Styling */}
-                      <div className="relative h-52 overflow-hidden">
-                        <div className={`absolute inset-0 bg-gradient-to-br ${
-                          darkmode 
-                            ? 'from-blue-800 via-purple-800 to-indigo-800' 
-                            : 'from-indigo-200 via-purple-200 to-pink-200'
-                        } opacity-50`}></div>
-                        
-                        <ImageWithFallback
-                          src={project.media[0]}
-                          alt={project.title}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
-                        />
-                        
-                        {/* Floating Badge */}
-                        <div className="absolute top-4 right-4">
-                          <div className={`px-4 py-2 rounded-full shadow-2xl backdrop-blur-md border ${
-                            darkmode 
-                              ? 'bg-blue-800/90 text-gray-200 border-blue-400/50' 
-                              : 'bg-white/90 text-slate-700 border-white/50'
-                          }`}>
-                            <div className="flex items-center gap-2">
-                              <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                              <span className="text-sm font-semibold">{project.upvotes?.length || 0}</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Category Tag */}
-                        {project.category && (
-                          <div className="absolute top-4 left-4">
-                            <div className={`px-3 py-1.5 rounded-full shadow-xl backdrop-blur-md text-xs font-bold uppercase tracking-wider ${
-                              darkmode 
-                                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white border-purple-400/30' 
-                                : 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white border-indigo-400/30'
-                            }`}>
-                              {project.category}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Hover Gradient Overlay */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                      </div>
-
-                      {/* Content Section */}
-                      <div className="relative p-6 space-y-4">
-                        {/* Title with Enhanced Typography */}
-                        <h3 className={`text-xl font-bold mb-3 transition-all duration-300 group-hover:text-transparent group-hover:bg-clip-text ${
-                          darkmode 
-                            ? 'text-white group-hover:bg-gradient-to-r group-hover:from-blue-400 group-hover:to-purple-400' 
-                            : 'text-slate-900 group-hover:bg-gradient-to-r group-hover:from-indigo-600 group-hover:to-purple-600'
-                        }`}>
-                          {project.title}
-                        </h3>
-
-                        {/* Description with Better Readability */}
-                        <p className={`text-sm leading-relaxed line-clamp-3 transition-all duration-300 ${
-                          darkmode 
-                            ? 'text-gray-300 group-hover:text-gray-200' 
-                            : 'text-slate-600 group-hover:text-slate-700'
-                        }`}>
-                          {project.description}
-                        </p>
-
-                        {/* Tags */}
-                        {project.autoTags && project.autoTags.length > 0 && (
-                          <div className="flex flex-wrap gap-2">
-                            {project.autoTags.slice(0, 3).map((tag, index) => (
-                              <span
-                                key={index}
-                                className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all duration-300 hover:scale-105 ${
-                                  darkmode 
-                                    ? 'bg-blue-700/50 text-blue-300 border border-blue-600/30' 
-                                    : 'bg-indigo-100/70 text-indigo-700 border border-indigo-200/50'
-                                }`}
-                              >
-                                #{tag}
-                              </span>
-                            ))}
-                            {project.autoTags.length > 3 && (
-                              <span className={`px-2.5 py-1 rounded-lg text-xs font-medium ${
-                                darkmode 
-                                  ? 'text-gray-400' 
-                                  : 'text-slate-500'
-                              }`}>
-                                +{project.autoTags.length - 3}
-                              </span>
-                            )}
-                          </div>
-                        )}
-
-                        {/* Stats Bar with Enhanced Design */}
-                        <div className={`flex items-center justify-between pt-4 border-t ${
-                          darkmode 
-                            ? 'border-blue-700/50' 
-                            : 'border-indigo-200/50'
-                        }`}>
-                          <div className="flex items-center gap-4">
-                            {/* Upvotes with Icon */}
-                            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl transition-all duration-300 hover:scale-105 ${
-                              darkmode 
-                                ? 'bg-red-900/30 text-red-400 border border-red-700/30' 
-                                : 'bg-red-50 text-red-600 border border-red-200/50'
-                            }`}>
-                              <Heart className="w-4 h-4 fill-current" />
-                              <span className="text-sm font-semibold">{project.upvotes?.length || 0}</span>
-                            </div>
-
-                            {/* Comments with Icon */}
-                            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl transition-all duration-300 hover:scale-105 ${
-                              darkmode 
-                                ? 'bg-blue-900/30 text-blue-400 border border-blue-700/30' 
-                                : 'bg-blue-50 text-blue-600 border border-blue-200/50'
-                            }`}>
-                              <MessageCircle className="w-4 h-4" />
-                              <span className="text-sm font-semibold">{project.reviews?.length || 0}</span>
-                            </div>
-                          </div>
-
-                          {/* View Button */}
-                          <button className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-300 transform hover:scale-105 ${
-                            darkmode 
-                              ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-500 hover:to-purple-500 shadow-lg' 
-                              : 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white hover:from-indigo-600 hover:to-purple-600 shadow-lg'
-                          }`}>
-                            View
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Decorative Elements */}
-                      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                      
-                      {/* Corner Accent */}
-                      <div className={`absolute top-4 right-4 w-2 h-2 rounded-full ${
-                        darkmode ? 'bg-purple-400' : 'bg-indigo-500'
-                      } opacity-0 group-hover:opacity-100 transition-all duration-500 group-hover:animate-pulse`}></div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className={`text-center py-16 rounded-2xl border ${darkmode ? 'bg-blue-800/40 border-blue-600' : 'bg-white/40 backdrop-blur-lg border-white/20'}`}>
-                  <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${darkmode ? 'bg-blue-700' : 'bg-gradient-to-br from-slate-200 to-slate-300'}`}>
-                    <Briefcase className={`w-8 h-8 ${darkmode ? 'text-gray-400' : 'text-slate-500'}`} />
-                  </div>
-                  <p className={`font-medium ${darkmode ? 'text-gray-300' : 'text-slate-600'}`}>No projects yet</p>
-                  <p className={`text-sm mt-2 ${darkmode ? 'text-gray-500' : 'text-slate-400'}`}>Start building and showcase your amazing work!</p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Wishlist Tab Content */}
-          {activeTab === 'wishlist' && (
-            <div className="space-y-6">
-              {wishlist.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {wishlist.map((item: any) => (
-                    <div 
-                      key={item._id} 
-                      className={`rounded-2xl shadow-xl border overflow-hidden hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:-translate-y-2 ${
-                        darkmode 
-                          ? 'bg-blue-800 border-blue-600' 
-                          : 'bg-white/80 backdrop-blur-lg border-white/20'
-                      }`}
-                    >
-                      <div className={`relative h-48 overflow-hidden ${
-                        darkmode ? 'bg-blue-700' : 'bg-gradient-to-br from-pink-50 to-rose-100'
-                      }`}>
-                        <ImageWithFallback
-                          src={item.productId?.media?.[0] || '/placeholder-product.jpg'}
-                          alt={item.productId?.title || 'Product'}
-                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                          fallback="/placeholder-product.jpg"
-                        />
-                        <div className={`absolute top-3 right-3 rounded-full p-2 shadow-lg ${
-                          darkmode 
-                            ? 'bg-blue-800/90 border-blue-600' 
-                            : 'bg-white/90 border-white/20'
-                        }`}>
-                          <Heart className="w-4 h-4 text-red-500 fill-current" />
-                        </div>
-                      </div>
-                      <div className="p-6">
-                        <h3 className={`text-lg font-semibold mb-2 line-clamp-1 transition-colors ${
-                          darkmode 
-                            ? 'text-slate-100 hover:text-pink-400' 
-                            : 'text-slate-900 hover:text-pink-600'
-                        }`}>
-                          {item.productId?.title || 'Untitled Product'}
-                        </h3>
-                        <p className={`text-sm mb-4 line-clamp-2 ${
-                          darkmode ? 'text-slate-300' : 'text-slate-600'
-                        }`}>
-                          {item.productId?.description || 'No description available'}
-                        </p>
-                        <div className="flex items-center justify-between text-sm">
-                          <span className={`flex items-center gap-1 ${
-                            darkmode ? 'text-slate-300' : 'text-slate-500'
-                          }`}>
-                            <Heart className="w-4 h-4 text-red-500" />
-                            Added {new Date(item.addedAt).toLocaleDateString()}
-                          </span>
-                        </div>
-                        {item.notes && (
-                          <div className={`mt-3 p-3 rounded-xl border ${
-                            darkmode 
-                              ? 'bg-blue-700 border-blue-600' 
-                              : 'bg-gradient-to-r from-pink-50 to-rose-50 border-pink-100'
-                          }`}>
-                            <p className={`text-sm italic ${
-                              darkmode ? 'text-slate-300' : 'text-slate-600'
-                            }`}>"{item.notes}"</p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className={`text-center py-16 rounded-2xl border ${darkmode ? 'bg-blue-800/40 border-blue-600' : 'bg-white/40 backdrop-blur-lg border-white/20'}`}>
-                  <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${darkmode ? 'bg-blue-700' : 'bg-gradient-to-br from-pink-200 to-rose-200'}`}>
-                    <Heart className={`w-8 h-8 ${darkmode ? 'text-pink-400' : 'text-pink-500'}`} />
-                  </div>
-                  <p className={`font-medium ${darkmode ? 'text-slate-200' : 'text-slate-600'}`}>No wishlist items yet</p>
-                  <p className={`text-sm mt-2 ${darkmode ? 'text-slate-400' : 'text-slate-400'}`}>Start adding products you love!</p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Activity Tab Content */}
-          {activeTab === 'activity' && (
-            <div className="space-y-4">
-              {activities.length > 0 ? (
-                activities.map((activity: any, index: number) => (
-                  <div key={activity._id || index} className={`rounded-2xl shadow-xl border hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 ${
-                    darkmode 
-                      ? 'bg-gray-800 border-gray-700' 
-                      : 'bg-white/80 backdrop-blur-lg border-white/20'
+        {/* ── Underline tab nav (PH style) ── */}
+        <div className="max-w-4xl mx-auto px-6">
+          <div className="flex border-b border-zinc-900 -mb-px">
+            {tabs.map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-1.5 pb-3 px-4 text-sm font-medium border-b-2 transition-colors ${
+                  activeTab === tab.id
+                    ? 'border-white text-white'
+                    : 'border-transparent text-zinc-500 hover:text-zinc-300'
+                }`}
+              >
+                {tab.label}
+                {tab.count != null && (
+                  <span className={`text-xs px-1.5 py-0.5 rounded-full ${
+                    activeTab === tab.id ? 'bg-zinc-800 text-white' : 'bg-zinc-900 text-zinc-600'
                   }`}>
-                    <div className="p-6">
-                      <div className="flex items-start gap-4">
-                        <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0">
-                          {activity.type === 'launch' && <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center shadow-lg"><Zap className="w-5 h-5 text-white" /></div>}
-                          {activity.type === 'update' && <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center shadow-lg"><TrendingUp className="w-5 h-5 text-white" /></div>}
-                          {activity.type === 'milestone' && <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full flex items-center justify-center shadow-lg"><Award className="w-5 h-5 text-white" /></div>}
-                          {activity.type === 'collab' && <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-full flex items-center justify-center shadow-lg"><Users className="w-5 h-5 text-white" /></div>}
-                          {activity.type === 'badge' && <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-amber-600 rounded-full flex items-center justify-center shadow-lg"><Award className="w-5 h-5 text-white" /></div>}
-                          {activity.type === 'upvote' && <div className="w-10 h-10 bg-gradient-to-br from-red-400 to-red-600 rounded-full flex items-center justify-center shadow-lg"><Heart className="w-5 h-5 text-white" /></div>}
-                          {activity.type === 'review' && <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center shadow-lg"><MessageCircle className="w-5 h-5 text-white" /></div>}
-                          {activity.type === 'comment' && <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-full flex items-center justify-center shadow-lg"><MessageCircle className="w-5 h-5 text-white" /></div>}
-                          {!activity.type && <div className="w-10 h-10 bg-gradient-to-br from-slate-400 to-slate-600 rounded-full flex items-center justify-center shadow-lg"><Award className="w-5 h-5 text-white" /></div>}
-                        </div>
-                        <div className="flex-1">
-                          <p className={`mb-1 ${darkmode ? 'text-white' : 'text-slate-900'}`}>
-                            <span className={`font-medium ${darkmode ? 'text-gray-300' : 'text-slate-700'}`}>{activity.action || 'Activity'}</span>
-                            {' '}
-                            {activity.target && (
-                              <span className={`hover:underline cursor-pointer font-semibold transition-colors ${
-                                darkmode 
-                                  ? 'text-white hover:text-blue-400' 
-                                  : 'text-slate-900 hover:text-indigo-600'
-                              }`}>
-                                {activity.target}
-                              </span>
-                            )}
-                          </p>
-                          <p className={`text-sm ${darkmode ? 'text-gray-400' : 'text-slate-500'}`}>
-                            {activity.createdAt ? new Date(activity.createdAt).toLocaleDateString() : 'Recently'}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className={`text-center py-16 rounded-2xl border ${darkmode ? 'bg-blue-800/40 border-blue-600' : 'bg-white/40 backdrop-blur-lg border-white/20'}`}>
-                  <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${darkmode ? 'bg-blue-700' : 'bg-gradient-to-br from-slate-200 to-slate-300'}`}>
-                    <Award className={`w-8 h-8 ${darkmode ? 'text-gray-400' : 'text-slate-500'}`} />
-                  </div>
-                  <p className={`font-medium ${darkmode ? 'text-gray-300' : 'text-slate-600'}`}>No recent activity</p>
-                  <p className={`text-sm mt-2 ${darkmode ? 'text-gray-500' : 'text-slate-400'}`}>Start engaging with the community!</p>
-                </div>
-              )}
-            </div>
-          )}
+                    {tab.count}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
+
+      {/* ── Tab content ── */}
+      <div className="max-w-4xl mx-auto px-6 py-8">
+
+        {/* ── About ── */}
+        {activeTab === 'about' && (
+          <div className="space-y-8">
+            {/* Bio */}
+            {user.bio && (
+              <div>
+                <h2 className="text-base font-semibold text-white mb-3">About</h2>
+                <p className="text-base text-zinc-400 leading-relaxed">{user.bio}</p>
+              </div>
+            )}
+
+            {/* Maker story */}
+            {user.makerStory && (
+              <div>
+                <h2 className="text-base font-semibold text-white mb-3">Maker Story</h2>
+                <p className="text-base text-zinc-400 leading-relaxed">{user.makerStory}</p>
+              </div>
+            )}
+
+            {/* Links */}
+            {(user.github || user.twitter || user.linkedin || user.website) && (
+              <div>
+                <h2 className="text-base font-semibold text-white mb-3">Links</h2>
+                <div className="space-y-2">
+                  {user.website && (
+                    <a href={user.website.startsWith('http') ? user.website : `https://${user.website}`}
+                      target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-3 text-base text-zinc-400 hover:text-white transition-colors group">
+                      <Globe className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400" />
+                      <span className="truncate">{user.website}</span>
+                      <ExternalLink className="w-3.5 h-3.5 text-zinc-700 group-hover:text-zinc-500 shrink-0" />
+                    </a>
+                  )}
+                  {user.github && (
+                    <a href={`https://github.com/${user.github}`} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-3 text-base text-zinc-400 hover:text-white transition-colors group">
+                      <Github className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400" />
+                      <span>github.com/{user.github}</span>
+                      <ExternalLink className="w-3.5 h-3.5 text-zinc-700 group-hover:text-zinc-500 shrink-0" />
+                    </a>
+                  )}
+                  {user.twitter && (
+                    <a href={`https://twitter.com/${user.twitter}`} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-3 text-base text-zinc-400 hover:text-white transition-colors group">
+                      <Twitter className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400" />
+                      <span>@{user.twitter}</span>
+                      <ExternalLink className="w-3.5 h-3.5 text-zinc-700 group-hover:text-zinc-500 shrink-0" />
+                    </a>
+                  )}
+                  {user.linkedin && (
+                    <a href={`https://linkedin.com/in/${user.linkedin}`} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-3 text-base text-zinc-400 hover:text-white transition-colors group">
+                      <Linkedin className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400" />
+                      <span>linkedin.com/in/{user.linkedin}</span>
+                      <ExternalLink className="w-3.5 h-3.5 text-zinc-700 group-hover:text-zinc-500 shrink-0" />
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Badges */}
+            {user.badges?.length > 0 && (
+              <div>
+                <h2 className="text-base font-semibold text-white mb-3">Badges</h2>
+                <div className="flex flex-wrap gap-2">
+                  {user.badges.map(b => (
+                    <div key={b._id || b.badge}
+                      className="flex items-center gap-1.5 border border-zinc-800 text-zinc-300 bg-zinc-900 text-sm px-3 py-1.5 rounded-full">
+                      <Award className="w-3.5 h-3.5 text-zinc-500" />
+                      {b.badge}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Achievements */}
+            {user.achievements?.length > 0 && (
+              <div>
+                <h2 className="text-base font-semibold text-white mb-3">Achievements</h2>
+                <div className="space-y-2">
+                  {user.achievements.map(a => (
+                    <div key={a._id}
+                      className="flex items-center justify-between bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <Star className="w-4 h-4 text-zinc-500" />
+                        <span className="text-sm text-zinc-300">{a.title}</span>
+                      </div>
+                      <span className="text-xs text-zinc-600">
+                        {new Date(a.earnedAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Empty about */}
+            {!user.bio && !user.makerStory && user.badges?.length === 0 && user.achievements?.length === 0 && (
+              <div className="border border-dashed border-zinc-800 rounded-2xl py-16 text-center">
+                <Users className="w-8 h-8 text-zinc-700 mx-auto mb-3" />
+                <p className="text-zinc-500 text-base">No info added yet</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── Products ── */}
+        {activeTab === 'projects' && (
+          <div>
+            {products.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {products.map(product => (
+                  <div
+                    key={product._id}
+                    onClick={() => navigate(`/product/${product._id}`)}
+                    className="group relative overflow-hidden rounded-3xl bg-zinc-900 border border-zinc-800 hover:border-zinc-700 shadow-xl hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:-translate-y-2"
+                  >
+                    {/* Image */}
+                    <div className="relative h-52 bg-zinc-800 overflow-hidden">
+                      <ImageWithFallback
+                        src={product.media?.[0]}
+                        alt={product.title}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+                      />
+                      {/* Upvote badge */}
+                      <div className="absolute top-4 right-4 bg-zinc-900/90 border border-zinc-700 rounded-full px-3 py-1.5 flex items-center gap-1.5 shadow-lg backdrop-blur-sm">
+                        <TrendingUp className="w-3.5 h-3.5 text-zinc-400" />
+                        <span className="text-sm font-semibold text-white">{product.upvotes?.length ?? 0}</span>
+                      </div>
+                      {/* Category badge */}
+                      {product.category && (
+                        <div className="absolute top-4 left-4 bg-black/70 border border-white/10 text-white text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-full backdrop-blur-sm shadow-xl">
+                          {product.category}
+                        </div>
+                      )}
+                      {/* Gradient overlay on hover */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-zinc-900/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    </div>
+
+                    {/* Content */}
+                    <div className="p-6">
+                      <h3 className="text-lg font-bold text-white mb-2 group-hover:text-zinc-200 transition-colors line-clamp-1">
+                        {product.title}
+                      </h3>
+                      <p className="text-sm text-zinc-500 leading-relaxed line-clamp-3 mb-4">
+                        {product.pitch || product.description}
+                      </p>
+
+                      {/* Tags */}
+                      {product.autoTags && product.autoTags.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mb-4">
+                          {product.autoTags.slice(0, 3).map((tag, i) => (
+                            <span key={i} className="text-xs bg-zinc-800 border border-zinc-700 text-zinc-400 px-2.5 py-1 rounded-lg">
+                              #{tag}
+                            </span>
+                          ))}
+                          {product.autoTags.length > 3 && (
+                            <span className="text-xs text-zinc-600 px-2.5 py-1">+{product.autoTags.length - 3}</span>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Stats bar */}
+                      <div className="flex items-center justify-between pt-4 border-t border-zinc-800">
+                        <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-1.5 text-sm text-zinc-500">
+                            <Heart className="w-3.5 h-3.5" />
+                            <span className="font-medium">{product.upvotes?.length ?? 0}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5 text-sm text-zinc-500">
+                            <MessageCircle className="w-3.5 h-3.5" />
+                            <span className="font-medium">{product.reviews?.length ?? 0}</span>
+                          </div>
+                        </div>
+                        <button className="text-xs font-semibold bg-white text-black px-4 py-1.5 rounded-xl hover:bg-zinc-200 transition-colors">
+                          View
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Top edge accent on hover */}
+                    <div className="absolute top-0 left-0 right-0 h-0.5 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-500" />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <EmptyState icon={<Briefcase className="w-8 h-8 text-zinc-700" />} message="No products yet" sub="Start building and submit your first product!" />
+            )}
+          </div>
+        )}
+
+        {/* ── Wishlist ── */}
+        {activeTab === 'wishlist' && (
+          <div>
+            {wishlist.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {wishlist.map((item: any) => (
+                  <div key={item._id}
+                    className="group relative overflow-hidden rounded-2xl bg-zinc-900 border border-zinc-800 hover:border-zinc-700 shadow-xl hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:-translate-y-2">
+                    {/* Image */}
+                    <div className="relative h-48 bg-zinc-800 overflow-hidden">
+                      <ImageWithFallback
+                        src={item.productId?.media?.[0]}
+                        alt={item.productId?.title || 'Product'}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        fallback="/placeholder-product.jpg"
+                      />
+                      {/* Heart badge */}
+                      <div className="absolute top-3 right-3 bg-zinc-900/90 border border-zinc-700 rounded-full p-2 shadow-lg backdrop-blur-sm">
+                        <Heart className="w-4 h-4 text-white fill-current" />
+                      </div>
+                      {/* Gradient overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-zinc-900/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    </div>
+
+                    {/* Content */}
+                    <div className="p-6">
+                      <h3 className="text-lg font-semibold text-white mb-2 line-clamp-1 group-hover:text-zinc-200 transition-colors">
+                        {item.productId?.title || 'Untitled Product'}
+                      </h3>
+                      <p className="text-sm text-zinc-500 line-clamp-2 mb-4 leading-relaxed">
+                        {item.productId?.description || 'No description available'}
+                      </p>
+                      <div className="flex items-center gap-1.5 text-sm text-zinc-600 pt-3 border-t border-zinc-800">
+                        <Heart className="w-4 h-4 text-zinc-500" />
+                        Added {new Date(item.addedAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                      </div>
+                      {item.notes && (
+                        <div className="mt-3 p-3 rounded-xl bg-zinc-950 border border-zinc-800">
+                          <p className="text-sm text-zinc-400 italic">"{item.notes}"</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <EmptyState icon={<Heart className="w-8 h-8 text-zinc-700" />} message="No wishlist items yet" sub="Start saving products you love!" />
+            )}
+          </div>
+        )}
+
+        {/* ── Activity ── */}
+        {activeTab === 'activity' && (
+          <div>
+            {activities.length > 0 ? (
+              <div className="space-y-2">
+                {activities.map((activity: any, index: number) => (
+                  <div key={activity._id || index}
+                    className="flex items-start gap-4 bg-zinc-900 border border-zinc-800 rounded-xl px-5 py-4 hover:border-zinc-700 transition-colors">
+                    <div className="w-9 h-9 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center shrink-0 text-zinc-400">
+                      {activityIcon[activity.type] ?? <Activity className="w-4 h-4" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-zinc-300">
+                        <span className="font-medium">{activity.action || 'Activity'}</span>
+                        {activity.target && (
+                          <span className="font-semibold text-white"> {activity.target}</span>
+                        )}
+                      </p>
+                      <p className="text-xs text-zinc-600 mt-0.5">
+                        {activity.createdAt
+                          ? new Date(activity.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+                          : 'Recently'}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <EmptyState icon={<Activity className="w-8 h-8 text-zinc-700" />} message="No recent activity" sub="Start engaging with the community!" />
+            )}
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
+}
+
+function EmptyState({ icon, message, sub }: { icon: React.ReactNode; message: string; sub: string }) {
+  return (
+    <div className="border border-dashed border-zinc-800 rounded-2xl py-16 text-center">
+      <div className="flex justify-center mb-3">{icon}</div>
+      <p className="text-zinc-500 text-base font-medium">{message}</p>
+      <p className="text-zinc-700 text-sm mt-1">{sub}</p>
+    </div>
   );
 }
