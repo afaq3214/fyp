@@ -147,8 +147,8 @@ export function PublicWishlistPage() {
           <div className="flex items-start justify-between mb-4">
             <div>
               <div className="flex items-center mb-2">
-                <Eye className="w-5 h-5 text-blue-600 mr-2" />
-                <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                <Eye className="w-5 h-5 text-white mr-2" />
+                <Badge variant="secondary" className="bg-zinc-800 text-zinc-200">
                   Public Wishlist
                 </Badge>
               </div>
@@ -212,7 +212,7 @@ export function PublicWishlistPage() {
                   <div className="space-y-3">
                     <div>
                       <h3 
-                        className="font-semibold cursor-pointer hover:text-blue-600 transition-colors"
+                        className="font-semibold cursor-pointer hover:text-white transition-colors"
                         onClick={() => viewProduct(item.productId._id)}
                       >
                         {item.productId.title}

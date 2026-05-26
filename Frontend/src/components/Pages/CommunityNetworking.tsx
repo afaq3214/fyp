@@ -212,7 +212,7 @@ export default function CommunityNetworking() {
               className="font-semibold text-white hover:underline text-sm text-left">
               {u.name}
             </button>
-            {u.jobTitle && <p className="text-xs text-zinc-400 mt-0.5">{u.jobTitle}</p>}
+            {u.jobTitle && <p className="text-xs text-white mt-0.5">{u.jobTitle}</p>}
             {u.location && <p className="text-xs text-zinc-600">{u.location}</p>}
             {u.bio && <p className="text-xs text-zinc-500 mt-1 line-clamp-2">{u.bio}</p>}
           </div>
@@ -244,20 +244,20 @@ export default function CommunityNetworking() {
                 </DialogHeader>
                 <div className="space-y-4 mt-2">
                   <div>
-                    <label className="text-xs text-zinc-400 mb-1.5 block uppercase tracking-wider">Your Message *</label>
+                    <label className="text-xs text-white mb-1.5 block uppercase tracking-wider">Your Message *</label>
                     <Textarea placeholder="What would you like to work on together?"
                       value={collabMessage} onChange={e => setCollabMessage(e.target.value)}
                       className="bg-zinc-900 border-zinc-700 text-white min-h-24 placeholder-zinc-600 resize-none" />
                   </div>
                   <div>
-                    <label className="text-xs text-zinc-400 mb-1.5 block uppercase tracking-wider">Skills You Offer</label>
+                    <label className="text-xs text-white mb-1.5 block uppercase tracking-wider">Skills You Offer</label>
                     <Input placeholder="e.g. React, Node.js, UI Design (comma-separated)"
                       value={collabSkills} onChange={e => setCollabSkills(e.target.value)}
                       className="bg-zinc-900 border-zinc-700 text-white placeholder-zinc-600" />
                   </div>
                   {myProducts.length > 0 && (
                     <div>
-                      <label className="text-xs text-zinc-400 mb-1.5 block uppercase tracking-wider">Related Product</label>
+                      <label className="text-xs text-white mb-1.5 block uppercase tracking-wider">Related Product</label>
                       <select value={collabProductId} onChange={e => setCollabProductId(e.target.value)}
                         className="w-full bg-zinc-900 border border-zinc-700 rounded-md px-3 py-2 text-white text-sm">
                         <option value="">No specific product</option>
@@ -364,7 +364,7 @@ export default function CommunityNetworking() {
             <div className="space-y-10">
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-sm font-semibold uppercase tracking-wider text-zinc-400">
+                  <h3 className="text-sm font-semibold uppercase tracking-wider text-white">
                     Following — {following.length}
                   </h3>
                 </div>
@@ -384,7 +384,7 @@ export default function CommunityNetworking() {
               </div>
 
               <div>
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-zinc-400 mb-4">
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-white mb-4">
                   Followers — {followers.length}
                 </h3>
                 {followers.length === 0 ? (
@@ -411,7 +411,7 @@ export default function CommunityNetworking() {
               <div className="flex gap-1 mb-6 bg-zinc-900 p-1 rounded-lg w-fit">
                 <button onClick={() => setCollabView('incoming')}
                   className={`flex items-center gap-2 px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                    collabView === 'incoming' ? 'bg-white text-black' : 'text-zinc-400 hover:text-white'}`}>
+                    collabView === 'incoming' ? 'bg-white text-black' : 'text-white hover:text-white'}`}>
                   <Inbox className="w-3.5 h-3.5" />
                   Incoming
                   {pendingIncoming > 0 && (
@@ -423,7 +423,7 @@ export default function CommunityNetworking() {
                 </button>
                 <button onClick={() => setCollabView('sent')}
                   className={`flex items-center gap-2 px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                    collabView === 'sent' ? 'bg-white text-black' : 'text-zinc-400 hover:text-white'}`}>
+                    collabView === 'sent' ? 'bg-white text-black' : 'text-white hover:text-white'}`}>
                   <Send className="w-3.5 h-3.5" />
                   Sent
                   {sentCollabs.length > 0 && (
@@ -466,7 +466,7 @@ export default function CommunityNetworking() {
                             <div className="flex flex-wrap gap-1.5 mb-2">
                               <span className="text-xs text-zinc-600 mr-1">Offers:</span>
                               {req.skills.map((s: string) => (
-                                <span key={s} className="text-xs border border-zinc-700 text-zinc-400 px-2 py-0.5 rounded-full">
+                                <span key={s} className="text-xs border border-zinc-700 text-white px-2 py-0.5 rounded-full">
                                   {s}
                                 </span>
                               ))}
@@ -474,7 +474,7 @@ export default function CommunityNetworking() {
                           )}
                           {req.productId && (
                             <p className="text-xs text-zinc-600">
-                              Re: <span className="text-zinc-400">{req.productId?.title}</span>
+                              Re: <span className="text-white">{req.productId?.title}</span>
                             </p>
                           )}
                           <p className="text-xs text-zinc-700 mt-2">
@@ -490,7 +490,7 @@ export default function CommunityNetworking() {
                             </Button>
                             <Button size="sm" onClick={() => updateCollab(req._id, 'rejected')}
                               disabled={btnLoading[req._id]}
-                              className="bg-zinc-900 border border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800 h-8 text-xs px-3">
+                              className="bg-zinc-900 border border-zinc-700 text-white hover:text-white hover:bg-zinc-800 h-8 text-xs px-3">
                               <XCircle className="w-3 h-3 mr-1" />Decline
                             </Button>
                           </div>
@@ -533,7 +533,7 @@ export default function CommunityNetworking() {
                             <div className="flex flex-wrap gap-1.5 mb-2">
                               <span className="text-xs text-zinc-600 mr-1">Skills offered:</span>
                               {req.skills.map((s: string) => (
-                                <span key={s} className="text-xs border border-zinc-700 text-zinc-400 px-2 py-0.5 rounded-full">
+                                <span key={s} className="text-xs border border-zinc-700 text-white px-2 py-0.5 rounded-full">
                                   {s}
                                 </span>
                               ))}
@@ -541,7 +541,7 @@ export default function CommunityNetworking() {
                           )}
                           {req.productId && (
                             <p className="text-xs text-zinc-600">
-                              Re: <span className="text-zinc-400">{req.productId?.title}</span>
+                              Re: <span className="text-white">{req.productId?.title}</span>
                             </p>
                           )}
                           <p className="text-xs text-zinc-700 mt-2">

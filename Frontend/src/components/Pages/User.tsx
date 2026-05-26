@@ -147,7 +147,7 @@ export function PublicUserProfile() {
     </div>
   );
   if (!user) return (
-    <div className="min-h-screen bg-black text-zinc-400 flex items-center justify-center text-base">
+    <div className="min-h-screen bg-black text-white flex items-center justify-center text-base">
       User not found
     </div>
   );
@@ -203,7 +203,7 @@ export function PublicUserProfile() {
                   />
                 ) : (
                   <div className="w-full h-full bg-zinc-800 flex items-center justify-center">
-                    <span className="text-3xl font-bold text-zinc-400">
+                    <span className="text-3xl font-bold text-white">
                       {user.name?.charAt(0).toUpperCase()}
                     </span>
                   </div>
@@ -221,7 +221,7 @@ export function PublicUserProfile() {
                 <div>
                   <h1 className="text-2xl font-bold text-white leading-tight">{user.name}</h1>
                   {user.makerStory && (
-                    <p className="text-base text-zinc-400 mt-0.5">{user.makerStory}</p>
+                    <p className="text-base text-white mt-0.5">{user.makerStory}</p>
                   )}
                 </div>
                 {/* Follow button */}
@@ -232,7 +232,7 @@ export function PublicUserProfile() {
 
               {/* Rank + followers row */}
               <div className="flex items-center gap-4 mt-3 text-sm text-zinc-500 flex-wrap">
-                <span className="font-mono font-medium text-zinc-400">{rankHex}</span>
+                <span className="font-mono font-medium text-white">{rankHex}</span>
                 <span>0 followers</span>
                 <span>0 following</span>
                 <span className="flex items-center gap-1">
@@ -270,26 +270,26 @@ export function PublicUserProfile() {
                 <div className="flex flex-wrap gap-2 mt-4">
                   {user.github && (
                     <a href={`https://github.com/${user.github}`} target="_blank" rel="noopener noreferrer"
-                      className="flex items-center gap-1.5 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-600 text-sm px-3 py-1.5 rounded-full transition-colors">
+                      className="flex items-center gap-1.5 border border-zinc-800 text-white hover:text-white hover:border-zinc-600 text-sm px-3 py-1.5 rounded-full transition-colors">
                       <Github className="w-3.5 h-3.5" />GitHub
                     </a>
                   )}
                   {user.twitter && (
                     <a href={`https://twitter.com/${user.twitter}`} target="_blank" rel="noopener noreferrer"
-                      className="flex items-center gap-1.5 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-600 text-sm px-3 py-1.5 rounded-full transition-colors">
+                      className="flex items-center gap-1.5 border border-zinc-800 text-white hover:text-white hover:border-zinc-600 text-sm px-3 py-1.5 rounded-full transition-colors">
                       <Twitter className="w-3.5 h-3.5" />Twitter
                     </a>
                   )}
                   {user.linkedin && (
                     <a href={`https://linkedin.com/in/${user.linkedin}`} target="_blank" rel="noopener noreferrer"
-                      className="flex items-center gap-1.5 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-600 text-sm px-3 py-1.5 rounded-full transition-colors">
+                      className="flex items-center gap-1.5 border border-zinc-800 text-white hover:text-white hover:border-zinc-600 text-sm px-3 py-1.5 rounded-full transition-colors">
                       <Linkedin className="w-3.5 h-3.5" />LinkedIn
                     </a>
                   )}
                   {user.website && (
                     <a href={user.website.startsWith('http') ? user.website : `https://${user.website}`}
                       target="_blank" rel="noopener noreferrer"
-                      className="flex items-center gap-1.5 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-600 text-sm px-3 py-1.5 rounded-full transition-colors">
+                      className="flex items-center gap-1.5 border border-zinc-800 text-white hover:text-white hover:border-zinc-600 text-sm px-3 py-1.5 rounded-full transition-colors">
                       <Globe className="w-3.5 h-3.5" />Website
                     </a>
                   )}
@@ -336,7 +336,7 @@ export function PublicUserProfile() {
             {user.bio && (
               <div>
                 <h2 className="text-base font-semibold text-white mb-3">About</h2>
-                <p className="text-base text-zinc-400 leading-relaxed">{user.bio}</p>
+                <p className="text-base text-white leading-relaxed">{user.bio}</p>
               </div>
             )}
 
@@ -344,7 +344,7 @@ export function PublicUserProfile() {
             {user.makerStory && (
               <div>
                 <h2 className="text-base font-semibold text-white mb-3">Maker Story</h2>
-                <p className="text-base text-zinc-400 leading-relaxed">{user.makerStory}</p>
+                <p className="text-base text-white leading-relaxed">{user.makerStory}</p>
               </div>
             )}
 
@@ -356,32 +356,32 @@ export function PublicUserProfile() {
                   {user.website && (
                     <a href={user.website.startsWith('http') ? user.website : `https://${user.website}`}
                       target="_blank" rel="noopener noreferrer"
-                      className="flex items-center gap-3 text-base text-zinc-400 hover:text-white transition-colors group">
-                      <Globe className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400" />
+                      className="flex items-center gap-3 text-base text-white hover:text-white transition-colors group">
+                      <Globe className="w-4 h-4 text-zinc-600 group-hover:text-white" />
                       <span className="truncate">{user.website}</span>
                       <ExternalLink className="w-3.5 h-3.5 text-zinc-700 group-hover:text-zinc-500 shrink-0" />
                     </a>
                   )}
                   {user.github && (
                     <a href={`https://github.com/${user.github}`} target="_blank" rel="noopener noreferrer"
-                      className="flex items-center gap-3 text-base text-zinc-400 hover:text-white transition-colors group">
-                      <Github className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400" />
+                      className="flex items-center gap-3 text-base text-white hover:text-white transition-colors group">
+                      <Github className="w-4 h-4 text-zinc-600 group-hover:text-white" />
                       <span>github.com/{user.github}</span>
                       <ExternalLink className="w-3.5 h-3.5 text-zinc-700 group-hover:text-zinc-500 shrink-0" />
                     </a>
                   )}
                   {user.twitter && (
                     <a href={`https://twitter.com/${user.twitter}`} target="_blank" rel="noopener noreferrer"
-                      className="flex items-center gap-3 text-base text-zinc-400 hover:text-white transition-colors group">
-                      <Twitter className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400" />
+                      className="flex items-center gap-3 text-base text-white hover:text-white transition-colors group">
+                      <Twitter className="w-4 h-4 text-zinc-600 group-hover:text-white" />
                       <span>@{user.twitter}</span>
                       <ExternalLink className="w-3.5 h-3.5 text-zinc-700 group-hover:text-zinc-500 shrink-0" />
                     </a>
                   )}
                   {user.linkedin && (
                     <a href={`https://linkedin.com/in/${user.linkedin}`} target="_blank" rel="noopener noreferrer"
-                      className="flex items-center gap-3 text-base text-zinc-400 hover:text-white transition-colors group">
-                      <Linkedin className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400" />
+                      className="flex items-center gap-3 text-base text-white hover:text-white transition-colors group">
+                      <Linkedin className="w-4 h-4 text-zinc-600 group-hover:text-white" />
                       <span>linkedin.com/in/{user.linkedin}</span>
                       <ExternalLink className="w-3.5 h-3.5 text-zinc-700 group-hover:text-zinc-500 shrink-0" />
                     </a>
@@ -457,7 +457,7 @@ export function PublicUserProfile() {
                       />
                       {/* Upvote badge */}
                       <div className="absolute top-4 right-4 bg-zinc-900/90 border border-zinc-700 rounded-full px-3 py-1.5 flex items-center gap-1.5 shadow-lg backdrop-blur-sm">
-                        <TrendingUp className="w-3.5 h-3.5 text-zinc-400" />
+                        <TrendingUp className="w-3.5 h-3.5 text-white" />
                         <span className="text-sm font-semibold text-white">{product.upvotes?.length ?? 0}</span>
                       </div>
                       {/* Category badge */}
@@ -483,7 +483,7 @@ export function PublicUserProfile() {
                       {product.autoTags && product.autoTags.length > 0 && (
                         <div className="flex flex-wrap gap-1.5 mb-4">
                           {product.autoTags.slice(0, 3).map((tag, i) => (
-                            <span key={i} className="text-xs bg-zinc-800 border border-zinc-700 text-zinc-400 px-2.5 py-1 rounded-lg">
+                            <span key={i} className="text-xs bg-zinc-800 border border-zinc-700 text-white px-2.5 py-1 rounded-lg">
                               #{tag}
                             </span>
                           ))}
@@ -560,7 +560,7 @@ export function PublicUserProfile() {
                       </div>
                       {item.notes && (
                         <div className="mt-3 p-3 rounded-xl bg-zinc-950 border border-zinc-800">
-                          <p className="text-sm text-zinc-400 italic">"{item.notes}"</p>
+                          <p className="text-sm text-white italic">"{item.notes}"</p>
                         </div>
                       )}
                     </div>
@@ -581,7 +581,7 @@ export function PublicUserProfile() {
                 {activities.map((activity: any, index: number) => (
                   <div key={activity._id || index}
                     className="flex items-start gap-4 bg-zinc-900 border border-zinc-800 rounded-xl px-5 py-4 hover:border-zinc-700 transition-colors">
-                    <div className="w-9 h-9 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center shrink-0 text-zinc-400">
+                    <div className="w-9 h-9 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center shrink-0 text-white">
                       {activityIcon[activity.type] ?? <Activity className="w-4 h-4" />}
                     </div>
                     <div className="flex-1 min-w-0">

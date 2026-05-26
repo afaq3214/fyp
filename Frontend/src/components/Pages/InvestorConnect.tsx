@@ -255,7 +255,7 @@ export default function InvestorConnect() {
               <p className="text-xs text-zinc-600 uppercase tracking-wider">{investors.length} active investors</p>
               {token && (
                 <Button size="sm" onClick={seedDemoInvestors}
-                  className="text-xs h-7 bg-zinc-900 border border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800">
+                  className="text-xs h-7 bg-zinc-900 border border-zinc-700 text-white hover:text-white hover:bg-zinc-800">
                   <Plus className="w-3 h-3 mr-1" />Add Demo Investors
                 </Button>
               )}
@@ -292,14 +292,14 @@ export default function InvestorConnect() {
                     )}
 
                     {inv.budget?.max > 0 && (
-                      <p className="text-xs text-zinc-400 mb-3">
+                      <p className="text-xs text-white mb-3">
                         Budget: <span className="text-white">${inv.budget.min?.toLocaleString()} – ${inv.budget.max?.toLocaleString()}</span>
                       </p>
                     )}
 
                     <div className="flex flex-wrap gap-1.5 mb-3">
                       {inv.investmentFocus?.map((f: string) => (
-                        <span key={f} className="text-[11px] border border-zinc-700 text-zinc-400 px-2 py-0.5 rounded-full">{f}</span>
+                        <span key={f} className="text-[11px] border border-zinc-700 text-white px-2 py-0.5 rounded-full">{f}</span>
                       ))}
                       {inv.stage?.map((s: string) => (
                         <span key={s} className="text-[11px] border border-zinc-800 text-zinc-600 px-2 py-0.5 rounded-full capitalize">{s}</span>
@@ -320,7 +320,7 @@ export default function InvestorConnect() {
                           </DialogHeader>
                           <div className="space-y-4 mt-2">
                             <div>
-                              <label className="text-xs text-zinc-400 mb-1.5 block uppercase tracking-wider">Select Your Product *</label>
+                              <label className="text-xs text-white mb-1.5 block uppercase tracking-wider">Select Your Product *</label>
                               <select value={applyForm.productId}
                                 onChange={e => setApplyForm(p => ({ ...p, productId: e.target.value }))}
                                 className="w-full bg-zinc-900 border border-zinc-700 rounded-md px-3 py-2 text-white text-sm">
@@ -329,20 +329,20 @@ export default function InvestorConnect() {
                               </select>
                             </div>
                             <div>
-                              <label className="text-xs text-zinc-400 mb-1.5 block uppercase tracking-wider">Your Pitch *</label>
+                              <label className="text-xs text-white mb-1.5 block uppercase tracking-wider">Your Pitch *</label>
                               <Textarea placeholder="Describe your product, traction, and why this investor is a fit..."
                                 value={applyForm.pitch} onChange={e => setApplyForm(p => ({ ...p, pitch: e.target.value }))}
                                 className="bg-zinc-900 border-zinc-700 text-white min-h-32 placeholder-zinc-600 resize-none" />
                             </div>
                             <div className="grid grid-cols-2 gap-3">
                               <div>
-                                <label className="text-xs text-zinc-400 mb-1.5 block uppercase tracking-wider">Funding ($)</label>
+                                <label className="text-xs text-white mb-1.5 block uppercase tracking-wider">Funding ($)</label>
                                 <Input type="number" placeholder="10000" value={applyForm.fundingAmount}
                                   onChange={e => setApplyForm(p => ({ ...p, fundingAmount: e.target.value }))}
                                   className="bg-zinc-900 border-zinc-700 text-white placeholder-zinc-600" />
                               </div>
                               <div>
-                                <label className="text-xs text-zinc-400 mb-1.5 block uppercase tracking-wider">Equity (%)</label>
+                                <label className="text-xs text-white mb-1.5 block uppercase tracking-wider">Equity (%)</label>
                                 <Input type="number" placeholder="5" value={applyForm.equity}
                                   onChange={e => setApplyForm(p => ({ ...p, equity: e.target.value }))}
                                   className="bg-zinc-900 border-zinc-700 text-white placeholder-zinc-600" />
@@ -399,7 +399,7 @@ export default function InvestorConnect() {
                         className={`px-3 py-1 rounded-full text-xs border transition-colors ${
                           profileForm.investmentFocus.includes(cat)
                             ? 'bg-white text-black border-white'
-                            : 'bg-transparent border-zinc-700 text-zinc-400 hover:border-zinc-500'}`}>
+                            : 'bg-transparent border-zinc-700 text-white hover:border-zinc-500'}`}>
                         {cat}
                       </button>
                     ))}
@@ -413,7 +413,7 @@ export default function InvestorConnect() {
                         className={`px-3 py-1 rounded-full text-xs border capitalize transition-colors ${
                           profileForm.stage.includes(s)
                             ? 'bg-white text-black border-white'
-                            : 'bg-transparent border-zinc-700 text-zinc-400 hover:border-zinc-500'}`}>
+                            : 'bg-transparent border-zinc-700 text-white hover:border-zinc-500'}`}>
                         {s}
                       </button>
                     ))}
@@ -468,7 +468,7 @@ export default function InvestorConnect() {
                               <AppStatusPill status={app.status} />
                             </div>
                             <p className="text-xs text-zinc-500 mb-1">Product: <span className="text-zinc-300">{app.productId?.title}</span></p>
-                            <p className="text-sm text-zinc-400 line-clamp-3 mb-2">{app.pitch}</p>
+                            <p className="text-sm text-white line-clamp-3 mb-2">{app.pitch}</p>
                             {(app.fundingAmount || app.equity) && (
                               <p className="text-xs text-zinc-600">
                                 {app.fundingAmount && `$${app.fundingAmount?.toLocaleString()}`}
@@ -483,7 +483,7 @@ export default function InvestorConnect() {
                                 <CheckCircle className="w-3 h-3 mr-1" />Accept
                               </Button>
                               <Button size="sm" onClick={() => updateApplication(app._id, 'rejected')}
-                                className="bg-zinc-900 border border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800 h-8 text-xs">
+                                className="bg-zinc-900 border border-zinc-700 text-white hover:text-white hover:bg-zinc-800 h-8 text-xs">
                                 <XCircle className="w-3 h-3 mr-1" />Reject
                               </Button>
                             </div>
@@ -526,9 +526,9 @@ export default function InvestorConnect() {
                               <AppStatusPill status={app.status} />
                             </div>
                             <p className="text-xs text-zinc-500 mb-1">Product: <span className="text-zinc-300">{app.productId?.title}</span></p>
-                            <p className="text-sm text-zinc-400 line-clamp-2">{app.pitch}</p>
+                            <p className="text-sm text-white line-clamp-2">{app.pitch}</p>
                             {app.investorNote && (
-                              <p className="text-xs text-zinc-400 mt-2 border-l-2 border-zinc-700 pl-2">{app.investorNote}</p>
+                              <p className="text-xs text-white mt-2 border-l-2 border-zinc-700 pl-2">{app.investorNote}</p>
                             )}
                           </div>
                           <div className="flex-shrink-0">
@@ -572,7 +572,7 @@ export default function InvestorConnect() {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-start justify-between gap-2">
                               <h3 className="font-semibold text-white text-sm leading-tight">{p.title}</h3>
-                              <button onClick={() => toggleBookmark(p._id)} className="text-zinc-400 hover:text-zinc-600 flex-shrink-0">
+                              <button onClick={() => toggleBookmark(p._id)} className="text-white hover:text-zinc-600 flex-shrink-0">
                                 <BookmarkCheck className="w-4 h-4" />
                               </button>
                             </div>
@@ -622,7 +622,7 @@ export default function InvestorConnect() {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="text-xs text-zinc-400 mb-1.5 block uppercase tracking-wider">{label}</label>
+      <label className="text-xs text-white mb-1.5 block uppercase tracking-wider">{label}</label>
       {children}
     </div>
   );

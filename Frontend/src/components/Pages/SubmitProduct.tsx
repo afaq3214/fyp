@@ -474,7 +474,7 @@ export default function SubmitProduct() {
                     <div className="text-center">
                       <div className="flex justify-center space-x-4 mb-4">
                         <div className="w-16 h-16 bg-blue-50 rounded-lg flex items-center justify-center">
-                          <ImageIcon className="w-8 h-8 text-blue-600" />
+                          <ImageIcon className="w-8 h-8 text-white" />
                         </div>
                         <div className="w-16 h-16 bg-purple-50 rounded-lg flex items-center justify-center">
                           <Video className="w-8 h-8 text-purple-600" />
@@ -581,10 +581,10 @@ export default function SubmitProduct() {
                       <Sparkles className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                      <h4 className="text-blue-900 mb-1">
+                      <h4 className="text-white mb-1">
                         Want instant visibility?
                       </h4>
-                      <p className="text-sm text-blue-700">
+                      <p className="text-sm text-white">
                         Use Boost Tokens to feature your product on the trending page for 24 hours. 
                         Earn tokens by reviewing other products and engaging with the community!
                       </p>

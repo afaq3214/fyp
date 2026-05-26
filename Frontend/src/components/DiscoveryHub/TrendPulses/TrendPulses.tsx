@@ -144,12 +144,12 @@ export function TrendPulses({ products }: TrendPulsesProps) {
         <Card className="bg-gradient-to-br from-blue-600/20 to-blue-800/20 backdrop-blur-sm border-blue-500/30 hover:shadow-lg transition-all duration-300 group cursor-pointer">
           <CardContent className="p-5">
             <div className="flex items-center gap-2 mb-3">
-              <Target className="w-5 h-5 text-blue-400 group-hover:scale-110 transition-transform" />
-              <span className="text-sm text-blue-200">Rising Stars</span>
+              <Target className="w-5 h-5 text-white group-hover:scale-110 transition-transform" />
+              <span className="text-sm text-white">Rising Stars</span>
               <Badge className="bg-blue-600 text-white border-0 ml-auto">Hot</Badge>
             </div>
             <div className="text-3xl text-white mb-2 font-bold">{metrics.risingStars}</div>
-            <div className="text-sm text-blue-200">Gaining momentum</div>
+            <div className="text-sm text-white">Gaining momentum</div>
           </CardContent>
         </Card>
       </div>

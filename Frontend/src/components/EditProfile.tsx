@@ -261,14 +261,14 @@ export function EditProfile() {
   // if (isLoading) return <div>Loading...</div>;
   // if (error) return <div>Error: {error}</div>;
 
-  const labelClass = "block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5";
+  const labelClass = "block text-xs font-semibold text-white uppercase tracking-wider mb-1.5";
   const inputClass = "bg-zinc-900 border-zinc-800 text-white placeholder-zinc-600 focus:border-white/30";
 
   return (
     <div className="min-h-screen bg-black text-white">
       <div className="border-b border-zinc-900 bg-zinc-950 px-6 py-8">
         <div className="max-w-2xl mx-auto">
-          <button onClick={handleCancel} className="flex items-center gap-2 text-zinc-400 hover:text-white text-sm mb-6 transition-colors">
+          <button onClick={handleCancel} className="flex items-center gap-2 text-white hover:text-white text-sm mb-6 transition-colors">
             <ArrowLeft className="w-4 h-4" />
             Back to Profile
           </button>
@@ -356,7 +356,7 @@ export function EditProfile() {
                 </div>
               ))}
               <button type="button" onClick={addPortfolioItem}
-                className="mt-3 flex items-center gap-2 text-sm text-zinc-400 hover:text-white border border-zinc-800 hover:border-zinc-700 px-4 py-2 rounded-lg transition-colors">
+                className="mt-3 flex items-center gap-2 text-sm text-white hover:text-white border border-zinc-800 hover:border-zinc-700 px-4 py-2 rounded-lg transition-colors">
                 <Plus className="w-4 h-4" />
                 Add Portfolio Item
               </button>
@@ -364,7 +364,7 @@ export function EditProfile() {
 
             <div className="flex justify-end gap-3 pt-2 border-t border-zinc-800">
               <button type="button" onClick={handleCancel}
-                className="px-5 py-2 text-sm text-zinc-400 hover:text-white border border-zinc-700 hover:border-zinc-600 rounded-lg transition-colors">
+                className="px-5 py-2 text-sm text-white hover:text-white border border-zinc-700 hover:border-zinc-600 rounded-lg transition-colors">
                 Cancel
               </button>
               <button type="submit"

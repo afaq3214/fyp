@@ -267,7 +267,7 @@ export function UserProfile() {
         <div className="absolute top-6 left-6">
           <button
             onClick={() => window.history.back()}
-            className="flex items-center gap-2 text-zinc-400 hover:text-white text-sm transition-colors"
+            className="flex items-center gap-2 text-white hover:text-white text-sm transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             Back
@@ -321,13 +321,13 @@ export function UserProfile() {
                 </div>
 
                 <div className="flex flex-wrap gap-4 mb-6">
-                  <div className="flex items-center text-zinc-400">
+                  <div className="flex items-center text-white">
                     <Briefcase className="w-4 h-4 mr-2" />
                     <span className="capitalize">{user.role}</span>
                   </div>
 
-                  <div className="flex items-center text-zinc-400">
-                    <Star className="w-4 h-4 mr-2 text-zinc-400" />
+                  <div className="flex items-center text-white">
+                    <Star className="w-4 h-4 mr-2 text-white" />
                     <span>{user.badges.length} Badges</span>
                   </div>
                 </div>
@@ -337,25 +337,25 @@ export function UserProfile() {
                   <div className="flex flex-wrap gap-2">
                     {user.github && (
                       <a href={user.github} target="_blank" rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 text-xs border border-zinc-700 text-zinc-400 hover:text-white hover:border-white/30 px-3 py-1.5 rounded-lg transition-colors">
+                        className="flex items-center gap-1.5 text-xs border border-zinc-700 text-white hover:text-white hover:border-white/30 px-3 py-1.5 rounded-lg transition-colors">
                         <Github className="w-3.5 h-3.5" />GitHub
                       </a>
                     )}
                     {user.twitter && (
                       <a href={user.twitter} target="_blank" rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 text-xs border border-zinc-700 text-zinc-400 hover:text-white hover:border-white/30 px-3 py-1.5 rounded-lg transition-colors">
+                        className="flex items-center gap-1.5 text-xs border border-zinc-700 text-white hover:text-white hover:border-white/30 px-3 py-1.5 rounded-lg transition-colors">
                         <Twitter className="w-3.5 h-3.5" />Twitter
                       </a>
                     )}
                     {user.linkedin && (
                       <a href={user.linkedin} target="_blank" rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 text-xs border border-zinc-700 text-zinc-400 hover:text-white hover:border-white/30 px-3 py-1.5 rounded-lg transition-colors">
+                        className="flex items-center gap-1.5 text-xs border border-zinc-700 text-white hover:text-white hover:border-white/30 px-3 py-1.5 rounded-lg transition-colors">
                         <Linkedin className="w-3.5 h-3.5" />LinkedIn
                       </a>
                     )}
                     {user.website && (
                       <a href={user.website} target="_blank" rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 text-xs border border-zinc-700 text-zinc-400 hover:text-white hover:border-white/30 px-3 py-1.5 rounded-lg transition-colors">
+                        className="flex items-center gap-1.5 text-xs border border-zinc-700 text-white hover:text-white hover:border-white/30 px-3 py-1.5 rounded-lg transition-colors">
                         <Globe className="w-3.5 h-3.5" />Website
                       </a>
                     )}
@@ -372,10 +372,10 @@ export function UserProfile() {
             <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <Target className="w-4 h-4 text-zinc-400" />
+                  <Target className="w-4 h-4 text-white" />
                   <span className="text-sm font-medium">Complete Your Profile — {profileCompletion}%</span>
                 </div>
-                <button onClick={handleEditProfile} className="text-xs text-zinc-400 hover:text-white underline underline-offset-2 transition-colors">
+                <button onClick={handleEditProfile} className="text-xs text-white hover:text-white underline underline-offset-2 transition-colors">
                   Complete Now →
                 </button>
               </div>
@@ -392,7 +392,7 @@ export function UserProfile() {
           <div className="mb-8">
             <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
               <div className="border-b border-zinc-800 px-6 py-4 flex items-center gap-2">
-                <Mail className="w-4 h-4 text-zinc-400" />
+                <Mail className="w-4 h-4 text-white" />
                 <span className="text-sm font-semibold">AI Recommendations</span>
               </div>
               <div className="p-6">
@@ -418,8 +418,8 @@ export function UserProfile() {
         <div className="mb-8">
           <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
             <div className="border-b border-zinc-800 px-6 py-4 flex items-center gap-2">
-              <Users className="w-4 h-4 text-zinc-400" />
-              <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">About</span>
+              <Users className="w-4 h-4 text-white" />
+              <span className="text-xs font-semibold text-white uppercase tracking-wider">About</span>
             </div>
             <div className="p-6">
               {user.bio ? (
@@ -429,7 +429,7 @@ export function UserProfile() {
               ) : (
                 <div className="text-center py-6">
                   <p className="text-zinc-600 text-sm mb-4">No bio added yet.</p>
-                  <Button variant="outline" onClick={handleEditProfile} className="border-zinc-700 text-zinc-400 hover:text-white hover:border-white/30">
+                  <Button variant="outline" onClick={handleEditProfile} className="border-zinc-700 text-white hover:text-white hover:border-white/30">
                     <Edit3 className="w-4 h-4 mr-2" />
                     Add Bio
                   </Button>
@@ -443,7 +443,7 @@ export function UserProfile() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 hover:border-zinc-700 transition-colors">
             <div className="flex items-center justify-between mb-2">
-              <Trophy className="w-6 h-6 text-zinc-400" />
+              <Trophy className="w-6 h-6 text-white" />
             </div>
             <div className="text-3xl font-bold mb-1">{products.length}</div>
             <div className="text-sm text-zinc-500">Products</div>
@@ -451,7 +451,7 @@ export function UserProfile() {
 
           <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 hover:border-zinc-700 transition-colors">
             <div className="flex items-center justify-between mb-2">
-              <Zap className="w-6 h-6 text-zinc-400" />
+              <Zap className="w-6 h-6 text-white" />
             </div>
             <div className="text-3xl font-bold mb-1">{user.totalUpvotes}</div>
             <div className="text-sm text-zinc-500">Total Upvotes</div>
@@ -462,8 +462,8 @@ export function UserProfile() {
         {user.makerStory && (
           <div className="mb-8 bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
             <div className="border-b border-zinc-800 px-6 py-4 flex items-center gap-2">
-              <Star className="w-4 h-4 text-zinc-400" />
-              <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">My Maker Journey</span>
+              <Star className="w-4 h-4 text-white" />
+              <span className="text-xs font-semibold text-white uppercase tracking-wider">My Maker Journey</span>
             </div>
             <div className="p-6">
               <p className="text-zinc-300 leading-relaxed whitespace-pre-wrap">
@@ -545,7 +545,7 @@ export function UserProfile() {
                       {product.autoTags.length > 0 && (
                         <div className="flex flex-wrap gap-1 mt-2">
                           {product.autoTags.slice(0, 3).map((tag, index) => (
-                            <span key={index} className="text-[10px] bg-zinc-800 text-zinc-400 px-1.5 py-0.5 rounded-full">#{tag}</span>
+                            <span key={index} className="text-[10px] bg-zinc-800 text-white px-1.5 py-0.5 rounded-full">#{tag}</span>
                           ))}
                         </div>
                       )}
@@ -621,9 +621,9 @@ export function UserProfile() {
           <div className="absolute inset-0 bg-black/70" onClick={() => setShowDeleteModal(false)} />
           <div className="relative bg-zinc-900 border border-zinc-800 rounded-xl w-full max-w-md p-6 z-10">
             <h3 className="text-sm font-semibold mb-3">Delete product</h3>
-            <p className="text-xs text-zinc-400 mb-6">Are you sure you want to delete <strong className="text-white">{productToDelete.title}</strong>? This action cannot be undone.</p>
+            <p className="text-xs text-white mb-6">Are you sure you want to delete <strong className="text-white">{productToDelete.title}</strong>? This action cannot be undone.</p>
             <div className="flex justify-end gap-3">
-              <button className="border border-zinc-700 text-zinc-400 hover:text-white text-xs px-4 py-2 rounded-lg transition-colors"
+              <button className="border border-zinc-700 text-white hover:text-white text-xs px-4 py-2 rounded-lg transition-colors"
                 onClick={() => { setShowDeleteModal(false); setProductToDelete(null); }}>
                 Cancel
               </button>

@@ -116,7 +116,7 @@ export default function ProblemDiscovery() {
               <Tag className="w-3.5 h-3.5 text-zinc-600 flex-shrink-0" />
               <span className="text-xs text-zinc-600 uppercase tracking-wider mr-1">Keywords</span>
               {keywords.map(kw => (
-                <span key={kw} className="text-xs border border-zinc-800 text-zinc-400 px-2 py-0.5 rounded-full">{kw}</span>
+                <span key={kw} className="text-xs border border-zinc-800 text-white px-2 py-0.5 rounded-full">{kw}</span>
               ))}
             </div>
           )}
@@ -227,7 +227,7 @@ export default function ProblemDiscovery() {
             ].map(step => (
               <div key={step.n} className="text-center">
                 <div className="text-3xl font-bold text-zinc-800 mb-2">{step.n}</div>
-                <h3 className="text-sm font-semibold text-zinc-400 mb-1">{step.title}</h3>
+                <h3 className="text-sm font-semibold text-white mb-1">{step.title}</h3>
                 <p className="text-xs text-zinc-700 leading-relaxed">{step.desc}</p>
               </div>
             ))}

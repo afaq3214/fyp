@@ -260,21 +260,21 @@ export function Header({
             <nav className="flex items-center space-x-1">
               <Link
                 to="/investor-connect"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-white hover:text-white hover:bg-zinc-900 transition-colors"
               >
                 <DollarSign className="w-4 h-4" />
                 <span>Investors</span>
               </Link>
               <Link
                 to="/problem-discovery"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-white hover:text-white hover:bg-zinc-900 transition-colors"
               >
                 <Sparkles className="w-4 h-4" />
                 <span>Discover</span>
               </Link>
               <Link
                 to="/community"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-white hover:text-white hover:bg-zinc-900 transition-colors"
               >
                 <Network className="w-4 h-4" />
                 <span>Community</span>
@@ -292,7 +292,7 @@ export function Header({
               <div className="flex items-center space-x-3">
                 <div className="relative" ref={notificationRef}>
                   <button
-                    className="relative p-2 text-zinc-400 hover:text-white transition-colors"
+                    className="relative p-2 text-white hover:text-white transition-colors"
                     onClick={(e) => {
                       e.stopPropagation();
                       navigate('/notifications');
@@ -349,7 +349,7 @@ export function Header({
                   )}
                 </div>
                 <button
-                  className="relative p-2 text-zinc-400 hover:text-white transition-colors"
+                  className="relative p-2 text-white hover:text-white transition-colors"
                   onClick={() => navigate('/wishlist')}
                 >
                   <Heart className="w-4 h-4" />
@@ -420,7 +420,7 @@ export function Header({
                         <div className="border-t border-zinc-800 my-1" />
                         <button
                           onClick={() => { onLogout(); setIsUserMenuOpen(false); }}
-                          className="flex items-center w-full px-4 py-2 text-sm text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors"
+                          className="flex items-center w-full px-4 py-2 text-sm text-white hover:bg-zinc-800 hover:text-white transition-colors"
                         >
                           Logout
                         </button>
@@ -442,7 +442,7 @@ export function Header({
           {/* Mobile Menu Button */}
           <div className="md:hidden">
             <button
-              className="p-2 text-zinc-400 hover:text-white transition-colors"
+              className="p-2 text-white hover:text-white transition-colors"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
               {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -510,15 +510,15 @@ export function Header({
           <div className="md:hidden border-t border-zinc-900 py-4">
             <div className="flex flex-col space-y-1">
               <Link to="/investor-connect" onClick={() => setIsMenuOpen(false)}
-                className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors">
+                className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-white hover:text-white hover:bg-zinc-900 transition-colors">
                 <DollarSign className="w-4 h-4" />Investor Connect
               </Link>
               <Link to="/problem-discovery" onClick={() => setIsMenuOpen(false)}
-                className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors">
+                className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-white hover:text-white hover:bg-zinc-900 transition-colors">
                 <Sparkles className="w-4 h-4" />AI Discovery
               </Link>
               <Link to="/community" onClick={() => setIsMenuOpen(false)}
-                className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors">
+                className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-white hover:text-white hover:bg-zinc-900 transition-colors">
                 <Network className="w-4 h-4" />Community
               </Link>
               <div className="pt-2">
@@ -534,25 +534,25 @@ export function Header({
                 <>
                   <div className="border-t border-zinc-900 my-1" />
                   <button onClick={() => { onProfileClick(); setIsMenuOpen(false); }}
-                    className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors w-full text-left">
+                    className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-white hover:text-white hover:bg-zinc-900 transition-colors w-full text-left">
                     <User className="w-4 h-4" />Profile
                   </button>
                   <button onClick={() => { navigate('/notifications'); setIsMenuOpen(false); }}
-                    className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors w-full text-left">
+                    className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-white hover:text-white hover:bg-zinc-900 transition-colors w-full text-left">
                     <Bell className="w-4 h-4" />Notifications
                   </button>
                   <Link to="/quests" onClick={() => setIsMenuOpen(false)}
-                    className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors">
+                    className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-white hover:text-white hover:bg-zinc-900 transition-colors">
                     Challenge Quests
                   </Link>
                   {currentUser?.isAdmin && (
                     <button onClick={() => { onAdminClick(); setIsMenuOpen(false); }}
-                      className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors w-full text-left">
+                      className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-white hover:text-white hover:bg-zinc-900 transition-colors w-full text-left">
                       <span>👑</span>Admin Panel
                     </button>
                   )}
                   <button onClick={() => { onLogout(); setIsMenuOpen(false); }}
-                    className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors w-full text-left">
+                    className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-white hover:text-white hover:bg-zinc-900 transition-colors w-full text-left">
                     Logout
                   </button>
                 </>

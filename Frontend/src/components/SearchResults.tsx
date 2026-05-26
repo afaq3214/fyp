@@ -153,7 +153,7 @@ export default function SearchResults() {
                             {product.autoTags.slice(0, 3).map((tag, i) => (
                               <span
                                 key={i}
-                                className="text-[10px] bg-white/5 border border-white/10 text-zinc-400 px-2 py-0.5 rounded-full"
+                                className="text-[10px] bg-white/5 border border-white/10 text-white px-2 py-0.5 rounded-full"
                               >
                                 {tag}
                               </span>

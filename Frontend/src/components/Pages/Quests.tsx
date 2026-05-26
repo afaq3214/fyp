@@ -158,7 +158,7 @@ export function ChallengeQuests() {
               className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium transition-all capitalize ${
                 activeTab === tab
                   ? 'bg-white text-black'
-                  : 'text-zinc-400 hover:text-white'
+                  : 'text-white hover:text-white'
               }`}
             >
               {tab === 'quests' ? <Target className="w-4 h-4" /> : <Award className="w-4 h-4" />}
@@ -236,7 +236,7 @@ export function ChallengeQuests() {
                   </h3>
                   <p className="text-xs text-zinc-600 mb-3">{badge.description}</p>
                   {badge.earned ? (
-                    <div className="flex items-center justify-center gap-1 text-xs text-zinc-400">
+                    <div className="flex items-center justify-center gap-1 text-xs text-white">
                       <CheckCircle2 className="w-3.5 h-3.5 text-white" />
                       {badge.earnedDate ? `Earned ${badge.earnedDate}` : 'Earned'}
                     </div>
@@ -271,7 +271,7 @@ function QuestCard({ quest }: QuestCardProps) {
       <div className="flex items-start justify-between mb-4">
         <div
           className={`w-9 h-9 rounded-lg flex items-center justify-center ${
-            quest.completed ? 'bg-white text-black' : 'bg-zinc-800 text-zinc-400'
+            quest.completed ? 'bg-white text-black' : 'bg-zinc-800 text-white'
           }`}
         >
           {quest.completed ? <CheckCircle2 className="w-4 h-4" /> : quest.icon}
@@ -288,7 +288,7 @@ function QuestCard({ quest }: QuestCardProps) {
         <>
           <div className="flex items-center justify-between text-xs text-zinc-600 mb-2">
             <span>Progress</span>
-            <span className="font-medium text-zinc-400">{quest.progress} / {quest.target}</span>
+            <span className="font-medium text-white">{quest.progress} / {quest.target}</span>
           </div>
           <div className="h-1.5 bg-zinc-800 rounded-full mb-4">
             <div
@@ -303,7 +303,7 @@ function QuestCard({ quest }: QuestCardProps) {
         disabled={quest.completed || progressPercent < 100}
         className={`w-full py-2 rounded-lg text-xs font-semibold transition-colors ${
           quest.completed
-            ? 'bg-white/10 text-zinc-400 cursor-default'
+            ? 'bg-white/10 text-white cursor-default'
             : progressPercent >= 100
             ? 'bg-white text-black hover:bg-zinc-200'
             : 'border border-zinc-800 text-zinc-600 cursor-default'

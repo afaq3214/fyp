@@ -330,7 +330,7 @@ export function SmartFilters({ products, onFiltersChange, onSortChange }: SmartF
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <SlidersHorizontal className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              <SlidersHorizontal className="w-5 h-5 text-white dark:text-white" />
               <CardTitle className="text-lg">Smart Filters</CardTitle>
               {getActiveFilterCount() > 0 && (
                 <Badge className="bg-blue-600 text-white border-0">

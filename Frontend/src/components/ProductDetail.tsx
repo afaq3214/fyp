@@ -316,8 +316,8 @@ const handleReportComment = async () => {
       <div className="w-8 h-8 border-2 border-zinc-700 border-t-white rounded-full animate-spin" />
     </div>
   );
-  if (error) return <div className="min-h-screen bg-black text-zinc-400 flex items-center justify-center">Error: {error}</div>;
-  if (!product) return <div className="min-h-screen bg-black text-zinc-400 flex items-center justify-center">Product not found</div>;
+  if (error) return <div className="min-h-screen bg-black text-white flex items-center justify-center">Error: {error}</div>;
+  if (!product) return <div className="min-h-screen bg-black text-white flex items-center justify-center">Product not found</div>;
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -326,7 +326,7 @@ const handleReportComment = async () => {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <button
             onClick={handleBack}
-            className="flex items-center gap-2 text-zinc-400 hover:text-white text-sm mb-6 transition-colors group"
+            className="flex items-center gap-2 text-white hover:text-white text-sm mb-6 transition-colors group"
           >
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
             Back to Discovery
@@ -375,7 +375,7 @@ const handleReportComment = async () => {
                 ))}
               </div>
               {product.pitch && (
-                <p className="text-sm text-zinc-400 mt-2 max-w-2xl line-clamp-2">{product.pitch}</p>
+                <p className="text-sm text-white mt-2 max-w-2xl line-clamp-2">{product.pitch}</p>
               )}
             </div>
 
@@ -507,7 +507,7 @@ const handleReportComment = async () => {
                   <div className="mb-6">
                     <div className="flex flex-wrap gap-1.5">
                       {product.autoTags.map(tag => (
-                        <span key={tag} className="text-xs bg-zinc-800 text-zinc-400 border border-zinc-700 px-2.5 py-1 rounded-full hover:border-zinc-600 transition-colors">
+                        <span key={tag} className="text-xs bg-zinc-800 text-white border border-zinc-700 px-2.5 py-1 rounded-full hover:border-zinc-600 transition-colors">
                           #{tag}
                         </span>
                       ))}
@@ -522,7 +522,7 @@ const handleReportComment = async () => {
                     className={`flex items-center gap-2 text-sm px-4 py-2 rounded-lg border transition-colors ${
                       isUpvoted
                         ? 'bg-white text-black border-white'
-                        : 'border-zinc-700 text-zinc-400 hover:text-white hover:border-white/30'
+                        : 'border-zinc-700 text-white hover:text-white hover:border-white/30'
                     }`}
                   >
                     <Heart className={`w-3.5 h-3.5 ${isUpvoted ? 'fill-current' : ''}`} />
@@ -532,7 +532,7 @@ const handleReportComment = async () => {
                   <WishlistButton productId={product._id} size="md" />
 
                   <button onClick={handleShare}
-                    className="flex items-center gap-2 text-sm px-4 py-2 rounded-lg border border-zinc-700 text-zinc-400 hover:text-white hover:border-white/30 transition-colors">
+                    className="flex items-center gap-2 text-sm px-4 py-2 rounded-lg border border-zinc-700 text-white hover:text-white hover:border-white/30 transition-colors">
                     <Share2 className="w-3.5 h-3.5" />Share
                   </button>
 
@@ -544,7 +544,7 @@ const handleReportComment = async () => {
                   )}
                   {product.githubUrl && (
                     <a href={product.githubUrl} target="_blank" rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-sm px-4 py-2 rounded-lg border border-zinc-700 text-zinc-400 hover:text-white hover:border-white/30 transition-colors">
+                      className="flex items-center gap-2 text-sm px-4 py-2 rounded-lg border border-zinc-700 text-white hover:text-white hover:border-white/30 transition-colors">
                       <Github className="w-3.5 h-3.5" />View Code
                     </a>
                   )}
@@ -555,7 +555,7 @@ const handleReportComment = async () => {
             {/* Reviews Section */}
             <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
               <div className="border-b border-zinc-800 px-6 py-4 flex items-center gap-2">
-                <MessageCircle className="w-4 h-4 text-zinc-400" />
+                <MessageCircle className="w-4 h-4 text-white" />
                 <span className="text-sm font-semibold">Community Feedback ({productComments.length})</span>
               </div>
               <div className="p-6">
@@ -630,7 +630,7 @@ const handleReportComment = async () => {
                     {currentUser ? (
                       <div className="space-y-5">
                         <div>
-                          <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3">
+                          <label className="block text-xs font-semibold text-white uppercase tracking-wider mb-3">
                             Choose your emoji tag
                           </label>
                           <div className="flex flex-wrap gap-2">
@@ -651,7 +651,7 @@ const handleReportComment = async () => {
                         </div>
 
                         <div>
-                          <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3">Rating</label>
+                          <label className="block text-xs font-semibold text-white uppercase tracking-wider mb-3">Rating</label>
                           <div className="flex items-center gap-2">
                             {[1, 2, 3, 4, 5].map(starValue => (
                               <button key={starValue} type="button"
@@ -668,7 +668,7 @@ const handleReportComment = async () => {
                         </div>
 
                         <div>
-                          <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3">Your review</label>
+                          <label className="block text-xs font-semibold text-white uppercase tracking-wider mb-3">Your review</label>
                           <Textarea
                             placeholder="Share your thoughts about this product..."
                             value={reviewText}
@@ -710,8 +710,8 @@ const handleReportComment = async () => {
             {/* Creator Profile */}
             <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
               <div className="border-b border-zinc-800 px-5 py-4 flex items-center gap-2">
-                <Users className="w-4 h-4 text-zinc-400" />
-                <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Creator Profile</span>
+                <Users className="w-4 h-4 text-white" />
+                <span className="text-xs font-semibold text-white uppercase tracking-wider">Creator Profile</span>
               </div>
               <div className="p-5">
                 <div
@@ -736,11 +736,11 @@ const handleReportComment = async () => {
                       <ExternalLink className="w-3 h-3" />View Full Profile
                     </p>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400 transition-colors shrink-0" />
+                  <ChevronRight className="w-4 h-4 text-zinc-600 group-hover:text-white transition-colors shrink-0" />
                 </div>
                 <button
                   onClick={() => navigate(`/product-owner/${product.author_id}`)}
-                  className="w-full text-sm border border-zinc-700 text-zinc-400 hover:text-white hover:border-white/30 py-2 rounded-lg transition-colors flex items-center justify-center gap-2"
+                  className="w-full text-sm border border-zinc-700 text-white hover:text-white hover:border-white/30 py-2 rounded-lg transition-colors flex items-center justify-center gap-2"
                 >
                   <Users className="w-3.5 h-3.5" />Connect & Collaborate
                 </button>
@@ -750,14 +750,14 @@ const handleReportComment = async () => {
             {/* Product Analytics */}
             <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
               <div className="border-b border-zinc-800 px-5 py-4 flex items-center gap-2">
-                <BarChart3 className="w-4 h-4 text-zinc-400" />
-                <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Analytics</span>
+                <BarChart3 className="w-4 h-4 text-white" />
+                <span className="text-xs font-semibold text-white uppercase tracking-wider">Analytics</span>
               </div>
               <div className="p-5 space-y-3">
                 <div className="grid grid-cols-2 gap-3">
                   <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-4">
                     <div className="flex items-center justify-between mb-1">
-                      <Heart className="w-4 h-4 text-zinc-400" />
+                      <Heart className="w-4 h-4 text-white" />
                       <span className="text-[10px] text-zinc-600 font-medium uppercase">Total</span>
                     </div>
                     <div className="text-2xl font-bold">{productUpvotes}</div>
@@ -765,7 +765,7 @@ const handleReportComment = async () => {
                   </div>
                   <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-4">
                     <div className="flex items-center justify-between mb-1">
-                      <Calendar className="w-4 h-4 text-zinc-400" />
+                      <Calendar className="w-4 h-4 text-white" />
                       <span className="text-[10px] text-zinc-600 font-medium uppercase">Since</span>
                     </div>
                     <div className="text-lg font-bold">
@@ -775,7 +775,7 @@ const handleReportComment = async () => {
                   </div>
                 </div>
                 <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-3 flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-xs text-zinc-400">
+                  <div className="flex items-center gap-2 text-xs text-white">
                     <TrendingUp className="w-3.5 h-3.5" />Performance
                   </div>
                   <div className="flex gap-0.5">
@@ -796,13 +796,13 @@ const handleReportComment = async () => {
         <DialogContent className="bg-zinc-900 border border-zinc-800 text-white">
           <DialogHeader>
             <DialogTitle className="text-white">Report Comment</DialogTitle>
-            <DialogDescription className="text-zinc-400">
+            <DialogDescription className="text-white">
               Help us keep the community safe by reporting inappropriate content.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">Reason for Report</label>
+              <label className="block text-xs font-semibold text-white uppercase tracking-wider mb-2">Reason for Report</label>
               <Select value={reportReason} onValueChange={setReportReason}>
                 <SelectTrigger className="bg-zinc-950 border-zinc-700 text-white">
                   <SelectValue placeholder="Select a reason" />
@@ -818,7 +818,7 @@ const handleReportComment = async () => {
               </Select>
             </div>
             <div>
-              <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">Additional Details (Optional)</label>
+              <label className="block text-xs font-semibold text-white uppercase tracking-wider mb-2">Additional Details (Optional)</label>
               <Textarea
                 value={reportDescription}
                 onChange={e => setReportDescription(e.target.value)}
@@ -827,7 +827,7 @@ const handleReportComment = async () => {
               />
             </div>
             <div className="flex gap-2 justify-end">
-              <button className="text-xs border border-zinc-700 text-zinc-400 hover:text-white px-4 py-2 rounded-lg transition-colors"
+              <button className="text-xs border border-zinc-700 text-white hover:text-white px-4 py-2 rounded-lg transition-colors"
                 onClick={() => setShowReportDialog(false)}>Cancel</button>
               <button className="text-xs bg-white text-black font-semibold px-4 py-2 rounded-lg hover:bg-zinc-200 transition-colors disabled:opacity-50"
                 onClick={handleReportComment} disabled={!reportReason}>Submit Report</button>

@@ -222,18 +222,18 @@ export function WishlistPage() {
                     <Save className="w-3.5 h-3.5" />Save
                   </button>
                   <button onClick={() => setIsEditing(false)}
-                    className="text-xs border border-zinc-700 text-zinc-400 hover:text-white px-3 py-1.5 rounded-lg transition-colors">
+                    className="text-xs border border-zinc-700 text-white hover:text-white px-3 py-1.5 rounded-lg transition-colors">
                     <X className="w-3.5 h-3.5" />
                   </button>
                 </>
               ) : (
                 <>
                   <button onClick={() => setIsEditing(true)}
-                    className="flex items-center gap-1.5 text-xs border border-zinc-700 text-zinc-400 hover:text-white px-3 py-1.5 rounded-lg transition-colors">
+                    className="flex items-center gap-1.5 text-xs border border-zinc-700 text-white hover:text-white px-3 py-1.5 rounded-lg transition-colors">
                     <Edit2 className="w-3.5 h-3.5" />Edit
                   </button>
                   <button onClick={shareWishlist}
-                    className="flex items-center gap-1.5 text-xs border border-zinc-700 text-zinc-400 hover:text-white px-3 py-1.5 rounded-lg transition-colors">
+                    className="flex items-center gap-1.5 text-xs border border-zinc-700 text-white hover:text-white px-3 py-1.5 rounded-lg transition-colors">
                     <Share2 className="w-3.5 h-3.5" />Share
                   </button>
                 </>
@@ -246,7 +246,7 @@ export function WishlistPage() {
               <Textarea value={editDescription} onChange={e => setEditDescription(e.target.value)}
                 placeholder="Describe your wishlist..." rows={2}
                 className="bg-zinc-800 border-zinc-700 text-white placeholder-zinc-600 resize-none text-sm" />
-              <label className="flex items-center gap-2 text-sm text-zinc-400 cursor-pointer">
+              <label className="flex items-center gap-2 text-sm text-white cursor-pointer">
                 <input type="checkbox" checked={editIsPublic} onChange={e => setEditIsPublic(e.target.checked)}
                   className="rounded border-zinc-600 bg-zinc-800 text-white" />
                 {editIsPublic ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
@@ -333,11 +333,11 @@ export function WishlistPage() {
             <div className="flex items-center justify-between bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3">
               <div className="flex items-center gap-3">
                 <button onClick={() => setSelectedItems(filtered.map(i => i._id))}
-                  className="text-xs border border-zinc-700 text-zinc-400 hover:text-white px-3 py-1 rounded-lg transition-colors">
+                  className="text-xs border border-zinc-700 text-white hover:text-white px-3 py-1 rounded-lg transition-colors">
                   Select All
                 </button>
                 <button onClick={() => setSelectedItems([])}
-                  className="text-xs border border-zinc-700 text-zinc-400 hover:text-white px-3 py-1 rounded-lg transition-colors">
+                  className="text-xs border border-zinc-700 text-white hover:text-white px-3 py-1 rounded-lg transition-colors">
                   Clear
                 </button>
                 <span className="text-xs text-zinc-600">{selectedItems.length} selected</span>
@@ -417,7 +417,7 @@ export function WishlistPage() {
                       <div className="flex gap-2">
                         <button className="text-xs bg-white text-black px-3 py-1 rounded-lg"
                           onClick={() => item.productId?._id && updateItemNotes(item.productId._id, editingNotes[item.productId._id] || '')}>Save</button>
-                        <button className="text-xs border border-zinc-700 text-zinc-400 px-3 py-1 rounded-lg"
+                        <button className="text-xs border border-zinc-700 text-white px-3 py-1 rounded-lg"
                           onClick={() => setEditingNotes(prev => { const n = {...prev}; if (item.productId?._id) delete n[item.productId._id]; return n; })}>Cancel</button>
                       </div>
                     </div>

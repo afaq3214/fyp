@@ -412,7 +412,7 @@ export function AdminPanel() {
     </div>
   );
   if (error) return (
-    <div className="flex items-center justify-center min-h-screen bg-black text-zinc-400">
+    <div className="flex items-center justify-center min-h-screen bg-black text-white">
       Error: {error}
     </div>
   );
@@ -424,7 +424,7 @@ export function AdminPanel() {
         <div className="container mx-auto">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <button onClick={handleBack} className="flex items-center gap-2 text-zinc-400 hover:text-white text-sm transition-colors">
+              <button onClick={handleBack} className="flex items-center gap-2 text-white hover:text-white text-sm transition-colors">
                 <ArrowLeft className="w-4 h-4" />
                 Back
               </button>
@@ -473,10 +473,10 @@ export function AdminPanel() {
         {/* Main Content Tabs */}
         <Tabs defaultValue="products" className="w-full">
           <TabsList className="flex w-fit gap-1 mb-8 bg-zinc-900 border border-zinc-800 rounded-xl p-1">
-            <TabsTrigger value="products" className="px-4 py-2 text-sm rounded-lg data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:font-semibold text-zinc-400">Products</TabsTrigger>
-            <TabsTrigger value="users" className="px-4 py-2 text-sm rounded-lg data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:font-semibold text-zinc-400">Users</TabsTrigger>
-            <TabsTrigger value="moderation" className="px-4 py-2 text-sm rounded-lg data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:font-semibold text-zinc-400">Moderation</TabsTrigger>
-            <TabsTrigger value="analytics" className="px-4 py-2 text-sm rounded-lg data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:font-semibold text-zinc-400">Analytics</TabsTrigger>
+            <TabsTrigger value="products" className="px-4 py-2 text-sm rounded-lg data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:font-semibold text-white">Products</TabsTrigger>
+            <TabsTrigger value="users" className="px-4 py-2 text-sm rounded-lg data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:font-semibold text-white">Users</TabsTrigger>
+            <TabsTrigger value="moderation" className="px-4 py-2 text-sm rounded-lg data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:font-semibold text-white">Moderation</TabsTrigger>
+            <TabsTrigger value="analytics" className="px-4 py-2 text-sm rounded-lg data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:font-semibold text-white">Analytics</TabsTrigger>
           </TabsList>
 
           {/* Products Management */}
@@ -499,20 +499,20 @@ export function AdminPanel() {
                     </SelectContent>
                   </Select>
                   <button onClick={() => exportData('products')}
-                    className="flex items-center gap-1 text-xs border border-zinc-700 text-zinc-400 hover:text-white px-3 py-1.5 rounded-lg transition-colors">
+                    className="flex items-center gap-1 text-xs border border-zinc-700 text-white hover:text-white px-3 py-1.5 rounded-lg transition-colors">
                     <Download className="w-3.5 h-3.5" />Export
                   </button>
                   <button onClick={() => fetchData()}
-                    className="flex items-center gap-1 text-xs border border-zinc-700 text-zinc-400 hover:text-white px-3 py-1.5 rounded-lg transition-colors">
+                    className="flex items-center gap-1 text-xs border border-zinc-700 text-white hover:text-white px-3 py-1.5 rounded-lg transition-colors">
                     <RefreshCw className="w-3.5 h-3.5" />Refresh
                   </button>
                 </div>
               </div>
               {selectedProducts.length > 0 && (
                 <div className="flex items-center gap-3 px-6 py-3 bg-zinc-950 border-b border-zinc-800">
-                  <span className="text-sm text-zinc-400">{selectedProducts.length} selected</span>
+                  <span className="text-sm text-white">{selectedProducts.length} selected</span>
                   <button onClick={handleBulkProductDelete}
-                    className="flex items-center gap-1 text-xs text-zinc-400 hover:text-white border border-zinc-700 px-3 py-1 rounded-lg">
+                    className="flex items-center gap-1 text-xs text-white hover:text-white border border-zinc-700 px-3 py-1 rounded-lg">
                     <Trash2 className="w-3.5 h-3.5" />Delete Selected
                   </button>
                 </div>
@@ -545,7 +545,7 @@ export function AdminPanel() {
                     </div>
                     <div className="flex items-center gap-2">
                       <button onClick={() => navigate(`/product/${product._id}`)}
-                        className="flex items-center gap-1 text-xs border border-zinc-700 text-zinc-400 hover:text-white px-3 py-1.5 rounded-lg transition-colors">
+                        className="flex items-center gap-1 text-xs border border-zinc-700 text-white hover:text-white px-3 py-1.5 rounded-lg transition-colors">
                         <Eye className="w-3.5 h-3.5" />Review
                       </button>
                       <button onClick={() => handleDeleteProduct(product._id)}
@@ -572,20 +572,20 @@ export function AdminPanel() {
                       className="pl-8 w-52 bg-zinc-950 border-zinc-700 text-white placeholder-zinc-600 h-8 text-sm" />
                   </div>
                   <button onClick={() => exportData('users')}
-                    className="flex items-center gap-1 text-xs border border-zinc-700 text-zinc-400 hover:text-white px-3 py-1.5 rounded-lg transition-colors">
+                    className="flex items-center gap-1 text-xs border border-zinc-700 text-white hover:text-white px-3 py-1.5 rounded-lg transition-colors">
                     <Download className="w-3.5 h-3.5" />Export
                   </button>
                   <button onClick={() => fetchData()}
-                    className="flex items-center gap-1 text-xs border border-zinc-700 text-zinc-400 hover:text-white px-3 py-1.5 rounded-lg transition-colors">
+                    className="flex items-center gap-1 text-xs border border-zinc-700 text-white hover:text-white px-3 py-1.5 rounded-lg transition-colors">
                     <RefreshCw className="w-3.5 h-3.5" />Refresh
                   </button>
                 </div>
               </div>
               {selectedUsers.length > 0 && (
                 <div className="flex items-center gap-3 px-6 py-3 bg-zinc-950 border-b border-zinc-800">
-                  <span className="text-sm text-zinc-400">{selectedUsers.length} selected</span>
+                  <span className="text-sm text-white">{selectedUsers.length} selected</span>
                   <button onClick={handleBulkUserDelete}
-                    className="flex items-center gap-1 text-xs text-zinc-400 hover:text-white border border-zinc-700 px-3 py-1 rounded-lg">
+                    className="flex items-center gap-1 text-xs text-white hover:text-white border border-zinc-700 px-3 py-1 rounded-lg">
                     <Trash2 className="w-3.5 h-3.5" />Delete Selected
                   </button>
                 </div>
@@ -641,10 +641,10 @@ export function AdminPanel() {
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="text-zinc-400 text-sm">{new Date(user.createdAt).toLocaleDateString()}</TableCell>
-                      <TableCell className="text-zinc-400 text-sm">{products.filter(p => p.author_id === user.id).length}</TableCell>
+                      <TableCell className="text-white text-sm">{new Date(user.createdAt).toLocaleDateString()}</TableCell>
+                      <TableCell className="text-white text-sm">{products.filter(p => p.author_id === user.id).length}</TableCell>
                       <TableCell>
-                        <span className="text-[10px] font-semibold border border-zinc-700 text-zinc-400 px-2 py-0.5 rounded-full flex items-center gap-1 w-fit">
+                        <span className="text-[10px] font-semibold border border-zinc-700 text-white px-2 py-0.5 rounded-full flex items-center gap-1 w-fit">
                           {user.isAdmin && <Crown className="w-3 h-3" />}
                           {user.isAdmin ? 'Admin' : user.role || 'User'}
                         </span>
@@ -662,7 +662,7 @@ export function AdminPanel() {
                               <Eye className="w-4 h-4 mr-2" />View Profile
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleDeleteUser(user.id)}
-                              className="hover:bg-zinc-800 cursor-pointer text-zinc-400">
+                              className="hover:bg-zinc-800 cursor-pointer text-white">
                               <Trash2 className="w-4 h-4 mr-2" />Delete User
                             </DropdownMenuItem>
                           </DropdownMenuContent>
@@ -729,7 +729,7 @@ export function AdminPanel() {
                   <div className="space-y-3">
                     {card.rows.map((row) => (
                       <div key={row.label} className="flex justify-between items-center">
-                        <span className="flex items-center gap-2 text-sm text-zinc-400">
+                        <span className="flex items-center gap-2 text-sm text-white">
                           {'icon' in row && row.icon}
                           {row.label}
                         </span>

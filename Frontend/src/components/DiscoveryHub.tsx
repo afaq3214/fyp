@@ -106,7 +106,7 @@ export function DiscoveryHub() {
     </div>
   );
   if (error) return (
-    <div className="flex items-center justify-center min-h-[60vh] bg-black text-zinc-400 text-base">
+    <div className="flex items-center justify-center min-h-[60vh] bg-black text-white text-base">
       {error}
     </div>
   );
@@ -161,7 +161,7 @@ export function DiscoveryHub() {
                       referrerPolicy="no-referrer" loading="lazy" />
                   ) : (
                     <div className="w-10 h-10 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center">
-                      <span className="text-sm font-bold text-zinc-400">{user.name?.charAt(0).toUpperCase()}</span>
+                      <span className="text-sm font-bold text-white">{user.name?.charAt(0).toUpperCase()}</span>
                     </div>
                   )}
                   {index < 3 && (
@@ -185,7 +185,7 @@ export function DiscoveryHub() {
             <div className="sticky top-24 space-y-4">
               <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
                 <div className="px-5 py-4 border-b border-zinc-800 flex items-center gap-2">
-                  <Trophy className="w-4 h-4 text-zinc-400" />
+                  <Trophy className="w-4 h-4 text-white" />
                   <span className="text-sm font-semibold text-white">Top Makers</span>
                 </div>
                 <div className="p-3 space-y-0.5">
@@ -199,7 +199,7 @@ export function DiscoveryHub() {
                       <span className={`w-5 text-sm font-bold text-center shrink-0 ${
                         index === 0 ? 'text-white' :
                         index === 1 ? 'text-zinc-300' :
-                        index === 2 ? 'text-zinc-400' :
+                        index === 2 ? 'text-white' :
                         'text-zinc-600'
                       }`}>
                         {index + 1}
@@ -211,7 +211,7 @@ export function DiscoveryHub() {
                           referrerPolicy="no-referrer" loading="lazy" />
                       ) : (
                         <div className="w-8 h-8 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center shrink-0">
-                          <span className="text-sm font-bold text-zinc-400">
+                          <span className="text-sm font-bold text-white">
                             {user.name?.charAt(0).toUpperCase()}
                           </span>
                         </div>
@@ -353,7 +353,7 @@ export function DiscoveryHub() {
               <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
                 <div className="px-5 py-4 border-b border-zinc-800 flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Activity className="w-4 h-4 text-zinc-400" />
+                    <Activity className="w-4 h-4 text-white" />
                     <span className="text-sm font-semibold text-white">Recent Activity</span>
                   </div>
                 </div>
@@ -397,7 +397,7 @@ export function DiscoveryHub() {
               {/* Daily Quests */}
               <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
                 <div className="flex items-center gap-2 mb-1">
-                  <Sparkles className="w-4 h-4 text-zinc-400" />
+                  <Sparkles className="w-4 h-4 text-white" />
                   <p className="text-sm font-semibold text-white">Daily Quests</p>
                 </div>
                 <p className="text-sm text-zinc-600 mb-4">Complete quests to earn points and badges</p>
@@ -459,12 +459,12 @@ function ProductListView({ products, onProductClick }: { products: Product[]; on
                   {product.title}
                 </h3>
                 {product.trending && (
-                  <span className="shrink-0 text-xs border border-zinc-700 text-zinc-400 px-2 py-0.5 rounded-full flex items-center gap-0.5">
+                  <span className="shrink-0 text-xs border border-zinc-700 text-white px-2 py-0.5 rounded-full flex items-center gap-0.5">
                     <Flame className="w-3 h-3" />Hot
                   </span>
                 )}
                 {product.fresh && (
-                  <span className="shrink-0 text-xs border border-zinc-700 text-zinc-400 px-2 py-0.5 rounded-full">
+                  <span className="shrink-0 text-xs border border-zinc-700 text-white px-2 py-0.5 rounded-full">
                     New
                   </span>
                 )}
@@ -494,7 +494,7 @@ function ProductListView({ products, onProductClick }: { products: Product[]; on
                 />
               ) : (
                 <div className="w-7 h-7 rounded-full bg-zinc-700 flex items-center justify-center">
-                  <span className="text-xs font-bold text-zinc-400">
+                  <span className="text-xs font-bold text-white">
                     {product.author_name?.charAt(0).toUpperCase()}
                   </span>
                 </div>
@@ -558,7 +558,7 @@ function ProductGridView({ products, onProductClick }: { products: Product[]; on
               {/* Tags */}
               <div className="flex flex-wrap gap-1.5 mb-4">
                 {product.autoTags?.slice(0, 3).map((tag, i) => (
-                  <span key={i} className="text-xs bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded-full">
+                  <span key={i} className="text-xs bg-zinc-800 text-white px-2 py-0.5 rounded-full">
                     #{tag}
                   </span>
                 ))}
@@ -577,7 +577,7 @@ function ProductGridView({ products, onProductClick }: { products: Product[]; on
                     />
                   ) : (
                     <div className="w-6 h-6 rounded-full bg-zinc-700 flex items-center justify-center">
-                      <span className="text-xs font-bold text-zinc-400">{product.author_name?.charAt(0)}</span>
+                      <span className="text-xs font-bold text-white">{product.author_name?.charAt(0)}</span>
                     </div>
                   )}
                   <span className="text-sm text-zinc-500 truncate max-w-[90px]">{product.author_name}</span>

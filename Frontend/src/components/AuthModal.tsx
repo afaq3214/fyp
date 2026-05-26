@@ -597,7 +597,7 @@ const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
           {mode === 'login' && (
             <div className="text-center">
               <button
-                className="text-sm text-zinc-400 hover:text-white underline"
+                className="text-sm text-white hover:text-white underline"
                 onClick={() => onToggleMode('forgot-password')}
                 disabled={isLoading}
               >

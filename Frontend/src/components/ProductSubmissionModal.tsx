@@ -159,7 +159,7 @@ export function ProductSubmissionModal({ isOpen, onClose, currentUser }: Product
       <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto bg-zinc-900 border border-zinc-800 text-white">
         <DialogHeader>
           <DialogTitle className="flex items-center text-white">
-            <Sparkles className="w-5 h-5 mr-2 text-zinc-400" />
+            <Sparkles className="w-5 h-5 mr-2 text-white" />
             Submit Your Product
           </DialogTitle>
         </DialogHeader>
@@ -185,7 +185,7 @@ export function ProductSubmissionModal({ isOpen, onClose, currentUser }: Product
                 type="button"
                 onClick={generateAIPitch}
                 disabled={isGeneratingPitch || !formData.title}
-                className="flex items-center gap-1 text-xs border border-zinc-700 text-zinc-400 hover:text-white px-3 py-1.5 rounded-lg transition-colors disabled:opacity-40"
+                className="flex items-center gap-1 text-xs border border-zinc-700 text-white hover:text-white px-3 py-1.5 rounded-lg transition-colors disabled:opacity-40"
               >
                 <Wand2 className="w-3.5 h-3.5" />
                 {isGeneratingPitch ? 'Generating...' : 'AI Suggest'}
@@ -252,7 +252,7 @@ export function ProductSubmissionModal({ isOpen, onClose, currentUser }: Product
                   className={`flex items-center gap-1 text-xs px-3 py-1 rounded-full transition-colors disabled:opacity-40 ${
                     formData.tags.includes(tag)
                       ? 'bg-white text-black'
-                      : 'border border-zinc-700 text-zinc-400 hover:text-white'
+                      : 'border border-zinc-700 text-white hover:text-white'
                   }`}
                 >
                   <Tags className="w-3 h-3" />{tag}
@@ -283,7 +283,7 @@ export function ProductSubmissionModal({ isOpen, onClose, currentUser }: Product
               <p className="text-sm text-zinc-500 mb-4">Upload images, GIFs, or short demo videos (max 5MB)</p>
               <input type="file" accept="image/*,video/*" onChange={handleImageUpload} className="hidden" id="media-upload" />
               <button type="button" onClick={() => document.getElementById('media-upload')?.click()}
-                className="flex items-center gap-2 mx-auto text-sm border border-zinc-700 text-zinc-400 hover:text-white px-4 py-2 rounded-lg transition-colors">
+                className="flex items-center gap-2 mx-auto text-sm border border-zinc-700 text-white hover:text-white px-4 py-2 rounded-lg transition-colors">
                 <Upload className="w-4 h-4" />Choose File
               </button>
               {formData.imageFile && (
@@ -337,7 +337,7 @@ export function ProductSubmissionModal({ isOpen, onClose, currentUser }: Product
           {/* Submit Button */}
           <div className="flex gap-3">
             <button type="button" onClick={onClose} disabled={isSubmitting}
-              className="flex-1 border border-zinc-700 text-zinc-400 hover:text-white text-sm font-medium py-2.5 rounded-lg transition-colors">
+              className="flex-1 border border-zinc-700 text-white hover:text-white text-sm font-medium py-2.5 rounded-lg transition-colors">
               Cancel
             </button>
             <button type="submit" disabled={isSubmitting || pitchLimitExceeded}

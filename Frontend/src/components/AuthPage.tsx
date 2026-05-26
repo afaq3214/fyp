@@ -235,7 +235,7 @@ export function AuthPage({ mode: initialMode, onAuth, onBackToDiscovery }: AuthP
                 )}
               </div>
             </div>
-            <h2 className="mt-6 text-slate-900">
+            <h2 className="mt-6 text-white">
               {getTitle()}
             </h2>
             <p className="mt-2 text-sm text-gray-600">
@@ -407,11 +407,11 @@ export function AuthPage({ mode: initialMode, onAuth, onBackToDiscovery }: AuthP
                         />
                         <Label htmlFor="terms" className="text-sm leading-normal">
                           I agree to the{' '}
-                          <a href="#" className="text-blue-600 hover:underline">
+                          <a href="#" className="text-white underline hover:text-zinc-300">
                             Terms of Service
                           </a>{' '}
                           and{' '}
-                          <a href="#" className="text-blue-600 hover:underline">
+                          <a href="#" className="text-white underline hover:text-zinc-300">
                             Privacy Policy
                           </a>
                         </Label>
@@ -437,7 +437,7 @@ export function AuthPage({ mode: initialMode, onAuth, onBackToDiscovery }: AuthP
                       setMode('login');
                       setForgotPasswordStep('email');
                     }}
-                    className="text-blue-600 hover:underline"
+                    className="text-white underline hover:text-zinc-300"
                     disabled={isLoading}
                   >
                     Back to Sign In
@@ -449,7 +449,7 @@ export function AuthPage({ mode: initialMode, onAuth, onBackToDiscovery }: AuthP
                     </span>{' '}
                     <button
                       onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}
-                      className="text-blue-600 hover:underline"
+                      className="text-white underline hover:text-zinc-300"
                       disabled={isLoading}
                     >
                       {mode === 'login' ? 'Sign up' : 'Sign in'}
@@ -461,7 +461,7 @@ export function AuthPage({ mode: initialMode, onAuth, onBackToDiscovery }: AuthP
               {mode === 'login' && (
                 <div className="text-center">
                   <button 
-                    className="text-sm text-blue-600 hover:underline"
+                    className="text-sm text-white underline hover:text-zinc-300"
                     onClick={() => {
                       setMode('forgot-password');
                       setForgotPasswordStep('email');
@@ -484,7 +484,7 @@ export function AuthPage({ mode: initialMode, onAuth, onBackToDiscovery }: AuthP
             <h1 className="text-white text-4xl mb-4">
               Discover & Showcase Amazing Projects
             </h1>
-            <p className="text-slate-300 text-lg">
+            <p className="text-zinc-300 text-lg">
               Join a vibrant community of students, indie makers, and entrepreneurs. 
               Share your work and discover innovative products without paid promotions.
             </p>
@@ -499,7 +499,7 @@ export function AuthPage({ mode: initialMode, onAuth, onBackToDiscovery }: AuthP
                 <h3 className="text-white mb-1">
                   Trend Pulse Dashboard
                 </h3>
-                <p className="text-slate-400 text-sm">
+                <p className="text-white text-sm">
                   Stay on top of trending projects and discover what's gaining momentum in the community.
                 </p>
               </div>
@@ -513,7 +513,7 @@ export function AuthPage({ mode: initialMode, onAuth, onBackToDiscovery }: AuthP
                 <h3 className="text-white mb-1">
                   Community-Driven Rankings
                 </h3>
-                <p className="text-slate-400 text-sm">
+                <p className="text-white text-sm">
                   Fair and transparent ranking system based on genuine community engagement and feedback.
                 </p>
               </div>
@@ -527,29 +527,29 @@ export function AuthPage({ mode: initialMode, onAuth, onBackToDiscovery }: AuthP
                 <h3 className="text-white mb-1">
                   Gamified Interactions
                 </h3>
-                <p className="text-slate-400 text-sm">
+                <p className="text-white text-sm">
                   Earn badges, complete challenges, and build your reputation in the maker community.
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="pt-8 border-t border-slate-800">
-            <p className="text-slate-400 text-sm">
+          <div className="pt-8 border-t border-zinc-800">
+            <p className="text-white text-sm">
               Trusted by thousands of makers and entrepreneurs worldwide
             </p>
             <div className="flex items-center space-x-8 mt-4">
               <div>
                 <div className="text-white text-2xl">10K+</div>
-                <div className="text-slate-400 text-sm">Active Users</div>
+                <div className="text-white text-sm">Active Users</div>
               </div>
               <div>
                 <div className="text-white text-2xl">5K+</div>
-                <div className="text-slate-400 text-sm">Projects</div>
+                <div className="text-white text-sm">Projects</div>
               </div>
               <div>
                 <div className="text-white text-2xl">50K+</div>
-                <div className="text-slate-400 text-sm">Reviews</div>
+                <div className="text-white text-sm">Reviews</div>
               </div>
             </div>
           </div>

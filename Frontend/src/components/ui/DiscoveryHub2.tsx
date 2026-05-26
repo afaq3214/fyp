@@ -360,58 +360,48 @@ export function DiscoveryHub() {
     rankingFeed === 'all' ? false : rankingLoading[rankingFeed];
 
   if (isLoading) return <div className="flex justify-center items-center min-h-screen bg-black"><div className="w-6 h-6 border-2 border-zinc-700 border-t-white rounded-full animate-spin" /></div>;
-  if (error) return <div className="flex justify-center items-center min-h-screen bg-black"><p className="text-zinc-400 text-sm">Error: {error}</p></div>;
+  if (error) return <div className="flex justify-center items-center min-h-screen bg-black"><p className="text-white text-sm">Error: {error}</p></div>;
 
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Hero */}
-
+      <div className="border-b border-zinc-900 py-16 text-center px-4">
+        <h1 className="text-6xl sm:text-7xl font-bold max-w-5xl mx-auto tracking-tight text-white leading-none mb-4">
+          Community Driven Product Ranking System
+        </h1>
+        <p className="text-white text-base sm:text-lg mb-10">
+          Explore products ranked by genuine peer feedback — no paid promotions.
+        </p>
+        <div className="flex items-center justify-center flex-wrap gap-3">
+          <div className="flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-full px-5 py-2.5">
+            <Zap className="w-4 h-4 text-white" />
+            <span className="text-white font-bold">{products.length}</span>
+            <span className="text-zinc-500 text-sm">Products</span>
+          </div>
+          <div className="flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-full px-5 py-2.5">
+            <Award className="w-4 h-4 text-white" />
+            <span className="text-white font-bold">{topUsers.length}</span>
+            <span className="text-zinc-500 text-sm">Top Makers</span>
+          </div>
+          <div className="flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-full px-5 py-2.5">
+            <Users className="w-4 h-4 text-white" />
+            <span className="text-white font-bold">12K+</span>
+            <span className="text-zinc-500 text-sm">Community</span>
+          </div>
+        </div>
+      </div>
 
       <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-12 gap-6">
           {/* LEFT SIDEBAR - TOP MAKERS */}
-          <div className="col-span-12 md:col-span-3">
-            <div className="sticky top-6">
-              <div className="rounded-2xl bg-zinc-900 border border-zinc-800 overflow-hidden">
-                <div className="px-4 py-2 border-b border-zinc-800">
-                  <h2 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Top Makers</h2>
-                </div>
-                <div className="divide-y divide-zinc-900">
-                  {topUsers.slice(0, 6).map((user, index) => (
-                    <Link key={user._id} to={`/product-owner/${user._id}`}>
-                      <div className="p-2.5 hover:bg-zinc-800/50 transition-colors cursor-pointer group flex items-center gap-2.5">
-                        <div className="relative shrink-0">
-                          {user.profilePicture ? (
-                            <img src={user.profilePicture} alt={user.name}
-                              className="w-9 h-9 rounded-lg object-cover ring-1 ring-zinc-700"
-                              referrerPolicy="no-referrer" loading="lazy" />
-                          ) : (
-                            <div className="w-9 h-9 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center">
-                              <span className="text-xs font-semibold text-white">{user.name.charAt(0).toUpperCase()}</span>
-                            </div>
-                          )}
-                          <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-zinc-950 border border-zinc-700 flex items-center justify-center text-[8px] font-bold text-zinc-300">
-                            {index + 1}
-                          </div>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="text-xs font-medium text-white truncate group-hover:text-zinc-200">{user.name}</div>
-                          <div className="text-[10px] text-zinc-600">{user.points || 0} pts</div>
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
+         
 
           {/* CENTER - Products Feed */}
-          <div className="col-span-12 md:col-span-6">
+          <div className="col-span-12 md:col-span-9">
             {/* Ranking tabs */}
             <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 mb-4">
               <div className="flex items-center gap-2 mb-3">
-                <TrendingUp className="w-4 h-4 text-zinc-400" />
+                <TrendingUp className="w-4 h-4 text-white" />
                 <span className="text-sm font-medium text-white">Ranking with Momentum</span>
               </div>
               <Tabs value={rankingFeed} onValueChange={(v) => setRankingFeed(v as RankingFeed)}>
@@ -534,10 +524,10 @@ export function DiscoveryHub() {
                       <div className="flex items-start justify-between gap-3 mb-3">
                         <div className="flex-1 min-w-0">
                           <h3 className="text-base font-bold text-white mb-2 group-hover:text-zinc-200 line-clamp-2">{product.title}</h3>
-                          <p className="text-sm text-zinc-400 line-clamp-2 leading-relaxed">{product.description}</p>
+                          <p className="text-sm text-white line-clamp-2 leading-relaxed">{product.description}</p>
                         </div>
                         <div className="shrink-0 flex flex-col items-center justify-center w-14 h-14 border border-zinc-800 hover:border-white/30 rounded-xl transition-colors bg-zinc-950">
-                          <ArrowUp className="w-5 h-5 text-zinc-400" />
+                          <ArrowUp className="w-5 h-5 text-white" />
                           <span className="text-sm font-bold text-white mt-1">{product.upvotes?.length ?? 0}</span>
                         </div>
                       </div>
@@ -562,7 +552,7 @@ export function DiscoveryHub() {
                             <span className="text-xs font-bold text-white">{product.author_name?.charAt(0)?.toUpperCase()}</span>
                           </div>
                         )}
-                        <span className="text-sm text-zinc-400">{product.author_name}</span>
+                        <span className="text-sm text-white">{product.author_name}</span>
                         <span className="text-zinc-700">·</span>
                         <span className="text-xs text-zinc-600">{new Date(product.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short" })}</span>
                       </div>
@@ -583,12 +573,45 @@ export function DiscoveryHub() {
           {/* RIGHT SIDEBAR */}
           <div className="col-span-12 md:col-span-3">
             <div className="sticky top-6 space-y-4">
+               <div className="sticky top-6">
+              <div className="rounded-2xl bg-zinc-900 border border-zinc-800 overflow-hidden">
+                <div className="px-4 py-2 border-b border-zinc-800">
+                  <h2 className="text-xs font-semibold text-white uppercase tracking-wider">Top Makers</h2>
+                </div>
+                <div className="divide-y divide-zinc-900">
+                  {topUsers.slice(0, 6).map((user, index) => (
+                    <Link key={user._id} to={`/product-owner/${user._id}`}>
+                      <div className="p-2.5 hover:bg-zinc-800/50 transition-colors cursor-pointer group flex items-center gap-2.5">
+                        <div className="relative shrink-0">
+                          {user.profilePicture ? (
+                            <img src={user.profilePicture} alt={user.name}
+                              className="w-9 h-9 rounded-lg object-cover ring-1 ring-zinc-700"
+                              referrerPolicy="no-referrer" loading="lazy" />
+                          ) : (
+                            <div className="w-9 h-9 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center">
+                              <span className="text-xs font-semibold text-white">{user.name.charAt(0).toUpperCase()}</span>
+                            </div>
+                          )}
+                          <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-zinc-950 border border-zinc-700 flex items-center justify-center text-[8px] font-bold text-zinc-300">
+                            {index + 1}
+                          </div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-xs font-medium text-white truncate group-hover:text-zinc-200">{user.name}</div>
+                          <div className="text-[10px] text-zinc-600">{user.points || 0} pts</div>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
               {/* AI Suggested */}
               {hasAuthToken && (
                 <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
                   <div className="px-4 py-3 border-b border-zinc-800 flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-zinc-400" />
-                    <h3 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">AI Suggested</h3>
+                    <Sparkles className="w-4 h-4 text-white" />
+                    <h3 className="text-xs font-semibold text-white uppercase tracking-wider">AI Suggested</h3>
                   </div>
                   <div className="divide-y divide-zinc-900 max-h-56 overflow-y-auto">
                     {suggestedLoading && <p className="p-4 text-xs text-zinc-600">Loading...</p>}
@@ -607,8 +630,8 @@ export function DiscoveryHub() {
               {/* Sentiment */}
               <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
                 <div className="px-4 py-3 border-b border-zinc-800 flex items-center gap-2">
-                  <BarChart3 className="w-4 h-4 text-zinc-400" />
-                  <h3 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Feedback Sentiment</h3>
+                  <BarChart3 className="w-4 h-4 text-white" />
+                  <h3 className="text-xs font-semibold text-white uppercase tracking-wider">Feedback Sentiment</h3>
                 </div>
                 <div className="p-4">
                   {sentimentInsights ? (
@@ -618,7 +641,7 @@ export function DiscoveryHub() {
                         <span className="text-sm font-bold text-white">{sentimentInsights.averageScore}</span>
                       </div>
                       <div className="flex gap-1.5 flex-wrap">
-                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg border border-zinc-800 text-zinc-400 text-[10px]">
+                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg border border-zinc-800 text-white text-[10px]">
                           <ThumbsUp className="w-3 h-3" />{sentimentInsights.distribution?.positive ?? 0}
                         </span>
                         <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg border border-zinc-800 text-zinc-500 text-[10px]">
@@ -638,7 +661,7 @@ export function DiscoveryHub() {
               {hasAuthToken && selectedCategory !== 'All Categories' && categorySuggestions && (
                 <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
                   <div className="px-4 py-3 border-b border-zinc-800">
-                    <h3 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider flex items-center gap-2">
+                    <h3 className="text-xs font-semibold text-white uppercase tracking-wider flex items-center gap-2">
                       <Gem className="w-4 h-4" />{selectedCategory}
                     </h3>
                   </div>
@@ -658,7 +681,7 @@ export function DiscoveryHub() {
               {/* Recent Activity */}
               <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
                 <div className="px-4 py-3 border-b border-zinc-800">
-                  <h3 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Recent Activity</h3>
+                  <h3 className="text-xs font-semibold text-white uppercase tracking-wider">Recent Activity</h3>
                 </div>
                 <div className="divide-y divide-zinc-900">
                   {products.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
@@ -675,7 +698,7 @@ export function DiscoveryHub() {
                           </div>
                         )}
                         <div className="flex-1 min-w-0">
-                          <p className="text-[11px] text-zinc-400 leading-snug">
+                          <p className="text-[11px] text-white leading-snug">
                             <span className="text-white font-medium">{product.author_name}</span>
                             {' launched '}
                             <span className="text-zinc-300">{product.title}</span>
@@ -691,14 +714,14 @@ export function DiscoveryHub() {
               {/* Daily Quests */}
               <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
                 <div className="px-4 py-3 border-b border-zinc-800">
-                  <h3 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Daily Quests</h3>
+                  <h3 className="text-xs font-semibold text-white uppercase tracking-wider">Daily Quests</h3>
                 </div>
                 <div className="p-4 space-y-3">
                   {dailyQuest.length === 0 && <p className="text-xs text-zinc-600 text-center py-2">Sign in to see quests</p>}
                   {dailyQuest.map((quest) => (
                     <div key={quest.id} className={`p-3 rounded-xl border ${quest.completed ? 'border-white/20 bg-white/5' : 'border-zinc-800 bg-zinc-950'}`}>
                       <div className="flex items-center gap-2 mb-2">
-                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${quest.completed ? 'bg-white text-black' : 'bg-zinc-800 text-zinc-400'}`}>
+                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${quest.completed ? 'bg-white text-black' : 'bg-zinc-800 text-white'}`}>
                           {quest.completed ? <CheckCircle2 className="w-4 h-4" /> : quest.icon}
                         </div>
                         <div className="flex-1 min-w-0">

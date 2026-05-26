@@ -102,10 +102,10 @@ export function HoverPreview({
 
   const getTrendColor = (trend: string) => {
     switch (trend) {
-      case 'rising': return 'text-green-600 dark:text-green-400';
-      case 'stable': return 'text-blue-600 dark:text-blue-400';
-      case 'declining': return 'text-red-600 dark:text-red-400';
-      default: return 'text-gray-600 dark:text-gray-400';
+      case 'rising': return 'text-zinc-300';
+      case 'stable': return 'text-white';
+      case 'declining': return 'text-white';
+      default: return 'text-white';
     }
   };
 
@@ -119,9 +119,9 @@ export function HoverPreview({
   };
 
   const getScoreColor = (score: number) => {
-    if (score >= 80) return 'text-green-600 dark:text-green-400';
+    if (score >= 80) return 'text-zinc-300';
     if (score >= 60) return 'text-yellow-600 dark:text-yellow-400';
-    return 'text-red-600 dark:text-red-400';
+    return 'text-white';
   };
 
   const getPositionClasses = () => {
@@ -195,34 +195,34 @@ export function HoverPreview({
               </div>
 
               {/* Description */}
-              <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2">
+              <p className="text-xs text-white line-clamp-2">
                 {product.description}
               </p>
 
               {/* Quick Stats */}
               <div className="grid grid-cols-3 gap-2">
-                <div className="text-center p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="text-center p-2 bg-zinc-800 rounded-lg">
                   <div className="flex items-center justify-center gap-1 text-red-500">
                     <Heart className="w-3 h-3" />
                     <span className="text-xs font-bold">{product.upvotes.length}</span>
                   </div>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">Upvotes</p>
+                  <p className="text-xs text-white">Upvotes</p>
                 </div>
-                <div className="text-center p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                  <div className="flex items-center justify-center gap-1 text-blue-500">
+                <div className="text-center p-2 bg-zinc-800 rounded-lg">
+                  <div className="flex items-center justify-center gap-1 text-white">
                     <MessageCircle className="w-3 h-3" />
                     <span className="text-xs font-bold">{product.reviews}</span>
                   </div>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">Reviews</p>
+                  <p className="text-xs text-white">Reviews</p>
                 </div>
-                <div className="text-center p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="text-center p-2 bg-zinc-800 rounded-lg">
                   <div className={`flex items-center justify-center gap-1 ${getTrendColor(metrics?.trendIndicator || 'stable')}`}>
                     {getTrendIcon(metrics?.trendIndicator || 'stable')}
                     <span className="text-xs font-bold capitalize">
                       {metrics?.trendIndicator || 'stable'}
                     </span>
                   </div>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">Trend</p>
+                  <p className="text-xs text-white">Trend</p>
                 </div>
               </div>
 
@@ -230,9 +230,9 @@ export function HoverPreview({
               {metrics && !isLoading && (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-600 dark:text-gray-400">Engagement</span>
+                    <span className="text-xs text-white">Engagement</span>
                     <div className="flex items-center gap-2">
-                      <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                      <div className="w-16 h-2 bg-zinc-700 rounded-full overflow-hidden">
                         <div 
                           className="h-full bg-blue-500 transition-all duration-300"
                           style={{ width: `${metrics.engagementScore}%` }}
@@ -244,9 +244,9 @@ export function HoverPreview({
                     </div>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-600 dark:text-gray-400">Quality</span>
+                    <span className="text-xs text-white">Quality</span>
                     <div className="flex items-center gap-2">
-                      <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                      <div className="w-16 h-2 bg-zinc-700 rounded-full overflow-hidden">
                         <div 
                           className="h-full bg-green-500 transition-all duration-300"
                           style={{ width: `${metrics.qualityScore}%` }}
@@ -277,7 +277,7 @@ export function HoverPreview({
               )}
 
               {/* Author Info */}
-              <div className="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-gray-700">
+              <div className="flex items-center justify-between pt-2 border-t border-zinc-800">
                 <div className="flex items-center gap-2">
                   {product.author_profile ? (
                     <img 
@@ -288,17 +288,17 @@ export function HoverPreview({
                       loading="lazy"
                     />
                   ) : (
-                    <div className="w-5 h-5 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                      <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                    <div className="w-5 h-5 rounded-full bg-zinc-700 flex items-center justify-center">
+                      <span className="text-xs font-medium text-zinc-300">
                         {product.author_name ? product.author_name.charAt(0).toUpperCase() : 'U'}
                       </span>
                     </div>
                   )}
-                  <span className="text-xs text-gray-600 dark:text-gray-400">
+                  <span className="text-xs text-white">
                     {product.author_name}
                   </span>
                 </div>
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-zinc-500">
                   {new Date(product.createdAt).toLocaleDateString()}
                 </span>
               </div>

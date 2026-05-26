@@ -92,7 +92,7 @@ export default function ProductOwner() {
   );
 
   if (!user) return (
-    <div className="flex items-center justify-center min-h-screen bg-black text-zinc-400">
+    <div className="flex items-center justify-center min-h-screen bg-black text-white">
       User not found
     </div>
   );
@@ -185,9 +185,9 @@ export default function ProductOwner() {
             <div className="flex items-end justify-between">
               <div>
                 <p className="text-5xl font-bold">{user.totalUpvotes || 0}</p>
-                <p className="text-blue-100 text-sm mt-2">Upvotes Given</p>
+                <p className="text-zinc-300 text-sm mt-2">Upvotes Given</p>
               </div>
-              <TrendingUp className="w-8 h-8 text-blue-200" />
+              <TrendingUp className="w-8 h-8 text-white" />
             </div>
           </div>
 
@@ -385,7 +385,7 @@ export default function ProductOwner() {
                       <div className="flex items-center gap-3 mb-1.5 flex-wrap">
                         <h3 className="font-bold text-base text-gray-900 group-hover:text-gray-700">{product.title}</h3>
                         {product.category && (
-                          <span className="text-xs border border-blue-200 bg-blue-50 text-blue-700 px-2 py-1 rounded-full shrink-0">
+                          <span className="text-xs border border-zinc-700 bg-zinc-800 text-white px-2 py-1 rounded-full shrink-0">
                             {product.category}
                           </span>
                         )}
@@ -446,7 +446,7 @@ export default function ProductOwner() {
                           target="_blank"
                           rel="noopener noreferrer"
                           onClick={(e) => e.stopPropagation()}
-                          className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 transition-colors"
+                          className="flex items-center gap-2 text-sm text-zinc-300 hover:text-white transition-colors"
                         >
                           <ExternalLink className="w-4 h-4" />
                           {item.demoUrl.replace(/^https?:\/\//, '').slice(0, 50)}
