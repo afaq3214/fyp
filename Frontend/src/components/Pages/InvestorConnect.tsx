@@ -117,6 +117,29 @@ export default function InvestorConnect() {
 
   const saveProfile = async () => {
     if (!token) { toast.error('Please sign in first'); return; }
+
+    // First-time creation → payment required
+    if (!myProfile) {
+      sessionStorage.setItem('investorProfileDraft', JSON.stringify(profileForm));
+      setLoading(true);
+      try {
+        const r = await fetch(`${API}/api/payment/create-investor-checkout-session`, {
+          method: 'POST',
+          headers,
+        });
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.error);
+        if (d.url) {
+          window.location.href = d.url;
+        }
+      } catch (e: any) {
+        toast.error(e.message || 'Payment setup failed');
+        setLoading(false);
+      }
+      return;
+    }
+
+    // Update existing profile → free
     setLoading(true);
     try {
       const r = await fetch(`${API}/api/investor/profile`, {
@@ -371,6 +394,17 @@ export default function InvestorConnect() {
               <div className="mb-6">
                 <h2 className="text-lg font-semibold">{myProfile ? 'Edit Investor Profile' : 'Create Investor Profile'}</h2>
                 <p className="text-xs text-zinc-500 mt-1">Tell creators what types of products you want to invest in.</p>
+                {!myProfile && (
+                  <div className="mt-4 flex items-start gap-3 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3">
+                    <DollarSign className="w-4 h-4 text-white mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium text-white">One-time listing fee: $49</p>
+                      <p className="text-xs text-zinc-500 mt-0.5">
+                        Pay once to publish your profile and get discovered by founders. Updates are always free.
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-5">
@@ -434,7 +468,11 @@ export default function InvestorConnect() {
                 </div>
 
                 <Button onClick={saveProfile} disabled={loading} className="w-full bg-white text-black hover:bg-zinc-200 h-10">
-                  {loading ? 'Saving...' : myProfile ? 'Update Profile' : 'Create Profile'}
+                  {loading
+                    ? (myProfile ? 'Saving...' : 'Redirecting to payment...')
+                    : myProfile
+                      ? 'Update Profile'
+                      : 'Pay $49 & Publish Profile'}
                 </Button>
               </div>
             </div>

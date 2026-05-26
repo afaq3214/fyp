@@ -18,6 +18,7 @@ import NotificationsPage from '@/components/Pages/NotificationsPage';
 import { AdminRoute } from '@/components/ProtectedRoute';
 import SearchResults from '@/components/SearchResults';
 import InvestorConnect from '@/components/Pages/InvestorConnect';
+import InvestorPaymentSuccess from '@/components/Pages/InvestorPaymentSuccess';
 import ProblemDiscovery from '@/components/Pages/ProblemDiscovery';
 import CommunityNetworking from '@/components/Pages/CommunityNetworking';
 export const router = createBrowserRouter([
@@ -85,6 +86,10 @@ export const router = createBrowserRouter([
       {
         path: '/community',
         element: <CommunityNetworking />
+      },
+      {
+        path: '/investor-payment/success',
+        element: <InvestorPaymentSuccess />
       }
     ]
   }

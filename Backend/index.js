@@ -21,6 +21,7 @@ import investorRoutes from "./routes/investor.js";
 import discoverRoutes from "./routes/discover.js";
 import communityRoutes from "./routes/community.js";
 import { startScheduler } from "./scheduler.js";
+import paymentRoutes from "./routes/payment.js";
 
 dotenv.config();
 connectDB();
@@ -33,8 +34,12 @@ const port = process.env.PORT || 5000;
 
 // Enable CORS (restrict origin in prod: e.g., { origin: 'https://your-frontend.vercel.app' })
 app.use(cors());
- 
+
 startScheduler();
+
+// Stripe webhook needs raw body — must be registered BEFORE express.json()
+app.use('/api/payment/webhook', express.raw({ type: 'application/json' }));
+
 // Middleware for JSON parsing
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
@@ -60,6 +65,7 @@ app.use('/api/ranking', rankingRoutes);
 app.use('/api/investor', investorRoutes);
 app.use('/api/discover', discoverRoutes);
 app.use('/api/community', communityRoutes);
+app.use('/api/payment', paymentRoutes);
 app.use((err, req, res, next) => {
   console.error("Server error:", err);
   if (err.type === "entity.too.large") {

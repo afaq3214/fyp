@@ -51,8 +51,12 @@ const productSchema = new mongoose.Schema(
     isPremium: { type: Boolean, default: false },
     premium: { type: Boolean, default: false }, // For backward compatibility
 
+    // Payment
+    paymentStatus: { type: String, enum: ['pending', 'paid'], default: 'paid' },
+    stripeSessionId: { type: String },
+
     // System
-   
+
   },
   { timestamps: true }
 );

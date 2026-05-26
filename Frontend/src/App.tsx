@@ -185,7 +185,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+    <div className="min-h-screen bg-black text-white">
       <Header
         currentUser={currentUser}
         onProfileClick={handleProfileClick}
