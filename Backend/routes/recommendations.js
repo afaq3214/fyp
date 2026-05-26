@@ -213,4 +213,153 @@ router.post("/send-digest", async (req, res) => {
   }
 });
 
+
+// ===============================
+// CATEGORY-BASED SUGGESTIONS
+// ===============================
+router.get("/category-suggestions", auth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { category } = req.query;
+    
+    if (!category) {
+      return res.status(400).json({ error: "Category is required" });
+    }
+
+    const limit = Math.min(parseInt(req.query.limit, 10) || 8, 20);
+
+    // Get user's interaction history for this category
+    const userInteractions = await Product.find({
+      $or: [
+        { upvotes: userId },
+        { author_id: userId }
+      ],
+      category: category
+    }).lean();
+
+    // Get user's preferred tags from this category
+    const preferredTags = [];
+    userInteractions.forEach(product => {
+      if (product.autoTags) {
+        preferredTags.push(...product.autoTags);
+      }
+    });
+    const uniqueTags = [...new Set(preferredTags)];
+
+    // Find similar products in the same category
+    const matchConditions = {
+      category: category,
+      author_id: { $ne: userId }
+    };
+
+    // If user has preferred tags, prioritize them
+    if (uniqueTags.length > 0) {
+      matchConditions.autoTags = { $in: uniqueTags };
+    }
+
+    const categoryProducts = await Product.find(matchConditions)
+      .populate('author_id', 'name email profilePicture')
+      .sort({ 
+        // Prioritize products with similar tags
+        ...(uniqueTags.length > 0 && { 
+          $expr: { 
+            $gt: [{ $size: { $setIntersection: ["$autoTags", uniqueTags] } }, 0] 
+          } 
+        }),
+        createdAt: -1 
+      })
+      .limit(limit * 2) // Get more to filter
+      .lean();
+
+    // Calculate relevance scores
+    const scoredProducts = categoryProducts.map(product => {
+      let relevanceScore = 0;
+      
+      // Tag matching
+      const commonTags = product.autoTags?.filter(tag => uniqueTags.includes(tag)) || [];
+      relevanceScore += commonTags.length * 10;
+      
+      // Recency bonus (newer is better for recommendations)
+      const daysSince = Math.max(1, (Date.now() - new Date(product.createdAt).getTime()) / (24 * 60 * 60 * 1000));
+      relevanceScore += Math.max(0, 30 - daysSince);
+      
+      // Engagement bonus
+      const upvotesCount = Array.isArray(product.upvotes) ? product.upvotes.length : 0;
+      relevanceScore += Math.min(upvotesCount, 20); // Cap at 20 to avoid popularity bias
+      
+      return {
+        ...product,
+        relevanceScore,
+        commonTags
+      };
+    });
+
+    // Sort by relevance and return top results
+    const recommendations = scoredProducts
+      .sort((a, b) => b.relevanceScore - a.relevanceScore)
+      .slice(0, limit);
+
+    res.json({
+      category,
+      recommendations,
+      userInteractions: userInteractions.length,
+      preferredTags: uniqueTags
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ===============================
+// TRENDING CATEGORIES
+// ===============================
+router.get("/trending-categories", async (req, res) => {
+  try {
+    const hours = parseInt(req.query.hours, 10) || 24;
+    const cutoffDate = new Date(Date.now() - hours * 60 * 60 * 1000);
+
+    const trendingCategories = await Product.aggregate([
+      {
+        $match: {
+          $or: [
+            { createdAt: { $gte: cutoffDate } },
+            { updatedAt: { $gte: cutoffDate } }
+          ]
+        }
+      },
+      {
+        $group: {
+          _id: "$category",
+          productCount: { $sum: 1 },
+          totalUpvotes: { $sum: { $size: { $ifNull: ["$upvotes", []] } } },
+          totalReviews: { $sum: "$totalcomments" },
+          avgMomentum: { $avg: { $divide: [{ $add: [{ $size: { $ifNull: ["$upvotes", []] } }, { $multiply: ["$totalcomments", 1.5] }] }, { $max: [1, { $divide: [{ $subtract: [new Date(), "$createdAt"] }, 86400000] }] }] } }
+        }
+      },
+      {
+        $addFields: {
+          trendScore: { $add: ["$totalUpvotes", { $multiply: ["$totalReviews", 1.5] }, { $multiply: ["$avgMomentum", 10] }] }
+        }
+      },
+      { $sort: { trendScore: -1 } },
+      { $limit: 10 },
+      {
+        $project: {
+          category: "$_id",
+          productCount: 1,
+          totalUpvotes: 1,
+          totalReviews: 1,
+          avgMomentum: 1,
+          trendScore: 1,
+          _id: 0
+        }
+      }
+    ]);
+
+    res.json(trendingCategories);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 export default router;

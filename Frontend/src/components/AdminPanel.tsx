@@ -29,9 +29,6 @@ import {
   MessageSquare,
   Activity
 } from 'lucide-react';
-import { Button } from './ui/button';
-import { Badge } from './ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Input } from './ui/input';
@@ -409,322 +406,273 @@ export function AdminPanel() {
     toast.success(`${type} data exported successfully`);
   };
 
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
+  if (isLoading) return (
+    <div className="flex items-center justify-center min-h-screen bg-black">
+      <div className="w-8 h-8 border-2 border-zinc-700 border-t-white rounded-full animate-spin" />
+    </div>
+  );
+  if (error) return (
+    <div className="flex items-center justify-center min-h-screen bg-black text-zinc-400">
+      Error: {error}
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center space-x-4">
-            <Button variant="ghost" onClick={handleBack}>
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back
-            </Button>
-            <div>
-              <h1 className="text-3xl font-bold">Admin Panel</h1>
-              <p className="text-gray-600 dark:text-gray-400">Manage your PeerRank community</p>
+    <div className="min-h-screen bg-black text-white">
+      {/* Header */}
+      <div className="border-b border-zinc-900 bg-zinc-950 px-6 py-8">
+        <div className="container mx-auto">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <button onClick={handleBack} className="flex items-center gap-2 text-zinc-400 hover:text-white text-sm transition-colors">
+                <ArrowLeft className="w-4 h-4" />
+                Back
+              </button>
+              <div>
+                <h1 className="text-2xl font-bold tracking-tight">Admin Panel</h1>
+                <p className="text-zinc-500 text-sm">Manage your PeerRank community</p>
+              </div>
             </div>
+            <span className="flex items-center gap-1.5 text-xs font-semibold border border-zinc-700 text-zinc-300 px-3 py-1.5 rounded-full">
+              <Crown className="w-3.5 h-3.5" />
+              Administrator
+            </span>
           </div>
-          <Badge className="bg-gradient-to-r from-purple-600 to-pink-600">
-            <Crown className="w-4 h-4 mr-1" />
-            Administrator
-          </Badge>
         </div>
+      </div>
 
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Total Users</p>
-                  <p className="text-2xl font-bold">{userStats.total}</p>
-                  <p className="text-xs text-green-600">+{userStats.today} today</p>
-                </div>
-                <Users className="w-8 h-8 text-blue-600" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Total Products</p>
-                  <p className="text-2xl font-bold">{productStats.total}</p>
-                  <p className="text-xs text-green-600">+{productStats.today} today</p>
-                </div>
-                <Package className="w-8 h-8 text-purple-600" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Total Users</p>
-                  <p className="text-2xl font-bold">{userStats.total}</p>
-                  <p className="text-xs text-green-600">+{userStats.today} today</p>
-                </div>
-                <Users className="w-8 h-8 text-blue-600" />
-              </div>
-            </CardContent>
-          </Card>
-          
-
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 flex items-center justify-between">
+            <div>
+              <p className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Total Users</p>
+              <p className="text-2xl font-bold">{userStats.total}</p>
+              <p className="text-xs text-zinc-500 mt-1">+{userStats.today} today</p>
+            </div>
+            <Users className="w-7 h-7 text-zinc-600" />
+          </div>
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 flex items-center justify-between">
+            <div>
+              <p className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Total Products</p>
+              <p className="text-2xl font-bold">{productStats.total}</p>
+              <p className="text-xs text-zinc-500 mt-1">+{productStats.today} today</p>
+            </div>
+            <Package className="w-7 h-7 text-zinc-600" />
+          </div>
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 flex items-center justify-between">
+            <div>
+              <p className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Moderators</p>
+              <p className="text-2xl font-bold">{userStats.moderators}</p>
+              <p className="text-xs text-zinc-500 mt-1">{userStats.banned} banned</p>
+            </div>
+            <Shield className="w-7 h-7 text-zinc-600" />
+          </div>
         </div>
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="products" className="w-full">
-          <TabsList className="grid w-full max-w-xl grid-cols-4">
-            <TabsTrigger value="products">Products</TabsTrigger>
-            <TabsTrigger value="users">Users</TabsTrigger>
-            <TabsTrigger value="moderation">Moderation</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsList className="flex w-fit gap-1 mb-8 bg-zinc-900 border border-zinc-800 rounded-xl p-1">
+            <TabsTrigger value="products" className="px-4 py-2 text-sm rounded-lg data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:font-semibold text-zinc-400">Products</TabsTrigger>
+            <TabsTrigger value="users" className="px-4 py-2 text-sm rounded-lg data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:font-semibold text-zinc-400">Users</TabsTrigger>
+            <TabsTrigger value="moderation" className="px-4 py-2 text-sm rounded-lg data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:font-semibold text-zinc-400">Moderation</TabsTrigger>
+            <TabsTrigger value="analytics" className="px-4 py-2 text-sm rounded-lg data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:font-semibold text-zinc-400">Analytics</TabsTrigger>
           </TabsList>
 
           {/* Products Management */}
-          <TabsContent value="products" className="mt-8">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>Product Management</CardTitle>
-                  <div className="flex items-center space-x-2">
-                    <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                      <SelectTrigger className="w-32">
-                        <SelectValue placeholder="Category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Categories</SelectItem>
-                        <SelectItem value="Developer Tools">Developer Tools</SelectItem>
-                        <SelectItem value="Productivity">Productivity</SelectItem>
-                        <SelectItem value="Design">Design</SelectItem>
-                        <SelectItem value="Marketing">Marketing</SelectItem>
-                        <SelectItem value="Social">Social</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Button variant="outline" size="sm" onClick={() => exportData('products')}>
-                      <Download className="w-4 h-4 mr-1" />
-                      Export
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={() => fetchData()}>
-                      <RefreshCw className="w-4 h-4 mr-1" />
-                      Refresh
-                    </Button>
-                  </div>
+          <TabsContent value="products" className="mt-0">
+            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
+              <div className="flex items-center justify-between p-6 border-b border-zinc-800">
+                <h2 className="font-semibold text-white">Product Management</h2>
+                <div className="flex items-center gap-2">
+                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                    <SelectTrigger className="w-36 bg-zinc-950 border-zinc-700 text-white text-sm h-8">
+                      <SelectValue placeholder="Category" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
+                      <SelectItem value="all">All Categories</SelectItem>
+                      <SelectItem value="Developer Tools">Developer Tools</SelectItem>
+                      <SelectItem value="Productivity">Productivity</SelectItem>
+                      <SelectItem value="Design">Design</SelectItem>
+                      <SelectItem value="Marketing">Marketing</SelectItem>
+                      <SelectItem value="Social">Social</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <button onClick={() => exportData('products')}
+                    className="flex items-center gap-1 text-xs border border-zinc-700 text-zinc-400 hover:text-white px-3 py-1.5 rounded-lg transition-colors">
+                    <Download className="w-3.5 h-3.5" />Export
+                  </button>
+                  <button onClick={() => fetchData()}
+                    className="flex items-center gap-1 text-xs border border-zinc-700 text-zinc-400 hover:text-white px-3 py-1.5 rounded-lg transition-colors">
+                    <RefreshCw className="w-3.5 h-3.5" />Refresh
+                  </button>
                 </div>
-                {selectedProducts.length > 0 && (
-                  <div className="flex items-center space-x-2 pt-2">
-                    <span className="text-sm text-gray-600">
-                      {selectedProducts.length} items selected
-                    </span>
-                    <Button 
-                      size="sm" 
-                      onClick={handleBulkProductDelete}
-                      className="text-red-600"
-                    >
-                      <Trash2 className="w-4 h-4 mr-1" />
-                      Delete Selected
-                    </Button>
-                  </div>
-                )}
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {filteredProducts.map(product => (
-                    <div key={product._id} className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-                      <div className="flex items-center space-x-3">
-                        <Checkbox
-                          checked={selectedProducts.includes(product._id)}
-                          onCheckedChange={(checked) => {
-                            if (checked) {
-                              setSelectedProducts([...selectedProducts, product._id]);
-                            } else {
-                              setSelectedProducts(selectedProducts.filter(id => id !== product._id));
-                            }
-                          }}
-                        />
-                        <div className="flex-1">
-                          <h3 className="font-semibold">{product.title}</h3>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
-                            by {product.author_name} • {product.category} • {new Date(product.createdAt).toLocaleDateString()}
-                          </p>
-                          <div className="flex items-center space-x-4 mt-1">
-                            <span className="text-xs text-gray-500 flex items-center">
-                              <Star className="w-3 h-3 mr-1" />
-                              {product.upvotes?.length || 0} upvotes
-                            </span>
-                            <span className="text-xs text-gray-500 flex items-center">
-                              <MessageSquare className="w-3 h-3 mr-1" />
-                              {product.reviews || 0} reviews
-                            </span>
-                          </div>
+              </div>
+              {selectedProducts.length > 0 && (
+                <div className="flex items-center gap-3 px-6 py-3 bg-zinc-950 border-b border-zinc-800">
+                  <span className="text-sm text-zinc-400">{selectedProducts.length} selected</span>
+                  <button onClick={handleBulkProductDelete}
+                    className="flex items-center gap-1 text-xs text-zinc-400 hover:text-white border border-zinc-700 px-3 py-1 rounded-lg">
+                    <Trash2 className="w-3.5 h-3.5" />Delete Selected
+                  </button>
+                </div>
+              )}
+              <div className="divide-y divide-zinc-800">
+                {filteredProducts.map(product => (
+                  <div key={product._id} className="flex items-center justify-between px-6 py-4 hover:bg-zinc-800/30 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <Checkbox
+                        checked={selectedProducts.includes(product._id)}
+                        onCheckedChange={(checked) => {
+                          if (checked) setSelectedProducts([...selectedProducts, product._id]);
+                          else setSelectedProducts(selectedProducts.filter(id => id !== product._id));
+                        }}
+                      />
+                      <div>
+                        <h3 className="font-medium text-white text-sm">{product.title}</h3>
+                        <p className="text-xs text-zinc-500 mt-0.5">
+                          by {product.author_name} · {product.category} · {new Date(product.createdAt).toLocaleDateString()}
+                        </p>
+                        <div className="flex items-center gap-3 mt-1">
+                          <span className="text-xs text-zinc-600 flex items-center gap-1">
+                            <Star className="w-3 h-3" />{product.upvotes?.length || 0} upvotes
+                          </span>
+                          <span className="text-xs text-zinc-600 flex items-center gap-1">
+                            <MessageSquare className="w-3 h-3" />{product.reviews || 0} reviews
+                          </span>
                         </div>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <Button variant="outline" size="sm" onClick={() => navigate(`/product/${product._id}`)}>
-                          <Eye className="w-4 h-4 mr-1" />
-                          Review
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => handleDeleteProduct(product._id)}
-                          className="text-red-600 hover:text-red-700"
-                        >
-                          <Trash2 className="w-4 h-4 mr-1" />
-                          Delete
-                        </Button>
-                      </div>
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => navigate(`/product/${product._id}`)}
+                        className="flex items-center gap-1 text-xs border border-zinc-700 text-zinc-400 hover:text-white px-3 py-1.5 rounded-lg transition-colors">
+                        <Eye className="w-3.5 h-3.5" />Review
+                      </button>
+                      <button onClick={() => handleDeleteProduct(product._id)}
+                        className="flex items-center gap-1 text-xs border border-zinc-700 text-zinc-500 hover:text-white px-3 py-1.5 rounded-lg transition-colors">
+                        <Trash2 className="w-3.5 h-3.5" />Delete
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </TabsContent>
 
           {/* Users Management */}
-          <TabsContent value="users" className="mt-8">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>User Management</CardTitle>
-                  <div className="flex items-center space-x-2">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                      <Input
-                        placeholder="Search users..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-10 w-64"
-                      />
-                    </div>
-                    <Button variant="outline" size="sm" onClick={() => exportData('users')}>
-                      <Download className="w-4 h-4 mr-1" />
-                      Export
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={() => fetchData()}>
-                      <RefreshCw className="w-4 h-4 mr-1" />
-                      Refresh
-                    </Button>
+          <TabsContent value="users" className="mt-0">
+            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
+              <div className="flex items-center justify-between p-6 border-b border-zinc-800">
+                <h2 className="font-semibold text-white">User Management</h2>
+                <div className="flex items-center gap-2">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" />
+                    <Input placeholder="Search users..." value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-8 w-52 bg-zinc-950 border-zinc-700 text-white placeholder-zinc-600 h-8 text-sm" />
                   </div>
+                  <button onClick={() => exportData('users')}
+                    className="flex items-center gap-1 text-xs border border-zinc-700 text-zinc-400 hover:text-white px-3 py-1.5 rounded-lg transition-colors">
+                    <Download className="w-3.5 h-3.5" />Export
+                  </button>
+                  <button onClick={() => fetchData()}
+                    className="flex items-center gap-1 text-xs border border-zinc-700 text-zinc-400 hover:text-white px-3 py-1.5 rounded-lg transition-colors">
+                    <RefreshCw className="w-3.5 h-3.5" />Refresh
+                  </button>
                 </div>
-                {selectedUsers.length > 0 && (
-                  <div className="flex items-center space-x-2 pt-2">
-                    <span className="text-sm text-gray-600">
-                      {selectedUsers.length} users selected
-                    </span>
-                    <Button 
-                      size="sm" 
-                      onClick={handleBulkUserDelete}
-                      className="text-red-600"
-                    >
-                      <Trash2 className="w-4 h-4 mr-1" />
-                      Delete Selected
-                    </Button>
-                  </div>
-                )}
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-12">
+              </div>
+              {selectedUsers.length > 0 && (
+                <div className="flex items-center gap-3 px-6 py-3 bg-zinc-950 border-b border-zinc-800">
+                  <span className="text-sm text-zinc-400">{selectedUsers.length} selected</span>
+                  <button onClick={handleBulkUserDelete}
+                    className="flex items-center gap-1 text-xs text-zinc-400 hover:text-white border border-zinc-700 px-3 py-1 rounded-lg">
+                    <Trash2 className="w-3.5 h-3.5" />Delete Selected
+                  </button>
+                </div>
+              )}
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-zinc-800 hover:bg-transparent">
+                    <TableHead className="w-12 text-zinc-500">
+                      <Checkbox
+                        checked={selectedUsers.length === filteredUsers.length && filteredUsers.length > 0}
+                        onCheckedChange={(checked) => {
+                          if (checked) setSelectedUsers(filteredUsers.map(u => u.id));
+                          else setSelectedUsers([]);
+                        }}
+                        onMouseDown={(e) => e.stopPropagation()}
+                        onMouseUp={(e) => e.stopPropagation()}
+                        ref={(checkbox) => {
+                          if (checkbox) checkbox.indeterminate = selectedUsers.length > 0 && selectedUsers.length < filteredUsers.length;
+                        }}
+                      />
+                    </TableHead>
+                    <TableHead className="text-zinc-500">User</TableHead>
+                    <TableHead className="text-zinc-500">Join Date</TableHead>
+                    <TableHead className="text-zinc-500">Products</TableHead>
+                    <TableHead className="text-zinc-500">Role</TableHead>
+                    <TableHead className="text-zinc-500">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredUsers.map(user => (
+                    <TableRow key={user.id} className="border-zinc-800 hover:bg-zinc-800/30">
+                      <TableCell>
                         <Checkbox
-                          checked={selectedUsers.length === filteredUsers.length && filteredUsers.length > 0}
+                          checked={selectedUsers.includes(user.id)}
                           onCheckedChange={(checked) => {
-                            console.log('Select all clicked:', checked);
-                            if (checked) {
-                              setSelectedUsers(filteredUsers.map(u => u.id));
-                            } else {
-                              setSelectedUsers([]);
-                            }
+                            const userId = user.id;
+                            if (checked) setSelectedUsers(prev => [...prev, userId]);
+                            else setSelectedUsers(prev => prev.filter(id => id !== userId));
                           }}
                           onMouseDown={(e) => e.stopPropagation()}
                           onMouseUp={(e) => e.stopPropagation()}
-                          ref={(checkbox) => {
-                            if (checkbox) {
-                              checkbox.indeterminate = selectedUsers.length > 0 && selectedUsers.length < filteredUsers.length;
-                            }
-                          }}
                         />
-                      </TableHead>
-                      <TableHead>User</TableHead>
-                      <TableHead>Join Date</TableHead>
-                      <TableHead>Products</TableHead>
-                      <TableHead>Role</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredUsers.map(user => (
-                      <TableRow key={user.id}>
-                        <TableCell>
-                          <Checkbox
-                            checked={selectedUsers.includes(user.id)}
-                            onCheckedChange={(checked) => {
-                              console.log('User object:', user);
-                              console.log('User ID:', user.id);
-                              const userId = user.id;
-                              console.log('User checkbox clicked:', userId, checked);
-                              if (checked) {
-                                setSelectedUsers(prev => [...prev, userId]);
-                              } else {
-                                setSelectedUsers(prev => prev.filter(id => id !== userId));
-                              }
-                            }}
-                            onMouseDown={(e) => e.stopPropagation()}
-                            onMouseUp={(e) => e.stopPropagation()}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center space-x-3">
-                            <Avatar className="w-8 h-8">
-                              <AvatarImage src={user.profilePicture} />
-                              <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <p className="font-medium">{user.name}</p>
-                              <p className="text-sm text-gray-600 dark:text-gray-400">{user.email}</p>
-                            </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <Avatar className="w-8 h-8">
+                            <AvatarImage src={user.profilePicture} />
+                            <AvatarFallback className="bg-zinc-700 text-white text-xs">{user.name.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium text-sm text-white">{user.name}</p>
+                            <p className="text-xs text-zinc-500">{user.email}</p>
                           </div>
-                        </TableCell>
-                        <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
-                        <TableCell>{products.filter(p => p.author_id === user.id).length}</TableCell>
-                        <TableCell>
-                          <Badge variant="outline">
-                            {user.isAdmin && <Crown className="w-3 h-3 mr-1" />}
-                            {user.isAdmin ? 'Admin' : user.role || 'User'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm">
-                                <MoreHorizontal className="w-4 h-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent>
-                              <DropdownMenuItem onClick={() => navigate(`/profile/${user.id}`)}>
-                                <Eye className="w-4 h-4 mr-2" />
-                                View Profile
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleDeleteUser(user.id)} className="text-red-600">
-                                <Trash2 className="w-4 h-4 mr-2" />
-                                Delete User
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-zinc-400 text-sm">{new Date(user.createdAt).toLocaleDateString()}</TableCell>
+                      <TableCell className="text-zinc-400 text-sm">{products.filter(p => p.author_id === user.id).length}</TableCell>
+                      <TableCell>
+                        <span className="text-[10px] font-semibold border border-zinc-700 text-zinc-400 px-2 py-0.5 rounded-full flex items-center gap-1 w-fit">
+                          {user.isAdmin && <Crown className="w-3 h-3" />}
+                          {user.isAdmin ? 'Admin' : user.role || 'User'}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <button className="p-1.5 text-zinc-500 hover:text-white rounded-lg transition-colors">
+                              <MoreHorizontal className="w-4 h-4" />
+                            </button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="bg-zinc-900 border-zinc-800 text-white">
+                            <DropdownMenuItem onClick={() => navigate(`/profile/${user.id}`)}
+                              className="hover:bg-zinc-800 cursor-pointer text-zinc-300">
+                              <Eye className="w-4 h-4 mr-2" />View Profile
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleDeleteUser(user.id)}
+                              className="hover:bg-zinc-800 cursor-pointer text-zinc-400">
+                              <Trash2 className="w-4 h-4 mr-2" />Delete User
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </TabsContent>
 
           {/* Content Moderation */}
@@ -733,135 +681,64 @@ export function AdminPanel() {
           </TabsContent>
 
           {/* Analytics */}
-          <TabsContent value="analytics" className="mt-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <BarChart3 className="w-5 h-5 mr-2" />
-                    Engagement Metrics
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <span className="flex items-center">
-                        <Activity className="w-4 h-4 mr-2 text-blue-600" />
-                        Daily Active Users
-                      </span>
-                      <span className="font-bold">{analytics.dailyActiveUsers}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="flex items-center">
-                        <Package className="w-4 h-4 mr-2 text-purple-600" />
-                        Product Submissions
-                      </span>
-                      <span className="font-bold">{analytics.productSubmissions}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="flex items-center">
-                        <MessageSquare className="w-4 h-4 mr-2 text-green-600" />
-                        User Reviews
-                      </span>
-                      <span className="font-bold">{analytics.userReviews}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="flex items-center">
-                        <Star className="w-4 h-4 mr-2 text-yellow-600" />
-                        Community Upvotes
-                      </span>
-                      <span className="font-bold">{analytics.communityUpvotes}</span>
-                    </div>
+          <TabsContent value="analytics" className="mt-0">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {[
+                {
+                  title: 'Engagement Metrics', icon: <BarChart3 className="w-4 h-4 text-zinc-500" />,
+                  rows: [
+                    { label: 'Daily Active Users', icon: <Activity className="w-3.5 h-3.5 text-zinc-500" />, value: analytics.dailyActiveUsers },
+                    { label: 'Product Submissions', icon: <Package className="w-3.5 h-3.5 text-zinc-500" />, value: analytics.productSubmissions },
+                    { label: 'User Reviews', icon: <MessageSquare className="w-3.5 h-3.5 text-zinc-500" />, value: analytics.userReviews },
+                    { label: 'Community Upvotes', icon: <Star className="w-3.5 h-3.5 text-zinc-500" />, value: analytics.communityUpvotes },
+                  ]
+                },
+                {
+                  title: 'Growth Trends', icon: <TrendingUp className="w-4 h-4 text-zinc-500" />,
+                  rows: [
+                    { label: 'Weekly Growth', value: `+${analytics.weeklyGrowth}%` },
+                    { label: 'User Retention', value: `${analytics.userRetention}%` },
+                    { label: 'Content Quality Score', value: `${analytics.contentQualityScore}/10` },
+                    { label: 'Community Health', value: analytics.communityHealth },
+                  ]
+                },
+                {
+                  title: 'User Statistics', icon: <Users className="w-4 h-4 text-zinc-500" />,
+                  rows: [
+                    { label: 'Total Users', value: userStats.total },
+                    { label: 'Active Users', value: userStats.active },
+                    { label: 'Moderators', value: userStats.moderators },
+                    { label: 'New Today', value: userStats.today },
+                  ]
+                },
+                {
+                  title: 'Product Statistics', icon: <Package className="w-4 h-4 text-zinc-500" />,
+                  rows: [
+                    { label: 'Total Products', value: productStats.total },
+                    { label: 'New Today', value: productStats.today },
+                    { label: 'Total Upvotes', value: analytics.communityUpvotes },
+                    { label: 'Total Reviews', value: analytics.userReviews },
+                  ]
+                },
+              ].map((card) => (
+                <div key={card.title} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+                  <div className="flex items-center gap-2 mb-5 pb-4 border-b border-zinc-800">
+                    {card.icon}
+                    <h3 className="font-semibold text-sm text-white">{card.title}</h3>
                   </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <TrendingUp className="w-5 h-5 mr-2" />
-                    Growth Trends
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <span>Weekly Growth</span>
-                      <span className="font-bold text-green-600">+{analytics.weeklyGrowth}%</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span>User Retention</span>
-                      <span className="font-bold text-blue-600">{analytics.userRetention}%</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span>Content Quality Score</span>
-                      <span className="font-bold text-purple-600">{analytics.contentQualityScore}/10</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span>Community Health</span>
-                      <span className="font-bold text-green-600">{analytics.communityHealth}</span>
-                    </div>
+                  <div className="space-y-3">
+                    {card.rows.map((row) => (
+                      <div key={row.label} className="flex justify-between items-center">
+                        <span className="flex items-center gap-2 text-sm text-zinc-400">
+                          {'icon' in row && row.icon}
+                          {row.label}
+                        </span>
+                        <span className="font-semibold text-white text-sm">{row.value}</span>
+                      </div>
+                    ))}
                   </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Users className="w-5 h-5 mr-2" />
-                    User Statistics
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <span>Total Users</span>
-                      <span className="font-bold">{userStats.total}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span>Active Users</span>
-                      <span className="font-bold text-green-600">{userStats.active}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span>Moderators</span>
-                      <span className="font-bold text-purple-600">{userStats.moderators}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span>New Users Today</span>
-                      <span className="font-bold text-blue-600">{userStats.today}</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Package className="w-5 h-5 mr-2" />
-                    Product Statistics
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <span>Total Products</span>
-                      <span className="font-bold">{productStats.total}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span>New Products Today</span>
-                      <span className="font-bold text-blue-600">{productStats.today}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span>Total Upvotes</span>
-                      <span className="font-bold text-green-600">{analytics.communityUpvotes}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span>Total Reviews</span>
-                      <span className="font-bold text-purple-600">{analytics.userReviews}</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                </div>
+              ))}
             </div>
           </TabsContent>
         </Tabs>

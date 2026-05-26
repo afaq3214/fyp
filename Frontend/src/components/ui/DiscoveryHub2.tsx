@@ -103,6 +103,8 @@ export function DiscoveryHub() {
   const [suggestedProducts, setSuggestedProducts] = useState<Product[]>([]);
   const [suggestedLoading, setSuggestedLoading] = useState(false);
   const [sentimentInsights, setSentimentInsights] = useState<{ total: number; averageScore: number; distribution: { positive: number; negative: number; neutral: number }; recentSample?: { comment: string; sentimentLabel: string; sentimentScore: number }[] } | null>(null);
+  const [categorySuggestions, setCategorySuggestions] = useState<{ category: string; recommendations: Product[]; userInteractions: number; preferredTags: string[] } | null>(null);
+  const [categoryLoading, setCategoryLoading] = useState(false);
 
   const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
 
@@ -229,6 +231,24 @@ export function DiscoveryHub() {
       .catch(() => setSentimentInsights(null));
   }, [url]);
 
+  // AI Recommendations: category-based suggestions (when category is selected)
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token || selectedCategory === 'All Categories') { 
+      setCategorySuggestions(null); 
+      return; 
+    }
+    
+    setCategoryLoading(true);
+    fetch(`${url}/api/recommendations/category-suggestions?category=${encodeURIComponent(selectedCategory)}&limit=6`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((r) => r.ok ? r.json() : null)
+      .then(setCategorySuggestions)
+      .catch(() => setCategorySuggestions(null))
+      .finally(() => setCategoryLoading(false));
+  }, [url, selectedCategory, hasAuthToken]);
+
   // Fetch quest progress
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -339,137 +359,92 @@ export function DiscoveryHub() {
   const displayLoading =
     rankingFeed === 'all' ? false : rankingLoading[rankingFeed];
 
-  if (isLoading) return <div className="flex justify-center items-center min-h-screen"><div className="text-lg">Loading...</div></div>;
-  if (error) return <div className="flex justify-center items-center min-h-screen"><div className="text-lg text-red-600">Error: {error}</div></div>;
+  if (isLoading) return <div className="flex justify-center items-center min-h-screen bg-black"><div className="w-6 h-6 border-2 border-zinc-700 border-t-white rounded-full animate-spin" /></div>;
+  if (error) return <div className="flex justify-center items-center min-h-screen bg-black"><p className="text-zinc-400 text-sm">Error: {error}</p></div>;
 
   return (
-    <div className="min-h-screen bg-slate-950">
+    <div className="min-h-screen bg-black text-white">
       {/* Hero */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-950/40 to-slate-900 border-b border-slate-700/80">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(99,102,241,0.15),transparent)]" />
-        <div className="container relative mx-auto px-4 sm:px-6 lg:px-8 py-14">
+      <div className="border-b border-zinc-900 bg-zinc-950 py-14 px-4">
+        <div className="container mx-auto max-w-7xl">
           <div className="text-center mb-10">
-            <h1 className="text-5xl sm:text-6xl font-bold text-white mb-4 tracking-tight">
+            <h1 className="text-5xl sm:text-6xl font-bold text-white mb-4 tracking-tight leading-none">
               Discovery Hub
             </h1>
-            <p className="text-slate-400 text-lg max-w-2xl mx-auto leading-relaxed">
-              Explore innovative products ranked by genuine peer feedback, not paid promotions
+            <p className="text-zinc-500 text-base max-w-xl mx-auto leading-relaxed">
+              Explore products ranked by genuine peer feedback — no paid promotions.
             </p>
           </div>
 
-          {/* Stats pills */}
-          <div className="flex flex-wrap items-center justify-center gap-4 mb-10">
-            <div className="flex items-center gap-3 px-6 py-3 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm">
-              <div className="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center">
-                <Zap className="w-5 h-5 text-indigo-400" />
+          {/* Stats row */}
+          <div className="flex flex-wrap items-center justify-center gap-3 mb-10">
+            {[
+              { icon: <Zap className="w-4 h-4" />, value: products.length, label: 'Products' },
+              { icon: <Award className="w-4 h-4" />, value: topUsers.length, label: 'Top Makers' },
+              { icon: <Users className="w-4 h-4" />, value: '12K+', label: 'Community' },
+            ].map((stat, i) => (
+              <div key={i} className="flex items-center gap-3 px-5 py-2.5 rounded-full bg-zinc-900 border border-zinc-800">
+                <span className="text-zinc-500">{stat.icon}</span>
+                <div>
+                  <span className="text-lg font-bold text-white mr-1.5">{stat.value}</span>
+                  <span className="text-xs text-zinc-500">{stat.label}</span>
+                </div>
               </div>
-              <div className="text-left">
-                <div className="text-2xl font-bold text-white">{products.length}</div>
-                <div className="text-xs text-slate-400">Active Products</div>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 px-6 py-3 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm">
-              <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center">
-                <Award className="w-5 h-5 text-amber-400" />
-              </div>
-              <div className="text-left">
-                <div className="text-2xl font-bold text-white">{topUsers.length}</div>
-                <div className="text-xs text-slate-400">Top Makers</div>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 px-6 py-3 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm">
-              <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                <Users className="w-5 h-5 text-emerald-400" />
-              </div>
-              <div className="text-left">
-                <div className="text-2xl font-bold text-white">12K+</div>
-                <div className="text-xs text-slate-400">Community</div>
-              </div>
-            </div>
+            ))}
           </div>
 
-          {/* About card */}
-          <div className="max-w-4xl mx-auto rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 p-6 sm:p-8 shadow-xl shadow-black/10">
-            <div className="flex items-start gap-5">
-              <div className="shrink-0 w-14 h-14 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/25">
-                <Sparkles className="w-7 h-7 text-white" />
+          {/* About strip */}
+          <div className="max-w-4xl mx-auto rounded-2xl bg-zinc-900 border border-zinc-800 p-6">
+            <div className="flex items-start gap-4">
+              <div className="shrink-0 w-10 h-10 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center">
+                <Sparkles className="w-5 h-5 text-white" />
               </div>
-              <div className="flex-1 min-w-0">
-                <h2 className="text-white font-semibold text-lg mb-2">Equal Opportunity Platform</h2>
-                <p className="text-slate-400 leading-relaxed mb-5">
-                  A community-driven platform where students, indie makers, and entrepreneurs showcase their projects with equal opportunity.
-                  Discover innovative products ranked by genuine peer feedback. Upvote products you love, write reviews,
-                  and connect with makers building the future.
+              <div>
+                <h2 className="text-white font-semibold mb-1.5">Equal Opportunity Platform</h2>
+                <p className="text-zinc-500 text-sm leading-relaxed mb-3">
+                  A community-driven platform where students, makers, and entrepreneurs showcase their projects. Ranked by genuine peer feedback.
                 </p>
-                <div className="flex flex-wrap items-center gap-4">
-                  <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-slate-300">
-                    <Award className="w-4 h-4 text-indigo-400" /> No Paid Promotions
-                  </span>
-                  <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-slate-300">
-                    <Zap className="w-4 h-4 text-amber-400" /> AI-Powered Discovery
-                  </span>
-                  <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-slate-300">
-                    <Users className="w-4 h-4 text-emerald-400" /> Peer-Driven Rankings
-                  </span>
+                <div className="flex flex-wrap gap-2">
+                  {['No Paid Promotions', 'AI-Powered Discovery', 'Peer-Driven Rankings'].map(tag => (
+                    <span key={tag} className="text-xs border border-zinc-800 text-zinc-500 px-3 py-1 rounded-full">{tag}</span>
+                  ))}
                 </div>
               </div>
             </div>
           </div>
-     
-               
-             </div>
-           </div>
+        </div>
+      </div>
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* About Section */}
-        
-
-        {/* New Layout - 3 Column: Top Makers | Products | Activity Feed */}
+      <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-12 gap-6">
-          {/* LEFT SIDEBAR - Top Makers */}
+          {/* LEFT SIDEBAR */}
           <div className="col-span-12 md:col-span-3">
             <div className="sticky top-6">
-              <div className="rounded-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur border border-slate-200/80 dark:border-slate-700 shadow-lg overflow-hidden">
-                <div className="px-5 py-4 bg-gradient-to-r from-slate-800 to-slate-700">
-                  <h2 className="font-semibold text-white">Top Makers</h2>
-                  <p className="text-xs text-slate-300 mt-0.5">Most active in the community</p>
+              <div className="rounded-2xl bg-zinc-900 border border-zinc-800 overflow-hidden">
+                <div className="px-4 py-3 border-b border-zinc-800">
+                  <h2 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Top Makers</h2>
                 </div>
-                <div className="divide-y divide-slate-100 dark:divide-slate-700">
+                <div className="divide-y divide-zinc-900">
                   {topUsers.slice(0, 8).map((user, index) => (
                     <Link key={user._id} to={`/product-owner/${user._id}`}>
-                      <div className="p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all duration-200 cursor-pointer group">
-                        <div className="flex items-center gap-3">
-                          <div className="relative shrink-0">
-                            {user.profilePicture ? (
-                              <img
-                                src={user.profilePicture}
-                                alt={user.name}
-                                className="w-11 h-11 rounded-xl object-cover ring-2 ring-slate-200 dark:ring-slate-600 group-hover:ring-indigo-400/50 transition-all"
-                                referrerPolicy="no-referrer"
-                                loading="lazy"
-                              />
-                            ) : (
-                              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/50 dark:to-purple-900/50 flex items-center justify-center ring-2 ring-slate-200 dark:ring-slate-600">
-                                <span className="text-lg font-semibold text-slate-700 dark:text-slate-300">{user.name.charAt(0).toUpperCase()}</span>
-                              </div>
-                            )}
-                            <div className={`absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold text-white shadow ${index === 0 ? 'bg-amber-500' : index === 1 ? 'bg-slate-400' : index === 2 ? 'bg-amber-700' : 'bg-slate-600'}`}>
-                              {index + 1}
+                      <div className="p-3 hover:bg-zinc-800/50 transition-colors cursor-pointer group flex items-center gap-3">
+                        <div className="relative shrink-0">
+                          {user.profilePicture ? (
+                            <img src={user.profilePicture} alt={user.name}
+                              className="w-9 h-9 rounded-lg object-cover ring-1 ring-zinc-700"
+                              referrerPolicy="no-referrer" loading="lazy" />
+                          ) : (
+                            <div className="w-9 h-9 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center">
+                              <span className="text-sm font-semibold text-white">{user.name.charAt(0).toUpperCase()}</span>
                             </div>
+                          )}
+                          <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-zinc-950 border border-zinc-700 flex items-center justify-center text-[9px] font-bold text-zinc-300">
+                            {index + 1}
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="font-medium text-slate-900 dark:text-white truncate">{user.name}</div>
-                            {user.badges && user.badges.length > 0 && (
-                              <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">
-                                {typeof user.badges[0] === 'string' ? user.badges[0] : (user.badges[0] as { badge?: string })?.badge || 'Badge'}
-                              </div>
-                            )}
-                            <div className="flex items-center gap-2 mt-1.5">
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 text-xs font-medium">
-                                {user.points || 0} pts
-                              </span>
-                            </div>
-                          </div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-medium text-white truncate group-hover:text-zinc-200">{user.name}</div>
+                          <div className="text-xs text-zinc-600">{user.points || 0} pts</div>
                         </div>
                       </div>
                     </Link>
@@ -479,357 +454,175 @@ export function DiscoveryHub() {
             </div>
           </div>
 
-          {/* CENTER - Main Products Feed */}
+          {/* CENTER - Products Feed */}
           <div className="col-span-12 md:col-span-6">
-            {/* Ranking with Momentum – feed tabs */}
-            <div className="rounded-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur border border-slate-200/80 dark:border-slate-700 shadow-lg p-5 mb-5">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-md">
-                  <TrendingUp className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-slate-900 dark:text-white">Ranking with Momentum</h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">Switch feeds to explore</p>
-                </div>
+            {/* Ranking tabs */}
+            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 mb-4">
+              <div className="flex items-center gap-2 mb-3">
+                <TrendingUp className="w-4 h-4 text-zinc-400" />
+                <span className="text-sm font-medium text-white">Ranking with Momentum</span>
               </div>
               <Tabs value={rankingFeed} onValueChange={(v) => setRankingFeed(v as RankingFeed)}>
-                <TabsList className="grid w-full grid-cols-5 h-auto flex-wrap gap-2 bg-slate-100 dark:bg-slate-800 p-2 rounded-xl">
-                  <TabsTrigger value="all" className="flex items-center gap-2 text-sm rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-slate-900 dark:data-[state=active]:bg-slate-700 dark:data-[state=active]:text-white">
-                    <Grid3X3 className="w-4 h-4 text-slate-500" />
-                    All
-                  </TabsTrigger>
-                  <TabsTrigger value="popular" className="flex items-center gap-2 text-sm rounded-lg data-[state=active]:bg-orange-50 data-[state=active]:text-orange-700 data-[state=active]:shadow-sm dark:data-[state=active]:bg-orange-900/30 dark:data-[state=active]:text-orange-300">
-                    <Flame className="w-4 h-4 text-orange-500" />
-                    Popular
-                  </TabsTrigger>
-                  <TabsTrigger value="fresh" className="flex items-center gap-2 text-sm rounded-lg data-[state=active]:bg-emerald-50 data-[state=active]:text-emerald-700 data-[state=active]:shadow-sm dark:data-[state=active]:bg-emerald-900/30 dark:data-[state=active]:text-emerald-300">
-                    <Clock className="w-4 h-4 text-green-500" />
-                    Fresh
-                  </TabsTrigger>
-                  <TabsTrigger value="smart" className="flex items-center gap-2 text-sm rounded-lg data-[state=active]:bg-indigo-50 data-[state=active]:text-indigo-700 data-[state=active]:shadow-sm dark:data-[state=active]:bg-indigo-900/30 dark:data-[state=active]:text-indigo-300">
-                    <SlidersHorizontal className="w-4 h-4 text-blue-500" />
-                    Smart
-                  </TabsTrigger>
-                  <TabsTrigger value="hidden_gems" className="flex items-center gap-2 text-sm rounded-lg data-[state=active]:bg-purple-50 data-[state=active]:text-purple-700 data-[state=active]:shadow-sm dark:data-[state=active]:bg-purple-900/30 dark:data-[state=active]:text-purple-300">
-                    <Gem className="w-4 h-4 text-purple-500" />
-                    Hidden Gems
-                  </TabsTrigger>
+                <TabsList className="grid w-full grid-cols-5 h-auto gap-1 bg-zinc-950 p-1 rounded-xl border border-zinc-800">
+                  {[
+                    { value: 'all', icon: <Grid3X3 className="w-3.5 h-3.5" />, label: 'All' },
+                    { value: 'popular', icon: <Flame className="w-3.5 h-3.5" />, label: 'Popular' },
+                    { value: 'fresh', icon: <Clock className="w-3.5 h-3.5" />, label: 'Fresh' },
+                    { value: 'smart', icon: <SlidersHorizontal className="w-3.5 h-3.5" />, label: 'Smart' },
+                    { value: 'hidden_gems', icon: <Gem className="w-3.5 h-3.5" />, label: 'Gems' },
+                  ].map(tab => (
+                    <TabsTrigger key={tab.value} value={tab.value}
+                      className="flex items-center gap-1.5 text-xs rounded-lg text-zinc-500 data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:font-semibold">
+                      {tab.icon}{tab.label}
+                    </TabsTrigger>
+                  ))}
                 </TabsList>
                 {rankingFeed === 'smart' && (
                   <div className="mt-3 space-y-3">
-                    <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex flex-wrap gap-2">
                       <Select value={smartCategory} onValueChange={setSmartCategory}>
-                        <SelectTrigger className="w-[160px] h-9 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600 text-slate-900 dark:text-slate-100">
+                        <SelectTrigger className="w-[150px] h-8 bg-zinc-950 border-zinc-700 text-zinc-300 text-xs">
                           <SelectValue placeholder="Category" />
                         </SelectTrigger>
-                        <SelectContent>
-                          {categories.map((cat) => (
-                            <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                          ))}
+                        <SelectContent className="bg-zinc-900 border-zinc-700">
+                          {categories.map((cat) => <SelectItem key={cat} value={cat} className="text-zinc-300 focus:bg-zinc-800 focus:text-white">{cat}</SelectItem>)}
                         </SelectContent>
                       </Select>
                       <Select value={smartTopic} onValueChange={setSmartTopic}>
-                        <SelectTrigger className="w-[160px] h-9 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600 text-slate-900 dark:text-slate-100">
+                        <SelectTrigger className="w-[150px] h-8 bg-zinc-950 border-zinc-700 text-zinc-300 text-xs">
                           <SelectValue placeholder="Topic" />
                         </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="All Topics">All Topics</SelectItem>
-                          {smartTags.map((tag) => (
-                            <SelectItem key={tag} value={tag}>{tag}</SelectItem>
-                          ))}
+                        <SelectContent className="bg-zinc-900 border-zinc-700">
+                          <SelectItem value="All Topics" className="text-zinc-300 focus:bg-zinc-800 focus:text-white">All Topics</SelectItem>
+                          {smartTags.map((tag) => <SelectItem key={tag} value={tag} className="text-zinc-300 focus:bg-zinc-800 focus:text-white">{tag}</SelectItem>)}
                         </SelectContent>
                       </Select>
                       <Select value={smartSort} onValueChange={setSmartSort}>
-                        <SelectTrigger className="w-[160px] h-9 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600 text-slate-900 dark:text-slate-100">
+                        <SelectTrigger className="w-[140px] h-8 bg-zinc-950 border-zinc-700 text-zinc-300 text-xs">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="popular">Popular</SelectItem>
-                          <SelectItem value="fresh">Fresh</SelectItem>
-                          <SelectItem value="rising_week">Rising this week</SelectItem>
-                          <SelectItem value="momentum">Momentum</SelectItem>
-                          <SelectItem value="hidden_gems">Hidden Gems</SelectItem>
+                        <SelectContent className="bg-zinc-900 border-zinc-700">
+                          {['popular','fresh','rising_week','momentum','hidden_gems'].map(v => (
+                            <SelectItem key={v} value={v} className="text-zinc-300 focus:bg-zinc-800 focus:text-white capitalize">{v.replace('_',' ')}</SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
-                    <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={smartDiversityMaker}
-                        onChange={(e) => setSmartDiversityMaker(e.target.checked)}
-                        className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                      />
-                      <span>One per maker</span>
-                      <span className="text-slate-400 text-xs">(diverse feed, one product per author)</span>
+                    <label className="flex items-center gap-2 text-xs text-zinc-500 cursor-pointer">
+                      <input type="checkbox" checked={smartDiversityMaker} onChange={(e) => setSmartDiversityMaker(e.target.checked)} className="rounded border-zinc-700 bg-zinc-900" />
+                      One per maker
                     </label>
                   </div>
                 )}
               </Tabs>
             </div>
 
-            {/* Filters Bar (category + sort for "all" or secondary filter) */}
-            <div className="bg-white rounded-lg border border-slate-200 p-4 mb-6">
-              <div className="flex flex-wrap items-center gap-3">
-                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                  <SelectTrigger className="w-[180px] h-9 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600 text-slate-900 dark:text-slate-100">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map(category => (
-                      <SelectItem key={category} value={category}>
-                        {category}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="w-[140px] h-9 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600 text-slate-900 dark:text-slate-100">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="upvotes">Most Upvotes</SelectItem>
-                    <SelectItem value="popular">Most Popular</SelectItem>
-                    <SelectItem value="fresh">Fresh</SelectItem>
-                    <SelectItem value="reviews">Most Reviews</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                <div className="flex-1" />
-
-                <div className="flex items-center gap-1 bg-slate-100 p-1 rounded">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setViewMode('grid')}
-                    className={`h-7 px-3 ${viewMode === 'grid' ? 'bg-white shadow-sm' : ''}`}
-                  >
-                    <Grid3X3 className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setViewMode('list')}
-                    className={`h-7 px-3 ${viewMode === 'list' ? 'bg-white shadow-sm' : ''}`}
-                  >
-                    <List className="w-4 h-4" />
-                  </Button>
-                </div>
+            {/* Filters */}
+            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-3 mb-5 flex flex-wrap items-center gap-2">
+              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <SelectTrigger className="w-[160px] h-8 bg-zinc-950 border-zinc-700 text-zinc-300 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-zinc-900 border-zinc-700">
+                  {categories.map(c => <SelectItem key={c} value={c} className="text-zinc-300 focus:bg-zinc-800 focus:text-white">{c}</SelectItem>)}
+                </SelectContent>
+              </Select>
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-[130px] h-8 bg-zinc-950 border-zinc-700 text-zinc-300 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-zinc-900 border-zinc-700">
+                  {[['upvotes','Most Upvotes'],['popular','Popular'],['fresh','Fresh'],['reviews','Most Reviews']].map(([v,l]) => (
+                    <SelectItem key={v} value={v} className="text-zinc-300 focus:bg-zinc-800 focus:text-white">{l}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <div className="flex-1" />
+              <div className="flex items-center gap-0.5 bg-zinc-950 border border-zinc-800 p-0.5 rounded-lg">
+                <Button variant="ghost" size="sm" onClick={() => setViewMode('grid')}
+                  className={`h-7 px-2 ${viewMode === 'grid' ? 'bg-white text-black' : 'text-zinc-500 hover:text-white'}`}>
+                  <Grid3X3 className="w-3.5 h-3.5" />
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => setViewMode('list')}
+                  className={`h-7 px-2 ${viewMode === 'list' ? 'bg-white text-black' : 'text-zinc-500 hover:text-white'}`}>
+                  <List className="w-3.5 h-3.5" />
+                </Button>
               </div>
             </div>
 
-            {/* Products List */}
-            <div className="space-y-4">
-              {displayLoading && (
-                <div className="flex justify-center py-8 text-slate-500">Loading feed...</div>
-              )}
+            {/* Product Cards */}
+            <div className="space-y-3">
+              {displayLoading && <div className="py-10 text-center text-zinc-600 text-sm">Loading feed...</div>}
               {!displayLoading && displayProducts.length === 0 && (
-                <div className="text-center py-8 text-slate-500">No products in this feed yet.</div>
+                <div className="py-10 text-center text-zinc-600 text-sm border border-dashed border-zinc-800 rounded-2xl">No products in this feed yet.</div>
               )}
-              {!displayLoading && displayProducts.map((product, index) => (
-                <div
-                  key={product._id}
-                  className={`group relative overflow-hidden rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-500 cursor-pointer transform hover:-translate-y-2 ${
-                    darkmode 
-                      ? 'bg-gradient-to-br from-blue-900/80 via-purple-900/60 to-indigo-900/80 border-blue-500/30' 
-                      : 'bg-gradient-to-br from-white/90 via-indigo-50/80 to-purple-50/90 border-white/50'
-                  } border backdrop-blur-xl`}
-                  onClick={() => handleProductClick(product)}
-                >
-                  {/* Gradient Overlay */}
-                  <div className={`absolute inset-0 bg-gradient-to-br ${
-                    darkmode 
-                      ? 'from-blue-600/20 via-purple-600/20 to-pink-600/20' 
-                      : 'from-indigo-500/10 via-purple-500/10 to-pink-500/10'
-                  } opacity-0 group-hover:opacity-0 transition-opacity duration-500 pointer-events-none`}></div>
-                  
-                  <div className="relative flex gap-0">
-                    {/* Product Image Section */}
-                    <div className="relative w-48 sm:w-56 shrink-0 overflow-hidden">
-                      <ImageWithFallback
-                        src={product.media && product.media[0]}
-                        alt={product.title}
-                        className="w-full h-full min-h-[180px] object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                      />
+              {!displayLoading && displayProducts.map((product) => (
+                <div key={product._id}
+                  className="group bg-zinc-900 border border-zinc-800 hover:border-zinc-700 rounded-2xl overflow-hidden cursor-pointer transition-all duration-200 flex"
+                  onClick={() => handleProductClick(product)}>
+                  {/* Image */}
+                  <div className="relative w-44 sm:w-52 shrink-0 overflow-hidden bg-zinc-800">
+                    <ImageWithFallback
+                      src={product.media && product.media[0]}
+                      alt={product.title}
+                      className="w-full h-full min-h-[160px] object-cover group-hover:scale-[1.02] transition-transform duration-500"
+                    />
+                    {product.category && (
+                      <div className="absolute top-2 left-2">
+                        <span className="text-[10px] font-semibold uppercase tracking-wider bg-black/80 text-zinc-300 border border-zinc-700 px-2 py-0.5 rounded-md">
+                          {product.category}
+                        </span>
+                      </div>
+                    )}
+                  </div>
 
-                      {/* Category Tag */}
-                      {product.category && (
-                        <div className="absolute top-3 left-3">
-                          <div className={`px-2 py-1 rounded-lg shadow-xl backdrop-blur-md text-xs font-bold uppercase tracking-wider ${
-                            darkmode 
-                              ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white border-purple-400/30' 
-                              : 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white border-indigo-400/30'
-                          }`}>
-                            {product.category}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Hover Gradient Overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                    </div>
-
-                    {/* Product Info Section */}
-                    <div className="flex-1 min-w-0 p-5 space-y-3">
-                      {/* Header with Title and Upvote Button */}
-                      <div className="flex items-start justify-between gap-3">
+                  {/* Content */}
+                  <div className="flex-1 min-w-0 p-4 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-start justify-between gap-3 mb-2">
                         <div className="flex-1 min-w-0">
-                          <h3 className={`text-lg font-bold mb-2 transition-all duration-300 group-hover:text-transparent group-hover:bg-clip-text ${
-                            darkmode 
-                              ? 'text-white group-hover:bg-gradient-to-r group-hover:from-blue-400 group-hover:to-purple-400' 
-                              : 'text-slate-900 group-hover:bg-gradient-to-r group-hover:from-indigo-600 group-hover:to-purple-600'
-                          }`}>
-                            {product.title}
-                          </h3>
-                          <p className={`text-sm leading-relaxed line-clamp-2 transition-all duration-300 ${
-                            darkmode 
-                              ? 'text-gray-300 group-hover:text-gray-200' 
-                              : 'text-slate-600 group-hover:text-slate-700'
-                          }`}>
-                            {product.description}
-                          </p>
+                          <h3 className="text-sm font-semibold text-white mb-1 group-hover:text-zinc-200 leading-snug">{product.title}</h3>
+                          <p className="text-xs text-zinc-500 line-clamp-2 leading-relaxed">{product.description}</p>
                         </div>
-
-                        {/* Enhanced Upvote Button */}
-                        <div className={`flex flex-col items-center justify-center gap-1 w-14 h-14 shrink-0 rounded-2xl border-2 transition-all duration-300 transform hover:scale-110 ${
-                          darkmode 
-                            ? 'bg-gradient-to-br from-red-900/30 to-pink-900/30 border-red-700/50 hover:border-red-500 hover:from-red-800/40 hover:to-pink-800/40' 
-                            : 'bg-gradient-to-br from-red-50 to-pink-50 border-red-200/50 hover:border-red-400 hover:from-red-100 hover:to-pink-100'
-                        }`}>
-                          <ArrowUp className={`w-5 h-5 transition-colors ${
-                            darkmode ? 'text-red-400' : 'text-red-600'
-                          }`} />
-                          <span className={`text-sm font-bold ${
-                            darkmode ? 'text-red-300' : 'text-red-700'
-                          }`}>
-                            {product.upvotes?.length ?? 0}
-                          </span>
+                        <div className="shrink-0 flex flex-col items-center justify-center w-12 h-12 border border-zinc-800 hover:border-white/30 rounded-xl transition-colors">
+                          <ArrowUp className="w-4 h-4 text-zinc-400" />
+                          <span className="text-xs font-bold text-white">{product.upvotes?.length ?? 0}</span>
                         </div>
                       </div>
 
-                      {/* Tags */}
                       {product.autoTags && product.autoTags.length > 0 && (
-                        <div className="flex flex-wrap gap-1.5">
-                          {product.autoTags.slice(0, 2).map((tag, index) => (
-                            <span
-                              key={index}
-                              className={`px-2 py-1 rounded-lg text-xs font-medium transition-all duration-300 hover:scale-105 ${
-                                darkmode 
-                                  ? 'bg-blue-700/50 text-blue-300 border border-blue-600/30' 
-                                  : 'bg-indigo-100/70 text-indigo-700 border border-indigo-200/50'
-                              }`}
-                            >
-                              #{tag}
-                            </span>
+                        <div className="flex flex-wrap gap-1 mb-2">
+                          {product.autoTags.slice(0, 3).map((tag, i) => (
+                            <span key={i} className="text-[10px] text-zinc-600 border border-zinc-800 px-1.5 py-0.5 rounded-md">#{tag}</span>
                           ))}
-                          {product.autoTags.length > 2 && (
-                            <span className={`px-2 py-1 rounded-lg text-xs font-medium ${
-                              darkmode 
-                                ? 'text-gray-400' 
-                                : 'text-slate-500'
-                            }`}>
-                              +{product.autoTags.length - 2}
-                            </span>
-                          )}
                         </div>
                       )}
+                    </div>
 
-                      {/* Meta Info Bar */}
-                      <div className={`flex items-center justify-between pt-3 border-t ${
-                        darkmode 
-                          ? 'border-blue-700/50' 
-                          : 'border-indigo-200/50'
-                      }`}>
-                        {/* Author and Date */}
-                        <div className="flex items-center gap-3">
-                          <div className="flex items-center gap-2">
-                            {product.author_profile ? (
-                              <div className="relative">
-                                <img 
-                                  src={product.author_profile} 
-                                  alt={product.author_name} 
-                                  className="w-7 h-7 rounded-full object-cover ring-2 ring-offset-2 ring-offset-transparent hover:ring-indigo-400 transition-all"
-                                  referrerPolicy="no-referrer"
-                                  loading="lazy"
-                                />
-                                <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-green-500 rounded-full border-2 border-current"></div>
-                              </div>
-                            ) : (
-                              <div className={`w-7 h-7 rounded-full flex items-center justify-center ring-2 ring-offset-2 ring-offset-transparent ${
-                                darkmode 
-                                  ? 'bg-gradient-to-br from-blue-600 to-purple-600 ring-blue-700/50' 
-                                  : 'bg-gradient-to-br from-indigo-500 to-purple-500 ring-indigo-200/50'
-                              }`}>
-                                <span className="text-xs font-bold text-white">
-                                  {product.author_name ? product.author_name.charAt(0).toUpperCase() : 'U'}
-                                </span>
-                              </div>
-                            )}
-                            <div>
-                              <span className={`text-sm font-medium ${
-                                darkmode ? 'text-gray-200' : 'text-slate-700'
-                              }`}>
-                                {product.author_name}
-                              </span>
-                              <div className={`text-xs ${
-                                darkmode ? 'text-gray-400' : 'text-slate-500'
-                              }`}>
-                                {new Date(product.createdAt).toLocaleDateString("en-GB", {
-                                  day: "2-digit",
-                                  month: "short",
-                                  year: "numeric",
-                                })}
-                              </div>
-                            </div>
+                    <div className="flex items-center justify-between pt-2 border-t border-zinc-800">
+                      <div className="flex items-center gap-2">
+                        {product.author_profile ? (
+                          <img src={product.author_profile} alt={product.author_name}
+                            className="w-5 h-5 rounded-full object-cover ring-1 ring-zinc-700"
+                            referrerPolicy="no-referrer" loading="lazy" />
+                        ) : (
+                          <div className="w-5 h-5 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center">
+                            <span className="text-[8px] font-bold text-white">{product.author_name?.charAt(0)?.toUpperCase()}</span>
                           </div>
-                        </div>
-
-                        {/* Engagement Stats */}
-                        <div className="flex items-center gap-3">
-                          {/* Comments */}
-                          <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl transition-all duration-300 hover:scale-105 ${
-                            darkmode 
-                              ? 'bg-blue-900/30 text-blue-400 border border-blue-700/30' 
-                              : 'bg-blue-50 text-blue-600 border border-blue-200/50'
-                          }`}>
-                            <MessageSquare className="w-3.5 h-3.5" />
-                            <span className="text-xs font-semibold">{getReviewCount(product)}</span>
-                          </div>
-
-                          {/* Status Badges */}
-                          <div className="flex items-center gap-1.5">
-                            {product.trending && (
-                              <div className={`px-2 py-1 rounded-lg text-xs font-bold shadow-lg backdrop-blur-md ${
-                                darkmode 
-                                  ? 'bg-gradient-to-r from-orange-600 to-red-600 text-white border-orange-400/30' 
-                                  : 'bg-gradient-to-r from-orange-500 to-red-500 text-white border-orange-200/30'
-                              }`}>
-                                <Flame className="w-3 h-3 inline mr-1" />
-                                Trending
-                              </div>
-                            )}
-                            {product.fresh && (
-                              <div className={`px-2 py-1 rounded-lg text-xs font-bold shadow-lg backdrop-blur-md ${
-                                darkmode 
-                                  ? 'bg-gradient-to-r from-emerald-600 to-green-600 text-white border-emerald-400/30' 
-                                  : 'bg-gradient-to-r from-emerald-500 to-green-500 text-white border-emerald-200/30'
-                              }`}>
-                                Fresh
-                              </div>
-                            )}
-                          </div>
-                        </div>
+                        )}
+                        <span className="text-xs text-zinc-500">{product.author_name}</span>
+                        <span className="text-zinc-700">·</span>
+                        <span className="text-xs text-zinc-600">{new Date(product.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short" })}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="flex items-center gap-1 text-xs text-zinc-600">
+                          <MessageSquare className="w-3 h-3" />{getReviewCount(product)}
+                        </span>
+                        {product.trending && <span className="text-[10px] border border-zinc-700 text-zinc-500 px-1.5 py-0.5 rounded-md">Trending</span>}
+                        {product.fresh && <span className="text-[10px] border border-zinc-700 text-zinc-500 px-1.5 py-0.5 rounded-md">Fresh</span>}
                       </div>
                     </div>
                   </div>
-
-                  {/* Decorative Elements */}
-                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                  
-                  {/* Corner Accent */}
-                  <div className={`absolute top-3 right-3 w-2 h-2 rounded-full ${
-                    darkmode ? 'bg-purple-400' : 'bg-indigo-500'
-                  } opacity-0 group-hover:opacity-100 transition-all duration-500 group-hover:animate-pulse`}></div>
                 </div>
               ))}
             </div>
@@ -837,137 +630,105 @@ export function DiscoveryHub() {
 
           {/* RIGHT SIDEBAR */}
           <div className="col-span-12 md:col-span-3">
-            <div className="sticky top-6 space-y-5">
-              {/* Community Stats */}
-              {/* <div className="rounded-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur border border-slate-200/80 dark:border-slate-700 shadow-lg overflow-hidden">
-                <div className="px-5 py-4 bg-gradient-to-r from-slate-800 to-slate-700">
-                  <h3 className="font-semibold text-white flex items-center gap-2">
-                    <Activity className="w-4 h-4 text-indigo-300" />
-                    Community Stats
-                  </h3>
-                </div>
-                <div className="p-5 space-y-5">
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm text-slate-600 dark:text-slate-400">Products Launched</span>
-                      <span className="text-sm font-bold text-slate-900 dark:text-white">{products.length}</span>
-                    </div>
-                    <div className="h-2.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
-                      <div className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-500" style={{ width: `${Math.min(100, (products.length / 20) * 100)}%` }} />
-                    </div>
-                  </div>
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm text-slate-600 dark:text-slate-400">Total Upvotes</span>
-                      <span className="text-sm font-bold text-slate-900 dark:text-white">
-                        {products.reduce((sum, p) => sum + (p.upvotes?.length || 0), 0)}
-                      </span>
-                    </div>
-                    <div className="h-2.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
-                      <div className="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full transition-all duration-500" style={{ width: `${Math.min(100, (products.reduce((s, p) => s + (p.upvotes?.length || 0), 0) / 30) * 100)}%` }} />
-                    </div>
-                  </div>
-                </div>
-              </div> */}
-
-              {/* AI Suggested for you */}
+            <div className="sticky top-6 space-y-4">
+              {/* AI Suggested */}
               {hasAuthToken && (
-                <div className="rounded-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur border border-slate-200/80 dark:border-slate-700 shadow-lg overflow-hidden">
-                  <div className="px-5 py-4 bg-gradient-to-r from-indigo-500/90 to-purple-600/90">
-                    <h3 className="font-semibold text-white flex items-center gap-2">
-                      <Sparkles className="w-4 h-4" />
-                      AI Suggested for you
-                    </h3>
-                    <p className="text-xs text-white/80 mt-0.5">Based on your upvotes and interests</p>
+                <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
+                  <div className="px-4 py-3 border-b border-zinc-800 flex items-center gap-2">
+                    <Sparkles className="w-3.5 h-3.5 text-zinc-400" />
+                    <h3 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">AI Suggested</h3>
                   </div>
-                  <div className="divide-y divide-slate-100 dark:divide-slate-700 max-h-64 overflow-y-auto">
-                    {suggestedLoading && <div className="p-4 text-sm text-slate-500 dark:text-slate-400">Loading...</div>}
-                    {!suggestedLoading && suggestedProducts.length === 0 && <div className="p-4 text-sm text-slate-500 dark:text-slate-400">Upvote or comment on products to get suggestions.</div>}
-                    {!suggestedLoading && suggestedProducts.slice(0, 6).map((p) => (
-                      <div key={p._id} className="p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors group" onClick={() => handleProductClick(p)}>
-                        <p className="font-medium text-sm text-slate-900 dark:text-white truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400">{p.title}</p>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{p.upvotes?.length ?? 0} upvotes · {getReviewCount(p)} reviews</p>
+                  <div className="divide-y divide-zinc-900 max-h-56 overflow-y-auto">
+                    {suggestedLoading && <p className="p-4 text-xs text-zinc-600">Loading...</p>}
+                    {!suggestedLoading && suggestedProducts.length === 0 && <p className="p-4 text-xs text-zinc-600">Upvote products to get suggestions.</p>}
+                    {!suggestedLoading && suggestedProducts.slice(0, 5).map((p) => (
+                      <div key={p._id} onClick={() => handleProductClick(p)}
+                        className="p-3 hover:bg-zinc-800/50 cursor-pointer transition-colors group">
+                        <p className="text-xs font-medium text-white truncate group-hover:text-zinc-200">{p.title}</p>
+                        <p className="text-[10px] text-zinc-600 mt-0.5">{p.upvotes?.length ?? 0} upvotes</p>
                       </div>
                     ))}
                   </div>
                 </div>
               )}
 
-              {/* Feedback sentiment */}
-              <div className="rounded-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur border border-slate-200/80 dark:border-slate-700 shadow-lg overflow-hidden">
-                <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-700">
-                  <h3 className="font-semibold text-slate-900 dark:text-white flex items-center gap-2">
-                    <BarChart3 className="w-4 h-4 text-purple-500" />
-                    Feedback sentiment
-                  </h3>
+              {/* Sentiment */}
+              <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
+                <div className="px-4 py-3 border-b border-zinc-800 flex items-center gap-2">
+                  <BarChart3 className="w-3.5 h-3.5 text-zinc-400" />
+                  <h3 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Feedback Sentiment</h3>
                 </div>
-                <div className="p-5">
+                <div className="p-4">
                   {sentimentInsights ? (
-                    <div className="space-y-4">
+                    <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-slate-600 dark:text-slate-400">Avg. score</span>
-                        <span className="text-lg font-bold text-slate-900 dark:text-white">{sentimentInsights.averageScore}</span>
+                        <span className="text-xs text-zinc-600">Avg. score</span>
+                        <span className="text-sm font-bold text-white">{sentimentInsights.averageScore}</span>
                       </div>
-                      <div className="flex gap-2 flex-wrap">
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-xs font-medium">
-                          <ThumbsUp className="w-3.5 h-3.5" />
-                          {sentimentInsights.distribution?.positive ?? 0}
+                      <div className="flex gap-1.5 flex-wrap">
+                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg border border-zinc-800 text-zinc-400 text-[10px]">
+                          <ThumbsUp className="w-3 h-3" />{sentimentInsights.distribution?.positive ?? 0}
                         </span>
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-medium">
-                          <Minus className="w-3.5 h-3.5" />
-                          {sentimentInsights.distribution?.neutral ?? 0}
+                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg border border-zinc-800 text-zinc-500 text-[10px]">
+                          <Minus className="w-3 h-3" />{sentimentInsights.distribution?.neutral ?? 0}
                         </span>
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-xs font-medium">
-                          <ThumbsDown className="w-3.5 h-3.5" />
-                          {sentimentInsights.distribution?.negative ?? 0}
+                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg border border-zinc-800 text-zinc-600 text-[10px]">
+                          <ThumbsDown className="w-3 h-3" />{sentimentInsights.distribution?.negative ?? 0}
                         </span>
                       </div>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">{sentimentInsights.total} comments analyzed</p>
+                      <p className="text-[10px] text-zinc-700">{sentimentInsights.total} comments analyzed</p>
                     </div>
-                  ) : (
-                    <p className="text-sm text-slate-500 dark:text-slate-400">Loading sentiment...</p>
-                  )}
+                  ) : <p className="text-xs text-zinc-600">Loading...</p>}
                 </div>
               </div>
 
-              {/* Recent Activity */}
-              <div className="rounded-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur border border-slate-200/80 dark:border-slate-700 shadow-lg overflow-hidden">
-                <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-700">
-                  <h3 className="font-semibold text-slate-900 dark:text-white">Recent Activity</h3>
+              {/* Category suggestions */}
+              {hasAuthToken && selectedCategory !== 'All Categories' && categorySuggestions && (
+                <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
+                  <div className="px-4 py-3 border-b border-zinc-800">
+                    <h3 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider flex items-center gap-2">
+                      <Gem className="w-3.5 h-3.5" />{selectedCategory}
+                    </h3>
+                  </div>
+                  <div className="divide-y divide-zinc-900 max-h-56 overflow-y-auto">
+                    {categoryLoading && <p className="p-4 text-xs text-zinc-600">Loading...</p>}
+                    {!categoryLoading && categorySuggestions.recommendations.map((p) => (
+                      <div key={p._id} onClick={() => handleProductClick(p)}
+                        className="p-3 hover:bg-zinc-800/50 cursor-pointer transition-colors group">
+                        <p className="text-xs font-medium text-white truncate group-hover:text-zinc-200">{p.title}</p>
+                        <p className="text-[10px] text-zinc-600 mt-0.5">{p.upvotes?.length ?? 0} upvotes</p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className="divide-y divide-slate-100 dark:divide-slate-700">
-                  {products
-                    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-                    .slice(0, 5)
-                    .map((product, index) => (
-                    <div key={index} className="p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                      <div className="flex items-start gap-3">
+              )}
+
+              {/* Recent Activity */}
+              <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
+                <div className="px-4 py-3 border-b border-zinc-800">
+                  <h3 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Recent Activity</h3>
+                </div>
+                <div className="divide-y divide-zinc-900">
+                  {products.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                    .slice(0, 5).map((product, index) => (
+                    <div key={index} className="p-3 hover:bg-zinc-800/50 transition-colors">
+                      <div className="flex items-start gap-2">
                         {product.author_profile ? (
-                          <img 
-                            src={product.author_profile} 
-                            alt={product.author_name} 
-                            className="w-8 h-8 rounded-full object-cover"
-                            referrerPolicy="no-referrer"
-                            loading="lazy"
-                          />
+                          <img src={product.author_profile} alt={product.author_name}
+                            className="w-6 h-6 rounded-full object-cover flex-shrink-0"
+                            referrerPolicy="no-referrer" loading="lazy" />
                         ) : (
-                          <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
-                            <span className="text-xs font-medium text-gray-700">
-                              {product.author_name ? product.author_name.charAt(0).toUpperCase() : 'U'}
-                            </span>
+                          <div className="w-6 h-6 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center flex-shrink-0">
+                            <span className="text-[9px] font-bold text-white">{product.author_name?.charAt(0)?.toUpperCase()}</span>
                           </div>
                         )}
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm text-slate-900 dark:text-slate-100">
-                            <span className="font-medium">{product.author_name}</span>
+                          <p className="text-[11px] text-zinc-400 leading-snug">
+                            <span className="text-white font-medium">{product.author_name}</span>
                             {' launched '}
-                            <span className="font-medium">{product.title}</span>
+                            <span className="text-zinc-300">{product.title}</span>
                           </p>
-                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{new Date(product.createdAt).toLocaleDateString("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  })}</p>
+                          <p className="text-[10px] text-zinc-700 mt-0.5">{new Date(product.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short" })}</p>
                         </div>
                       </div>
                     </div>
@@ -976,77 +737,43 @@ export function DiscoveryHub() {
               </div>
 
               {/* Daily Quests */}
-              <div className="rounded-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur border border-slate-200/80 dark:border-slate-700 shadow-lg overflow-hidden">
-                <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-700">
-                  <h3 className="font-semibold text-slate-900 dark:text-white">Daily Quests</h3>
+              <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
+                <div className="px-4 py-3 border-b border-zinc-800">
+                  <h3 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Daily Quests</h3>
                 </div>
-                <div className="p-5 space-y-3">
-                  {dailyQuest.map((quest) => {
-                    const progressPercent = (quest.progress / quest.target) * 100;
-                    return (
-                      <div 
-                        key={quest.id} 
-                        className={`p-3 rounded-lg border ${
-                          quest.completed 
-                            ? 'bg-green-50 border-green-200' 
-                            : 'bg-blue-50 border-blue-200'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2 mb-2">
-                          <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                            quest.completed ? 'bg-green-600' : 'bg-blue-600'
-                          }`}>
-                            {quest.completed ? (
-                              <CheckCircle2 className="w-4 h-4 text-white" />
-                            ) : (
-                              quest.icon
-                            )}
-                          </div>
-                          <div className="flex-1">
-                            <h4 className="font-medium text-slate-900 text-sm">{quest.title}</h4>
-                            <p className="text-xs text-slate-600">{quest.description}</p>
-                          </div>
+                <div className="p-4 space-y-3">
+                  {dailyQuest.length === 0 && <p className="text-xs text-zinc-600 text-center py-2">Sign in to see quests</p>}
+                  {dailyQuest.map((quest) => (
+                    <div key={quest.id} className={`p-3 rounded-xl border ${quest.completed ? 'border-white/20 bg-white/5' : 'border-zinc-800 bg-zinc-950'}`}>
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${quest.completed ? 'bg-white text-black' : 'bg-zinc-800 text-zinc-400'}`}>
+                          {quest.completed ? <CheckCircle2 className="w-3.5 h-3.5" /> : quest.icon}
                         </div>
-                        
-                        {!quest.completed && (
-                          <div className="mb-2">
-                            <div className="flex items-center justify-between text-xs mb-1">
-                              <span className="text-gray-600">Progress</span>
-                              <span className="font-semibold text-gray-900">
-                                {quest.progress} / {quest.target}
-                              </span>
-                            </div>
-                            <Progress value={progressPercent} className="h-2" />
-                          </div>
-                        )}
-                        
-                        <div className="flex items-center justify-between">
-                          <span className={`text-xs font-medium ${
-                            quest.completed ? 'text-green-600' : 'text-blue-600'
-                          }`}>
-                            {quest.reward}
-                          </span>
-                          <Button 
-                            size="sm" 
-                            className="h-6 text-xs"
-                            variant={quest.completed ? "outline" : "default"}
-                            disabled={quest.completed}
-                          >
-                            {quest.completed ? 'Completed' : 'In Progress'}
-                          </Button>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-xs font-medium text-white">{quest.title}</h4>
+                          <p className="text-[10px] text-zinc-600">{quest.description}</p>
                         </div>
                       </div>
-                    );
-                  })}
-                  
-                  {dailyQuest.length === 0 && (
-                    <div className="text-center py-4 text-sm text-slate-500 dark:text-slate-400">
-                      Loading quests...
+                      {!quest.completed && (
+                        <div className="mb-2">
+                          <div className="flex justify-between text-[10px] text-zinc-600 mb-1">
+                            <span>Progress</span><span>{quest.progress}/{quest.target}</span>
+                          </div>
+                          <div className="h-1 bg-zinc-800 rounded-full overflow-hidden">
+                            <div className="h-full bg-white rounded-full transition-all" style={{ width: `${(quest.progress / quest.target) * 100}%` }} />
+                          </div>
+                        </div>
+                      )}
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] text-zinc-500">{quest.reward}</span>
+                        <span className={`text-[10px] border px-2 py-0.5 rounded-full ${quest.completed ? 'border-white/20 text-white' : 'border-zinc-800 text-zinc-600'}`}>
+                          {quest.completed ? 'Done' : 'In Progress'}
+                        </span>
+                      </div>
                     </div>
-                  )}
+                  ))}
                 </div>
               </div>
-
             </div>
           </div>
         </div>

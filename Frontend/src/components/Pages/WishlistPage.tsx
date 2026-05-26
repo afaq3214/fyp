@@ -1,13 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Heart, Edit2, Share2, Trash2, Plus, X, Save, Eye, EyeOff, Search, Filter, Grid3X3, List, Download, Copy, Check, ChevronDown, Calendar, Tag, TrendingUp, Clock } from 'lucide-react';
-import { Button } from '../ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { Heart, Edit2, Share2, Trash2, Plus, X, Save, Eye, EyeOff, Search, Filter, Grid3X3, List, Download, Check, ChevronDown } from 'lucide-react';
 import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
-import { Badge } from '../ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
@@ -57,21 +52,14 @@ export function WishlistPage() {
   const [showBulkActions, setShowBulkActions] = useState(false);
   const navigate = useNavigate();
 
-  const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
+  const url = import.meta.env.VITE_API_URL || 'https://fyp-1ejm.vercel.app';
 
-  useEffect(() => {
-    fetchWishlist();
-  }, []);
+  useEffect(() => { fetchWishlist(); }, []);
 
   const fetchWishlist = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${url}/api/wishlist`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
+      const response = await fetch(`${url}/api/wishlist`, { headers: { Authorization: `Bearer ${token}` } });
       if (response.ok) {
         const data = await response.json();
         setWishlist(data);
@@ -80,7 +68,6 @@ export function WishlistPage() {
         setEditIsPublic(data.isPublic);
       }
     } catch (error) {
-      console.error('Error fetching wishlist:', error);
       toast.error('Failed to fetch wishlist');
     } finally {
       setLoading(false);
@@ -91,21 +78,13 @@ export function WishlistPage() {
     try {
       const token = localStorage.getItem('token');
       const response = await fetch(`${url}/api/wishlist/remove/${productId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        method: 'DELETE', headers: { Authorization: `Bearer ${token}` },
       });
-
       if (response.ok) {
-        const updatedWishlist = await response.json();
-        setWishlist(updatedWishlist);
+        setWishlist(await response.json());
         toast.success('Item removed from wishlist');
       }
-    } catch (error) {
-      console.error('Error removing from wishlist:', error);
-      toast.error('Failed to remove item');
-    }
+    } catch { toast.error('Failed to remove item'); }
   };
 
   const updateWishlist = async () => {
@@ -113,27 +92,15 @@ export function WishlistPage() {
       const token = localStorage.getItem('token');
       const response = await fetch(`${url}/api/wishlist/update`, {
         method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          name: editName,
-          description: editDescription,
-          isPublic: editIsPublic
-        })
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: editName, description: editDescription, isPublic: editIsPublic }),
       });
-
       if (response.ok) {
-        const updatedWishlist = await response.json();
-        setWishlist(updatedWishlist);
+        setWishlist(await response.json());
         setIsEditing(false);
-        toast.success('Wishlist updated successfully');
+        toast.success('Wishlist updated');
       }
-    } catch (error) {
-      console.error('Error updating wishlist:', error);
-      toast.error('Failed to update wishlist');
-    }
+    } catch { toast.error('Failed to update wishlist'); }
   };
 
   const updateItemNotes = async (productId: string, notes: string) => {
@@ -141,627 +108,376 @@ export function WishlistPage() {
       const token = localStorage.getItem('token');
       const response = await fetch(`${url}/api/wishlist/item/${productId}/notes`, {
         method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ notes })
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ notes }),
       });
-
       if (response.ok) {
-        const updatedWishlist = await response.json();
-        setWishlist(updatedWishlist);
+        setWishlist(await response.json());
         setEditingNotes(prev => ({ ...prev, [productId]: '' }));
         toast.success('Notes updated');
       }
-    } catch (error) {
-      console.error('Error updating notes:', error);
-      toast.error('Failed to update notes');
-    }
+    } catch { toast.error('Failed to update notes'); }
   };
 
   const shareWishlist = () => {
     if (wishlist?.isPublic) {
-      const shareUrl = `${window.location.origin}/wishlist/public/${wishlist.userId}`;
-      navigator.clipboard.writeText(shareUrl);
-      toast.success('Wishlist link copied to clipboard!');
+      navigator.clipboard.writeText(`${window.location.origin}/wishlist/public/${wishlist.userId}`);
+      toast.success('Wishlist link copied!');
     } else {
-      toast.error('Make your wishlist public first to share it');
-    }
-  };
-
-  // Advanced filtering and sorting
-  const getFilteredAndSortedItems = () => {
-    if (!wishlist) return [];
-    
-    let filteredItems = wishlist.items;
-    
-    // Filter by search query
-    if (searchQuery) {
-      filteredItems = filteredItems.filter(item =>
-        item.productId.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.productId.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.productId.tags?.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
-      );
-    }
-    
-    // Filter by category
-    if (filterCategory !== 'all') {
-      filteredItems = filteredItems.filter(item => item.productId.category === filterCategory);
-    }
-    
-    // Sort items
-    const sortedItems = [...filteredItems].sort((a, b) => {
-      switch (sortBy) {
-        case 'dateAdded':
-          return new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime();
-        case 'name':
-          return a.productId.title.localeCompare(b.productId.title);
-        case 'category':
-          return a.productId.category.localeCompare(b.productId.category);
-        case 'upvotes':
-          return (b.productId.upvotes?.length || 0) - (a.productId.upvotes?.length || 0);
-        default:
-          return 0;
-      }
-    });
-    
-    return sortedItems;
-  };
-
-  // Get unique categories from wishlist items
-  const getCategories = () => {
-    if (!wishlist) return [];
-    const categories = [...new Set(wishlist.items
-      .filter(item => item.productId && item.productId.category)
-      .map(item => item.productId.category)
-    )];
-    return categories;
-  };
-
-  // Bulk selection handlers
-  const toggleItemSelection = (itemId: string) => {
-    setSelectedItems(prev => 
-      prev.includes(itemId) 
-        ? prev.filter(id => id !== itemId)
-        : [...prev, itemId]
-    );
-  };
-
-  const selectAllItems = () => {
-    const filteredItems = getFilteredAndSortedItems();
-    setSelectedItems(filteredItems.map(item => item._id));
-  };
-
-  const clearSelection = () => {
-    setSelectedItems([]);
-  };
-
-  // Bulk actions
-  const bulkRemoveItems = async () => {
-    if (selectedItems.length === 0) return;
-    
-    try {
-      const token = localStorage.getItem('token');
-      await Promise.all(
-        selectedItems.map(itemId => 
-          fetch(`${url}/api/wishlist/remove/${itemId}`, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${token}` }
-          })
-        )
-      );
-      
-      await fetchWishlist();
-      setSelectedItems([]);
-      toast.success(`${selectedItems.length} items removed from wishlist`);
-    } catch (error) {
-      toast.error('Failed to remove items');
+      toast.error('Make your wishlist public first');
     }
   };
 
   const exportWishlist = () => {
     if (!wishlist) return;
-    
-    const exportData = wishlist.items.map(item => ({
-      title: item.productId.title,
-      description: item.productId.description,
-      category: item.productId.category,
-      tags: item.productId.tags,
-      notes: item.notes,
-      addedAt: item.addedAt,
-      upvotes: item.productId.upvotes?.length || 0
+    const data = wishlist.items.map(item => ({
+      title: item.productId.title, description: item.productId.description,
+      category: item.productId.category, notes: item.notes, addedAt: item.addedAt,
     }));
-    
-    const dataStr = JSON.stringify(exportData, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-    
-    const exportFileDefaultName = `wishlist-${wishlist.name.replace(/\s+/g, '-')}.json`;
-    
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileDefaultName);
-    linkElement.click();
-    
-    toast.success('Wishlist exported successfully');
+    const uri = 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data, null, 2));
+    const link = document.createElement('a');
+    link.setAttribute('href', uri);
+    link.setAttribute('download', `wishlist-${wishlist.name.replace(/\s+/g, '-')}.json`);
+    link.click();
+    toast.success('Wishlist exported');
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>
+  const getFilteredAndSortedItems = () => {
+    if (!wishlist) return [];
+    let items = wishlist.items;
+    if (searchQuery) items = items.filter(i =>
+      i.productId.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      i.productId.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      i.productId.tags?.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()))
     );
-  }
+    if (filterCategory !== 'all') items = items.filter(i => i.productId.category === filterCategory);
+    return [...items].sort((a, b) => {
+      if (sortBy === 'dateAdded') return new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime();
+      if (sortBy === 'name') return a.productId.title.localeCompare(b.productId.title);
+      if (sortBy === 'category') return a.productId.category.localeCompare(b.productId.category);
+      if (sortBy === 'upvotes') return (b.productId.upvotes?.length || 0) - (a.productId.upvotes?.length || 0);
+      return 0;
+    });
+  };
 
-  if (!wishlist) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center">
-          <Heart className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-          <h2 className="text-2xl font-bold mb-2">No Wishlist Yet</h2>
-          <p className="text-gray-600 mb-4">Start adding products you love!</p>
-          <Button onClick={() => navigate('/')}>
-            <Plus className="w-4 h-4 mr-2" />
-            Discover Products
-          </Button>
-        </div>
-      </div>
-    );
-  }
+  const getCategories = () => {
+    if (!wishlist) return [];
+    return [...new Set(wishlist.items.filter(i => i.productId?.category).map(i => i.productId.category))];
+  };
+
+  const toggleItemSelection = (id: string) =>
+    setSelectedItems(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+
+  const bulkRemoveItems = async () => {
+    if (!selectedItems.length) return;
+    const token = localStorage.getItem('token');
+    await Promise.all(selectedItems.map(id =>
+      fetch(`${url}/api/wishlist/remove/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } })
+    ));
+    await fetchWishlist();
+    setSelectedItems([]);
+    toast.success(`${selectedItems.length} items removed`);
+  };
+
+  if (loading) return (
+    <div className="flex items-center justify-center min-h-screen bg-black">
+      <div className="w-8 h-8 border-2 border-zinc-700 border-t-white rounded-full animate-spin" />
+    </div>
+  );
+
+  if (!wishlist) return (
+    <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center gap-4">
+      <Heart className="w-12 h-12 text-zinc-700" />
+      <h2 className="text-xl font-semibold">No Wishlist Yet</h2>
+      <p className="text-zinc-500 text-sm">Start adding products you love!</p>
+      <button onClick={() => navigate('/')}
+        className="bg-white text-black text-sm font-semibold px-5 py-2 rounded-lg hover:bg-zinc-200 transition-colors">
+        <Plus className="w-4 h-4 inline mr-1.5" />Discover Products
+      </button>
+    </div>
+  );
+
+  const filtered = getFilteredAndSortedItems();
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header with light blue background */}
-      <div className="bg-blue-50 border-b border-blue-100">
-        <div className="container mx-auto px-4 py-6">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">My Wishlist</h1>
-          <p className="text-gray-600">Manage and organize your favorite products</p>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
-        {/* Advanced Search and Filter Bar */}
-        <div className="mb-6 space-y-4">
-        {/* Search Bar */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-          <Input
-            type="text"
-            placeholder="Search products by name, description, or tags..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 pr-4 py-2 w-full"
-          />
-        </div>
-
-        {/* Filter and Sort Controls */}
-        <div className="flex flex-wrap items-center gap-4">
-          {/* Category Filter */}
-          <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4 text-gray-600" />
-            <Select value={filterCategory} onValueChange={setFilterCategory}>
-              <SelectTrigger className="w-40">
-                <SelectValue placeholder="All Categories" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                {getCategories().map(category => (
-                  <SelectItem key={category} value={category}>
-                    {category}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Sort Options */}
-          <div className="flex items-center gap-2">
-            <ChevronDown className="w-4 h-4 text-gray-600" />
-            <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
-              <SelectTrigger className="w-40">
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="dateAdded">Date Added</SelectItem>
-                <SelectItem value="name">Name</SelectItem>
-                <SelectItem value="category">Category</SelectItem>
-                <SelectItem value="upvotes">Most Upvoted</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* View Mode Toggle */}
-          <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
-            <Button
-              variant={viewMode === 'grid' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setViewMode('grid')}
-              className="px-3 py-1"
-            >
-              <Grid3X3 className="w-4 h-4" />
-            </Button>
-            <Button
-              variant={viewMode === 'list' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setViewMode('list')}
-              className="px-3 py-1"
-            >
-              <List className="w-4 h-4" />
-            </Button>
-          </div>
-
-          {/* Bulk Selection Toggle */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              setShowBulkActions(!showBulkActions);
-              clearSelection();
-            }}
-            className="ml-auto"
-          >
-            <Check className="w-4 h-4 mr-2" />
-            Bulk Select
-          </Button>
-        </div>
-
-        {/* Bulk Actions Toolbar */}
-        {showBulkActions && (
-          <div className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg p-3">
-            <div className="flex items-center gap-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={selectAllItems}
-              >
-                <Check className="w-4 h-4 mr-2" />
-                Select All
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={clearSelection}
-              >
-                <X className="w-4 h-4 mr-2" />
-                Clear
-              </Button>
-              <span className="text-sm text-gray-600">
-                {selectedItems.length} items selected
-              </span>
+    <div className="min-h-screen bg-black text-white">
+      {/* Header */}
+      <div className="border-b border-zinc-900 bg-zinc-950 py-10 px-6">
+        <div className="max-w-5xl mx-auto">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-3">
+              <Heart className="w-5 h-5 text-white" />
+              {isEditing ? (
+                <Input value={editName} onChange={e => setEditName(e.target.value)}
+                  className="bg-zinc-800 border-zinc-700 text-white h-8 text-xl font-bold w-48" />
+              ) : (
+                <h1 className="text-2xl font-bold tracking-tight">{wishlist.name}</h1>
+              )}
             </div>
             <div className="flex items-center gap-2">
-              {selectedItems.length > 0 && (
+              {isEditing ? (
                 <>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={bulkRemoveItems}
-                  >
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Remove Selected
-                  </Button>
+                  <button onClick={updateWishlist}
+                    className="flex items-center gap-1.5 text-xs bg-white text-black font-semibold px-3 py-1.5 rounded-lg hover:bg-zinc-200 transition-colors">
+                    <Save className="w-3.5 h-3.5" />Save
+                  </button>
+                  <button onClick={() => setIsEditing(false)}
+                    className="text-xs border border-zinc-700 text-zinc-400 hover:text-white px-3 py-1.5 rounded-lg transition-colors">
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button onClick={() => setIsEditing(true)}
+                    className="flex items-center gap-1.5 text-xs border border-zinc-700 text-zinc-400 hover:text-white px-3 py-1.5 rounded-lg transition-colors">
+                    <Edit2 className="w-3.5 h-3.5" />Edit
+                  </button>
+                  <button onClick={shareWishlist}
+                    className="flex items-center gap-1.5 text-xs border border-zinc-700 text-zinc-400 hover:text-white px-3 py-1.5 rounded-lg transition-colors">
+                    <Share2 className="w-3.5 h-3.5" />Share
+                  </button>
                 </>
               )}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={exportWishlist}
-              >
-                <Download className="w-4 h-4 mr-2" />
-                Export
-              </Button>
             </div>
           </div>
-        )}
 
-        {/* Results Summary */}
-        <div className="flex items-center justify-between text-sm text-gray-600">
-          <span>
-            {getFilteredAndSortedItems().length} of {wishlist.items.length} items
-            {searchQuery && ` matching "${searchQuery}"`}
-            {filterCategory !== 'all' && ` in ${filterCategory}`}
-          </span>
-          {selectedItems.length > 0 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={clearSelection}
-            >
-              Clear selection ({selectedItems.length})
-            </Button>
+          {isEditing ? (
+            <div className="space-y-3 mt-4">
+              <Textarea value={editDescription} onChange={e => setEditDescription(e.target.value)}
+                placeholder="Describe your wishlist..." rows={2}
+                className="bg-zinc-800 border-zinc-700 text-white placeholder-zinc-600 resize-none text-sm" />
+              <label className="flex items-center gap-2 text-sm text-zinc-400 cursor-pointer">
+                <input type="checkbox" checked={editIsPublic} onChange={e => setEditIsPublic(e.target.checked)}
+                  className="rounded border-zinc-600 bg-zinc-800 text-white" />
+                {editIsPublic ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                Make wishlist public
+              </label>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3 text-xs text-zinc-500 mt-1">
+              {wishlist.description && <span>{wishlist.description}</span>}
+              <span>{wishlist.items.length} items</span>
+              <span>·</span>
+              <span className="flex items-center gap-1">
+                {wishlist.isPublic ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+                {wishlist.isPublic ? 'Public' : 'Private'}
+              </span>
+            </div>
           )}
         </div>
       </div>
 
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center space-x-3">
-            <Heart className="w-8 h-8 text-red-500 fill-red-500" />
-            <h1 className="text-3xl font-bold">
-              {isEditing ? (
-                <Input
-                  value={editName}
-                  onChange={(e) => setEditName(e.target.value)}
-                  className="text-3xl font-bold border-2 border-blue-500"
-                />
-              ) : (
-                wishlist.name
+      <div className="max-w-5xl mx-auto px-6 py-8">
+        {/* Controls */}
+        <div className="space-y-3 mb-6">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+            <Input placeholder="Search by name, description, or tags..."
+              value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+              className="pl-10 bg-zinc-900 border-zinc-800 text-white placeholder-zinc-600 focus:border-white/30" />
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
+              <Filter className="w-3.5 h-3.5 text-zinc-600" />
+              <Select value={filterCategory} onValueChange={setFilterCategory}>
+                <SelectTrigger className="w-36 h-8 text-xs bg-zinc-900 border-zinc-800 text-zinc-300">
+                  <SelectValue placeholder="All Categories" />
+                </SelectTrigger>
+                <SelectContent className="bg-zinc-900 border-zinc-800">
+                  <SelectItem value="all">All Categories</SelectItem>
+                  {getCategories().map(cat => <SelectItem key={cat} value={cat}>{cat}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <ChevronDown className="w-3.5 h-3.5 text-zinc-600" />
+              <Select value={sortBy} onValueChange={(v: any) => setSortBy(v)}>
+                <SelectTrigger className="w-36 h-8 text-xs bg-zinc-900 border-zinc-800 text-zinc-300">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent className="bg-zinc-900 border-zinc-800">
+                  <SelectItem value="dateAdded">Date Added</SelectItem>
+                  <SelectItem value="name">Name</SelectItem>
+                  <SelectItem value="category">Category</SelectItem>
+                  <SelectItem value="upvotes">Most Upvoted</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-center gap-1 bg-zinc-900 border border-zinc-800 rounded-lg p-1">
+              <button onClick={() => setViewMode('grid')}
+                className={`p-1.5 rounded ${viewMode === 'grid' ? 'bg-white text-black' : 'text-zinc-500 hover:text-white'}`}>
+                <Grid3X3 className="w-3.5 h-3.5" />
+              </button>
+              <button onClick={() => setViewMode('list')}
+                className={`p-1.5 rounded ${viewMode === 'list' ? 'bg-white text-black' : 'text-zinc-500 hover:text-white'}`}>
+                <List className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            <div className="ml-auto flex items-center gap-2">
+              <button onClick={exportWishlist}
+                className="flex items-center gap-1.5 text-xs border border-zinc-800 text-zinc-500 hover:text-white px-3 py-1.5 rounded-lg transition-colors">
+                <Download className="w-3.5 h-3.5" />Export
+              </button>
+              <button onClick={() => { setShowBulkActions(!showBulkActions); setSelectedItems([]); }}
+                className={`flex items-center gap-1.5 text-xs border px-3 py-1.5 rounded-lg transition-colors ${showBulkActions ? 'border-white text-white' : 'border-zinc-800 text-zinc-500 hover:text-white'}`}>
+                <Check className="w-3.5 h-3.5" />Bulk Select
+              </button>
+            </div>
+          </div>
+
+          {showBulkActions && (
+            <div className="flex items-center justify-between bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3">
+              <div className="flex items-center gap-3">
+                <button onClick={() => setSelectedItems(filtered.map(i => i._id))}
+                  className="text-xs border border-zinc-700 text-zinc-400 hover:text-white px-3 py-1 rounded-lg transition-colors">
+                  Select All
+                </button>
+                <button onClick={() => setSelectedItems([])}
+                  className="text-xs border border-zinc-700 text-zinc-400 hover:text-white px-3 py-1 rounded-lg transition-colors">
+                  Clear
+                </button>
+                <span className="text-xs text-zinc-600">{selectedItems.length} selected</span>
+              </div>
+              {selectedItems.length > 0 && (
+                <button onClick={bulkRemoveItems}
+                  className="flex items-center gap-1.5 text-xs bg-white text-black font-semibold px-3 py-1.5 rounded-lg hover:bg-zinc-200 transition-colors">
+                  <Trash2 className="w-3.5 h-3.5" />Remove Selected
+                </button>
               )}
-            </h1>
-          </div>
-          <div className="flex items-center space-x-2">
-            {isEditing ? (
-              <>
-                <Button size="sm" onClick={updateWishlist}>
-                  <Save className="w-4 h-4 mr-2" />
-                  Save
-                </Button>
-                <Button size="sm" variant="outline" onClick={() => setIsEditing(false)}>
-                  <X className="w-4 h-4" />
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button size="sm" variant="outline" onClick={() => setIsEditing(true)}>
-                  <Edit2 className="w-4 h-4 mr-2" />
-                  Edit
-                </Button>
-                <Button size="sm" variant="outline" onClick={shareWishlist}>
-                  <Share2 className="w-4 h-4 mr-2" />
-                  Share
-                </Button>
-              </>
-            )}
-          </div>
+            </div>
+          )}
+
+          <p className="text-xs text-zinc-600">
+            {filtered.length} of {wishlist.items.length} items
+            {searchQuery && ` matching "${searchQuery}"`}
+            {filterCategory !== 'all' && ` in ${filterCategory}`}
+          </p>
         </div>
 
-        {/* Description */}
-        {isEditing ? (
-          <div className="space-y-4">
-            <Textarea
-              value={editDescription}
-              onChange={(e) => setEditDescription(e.target.value)}
-              placeholder="Describe your wishlist..."
-              className="border-2 border-blue-500"
-            />
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="public"
-                checked={editIsPublic}
-                onChange={(e) => setEditIsPublic(e.target.checked)}
-                className="rounded"
-              />
-              <label htmlFor="public" className="flex items-center">
-                {editIsPublic ? <Eye className="w-4 h-4 mr-2" /> : <EyeOff className="w-4 h-4 mr-2" />}
-                Make wishlist public
-              </label>
-            </div>
+        {/* Items */}
+        {filtered.length === 0 ? (
+          <div className="border border-dashed border-zinc-800 rounded-xl p-16 text-center">
+            <Heart className="w-10 h-10 mx-auto mb-3 text-zinc-700" />
+            <p className="text-zinc-500 text-sm font-medium">
+              {searchQuery || filterCategory !== 'all' ? 'No items found' : 'Your wishlist is empty'}
+            </p>
+            <p className="text-zinc-700 text-xs mt-1">
+              {searchQuery || filterCategory !== 'all' ? 'Try adjusting your filters' : 'Start adding products you love!'}
+            </p>
+            {!(searchQuery || filterCategory !== 'all') && (
+              <button onClick={() => navigate('/')}
+                className="mt-5 bg-white text-black text-xs font-semibold px-5 py-2 rounded-lg hover:bg-zinc-200 transition-colors">
+                <Plus className="w-3.5 h-3.5 inline mr-1.5" />Discover Products
+              </button>
+            )}
+          </div>
+        ) : viewMode === 'grid' ? (
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {filtered.map(item => (
+              <div key={item._id}
+                className={`group bg-zinc-900 border rounded-xl overflow-hidden transition-all ${selectedItems.includes(item._id) ? 'border-white' : 'border-zinc-800 hover:border-zinc-700'}`}>
+                <div className="relative h-44 bg-zinc-800 overflow-hidden">
+                  {showBulkActions && (
+                    <div className="absolute top-2 left-2 z-10">
+                      <input type="checkbox" checked={selectedItems.includes(item._id)}
+                        onChange={() => toggleItemSelection(item._id)}
+                        className="w-4 h-4 rounded border-zinc-600 bg-zinc-800" />
+                    </div>
+                  )}
+                  <ImageWithFallback src={item.productId?.media?.[0] || ''} alt={item.productId?.title || ''}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                  <button
+                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 p-1.5 bg-zinc-900/80 text-white rounded-lg transition-all hover:bg-zinc-900"
+                    onClick={() => item.productId?._id && removeFromWishlist(item.productId._id)}>
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+                <div className="p-4">
+                  <h3 className="font-semibold text-sm mb-1 cursor-pointer hover:text-zinc-300 transition-colors"
+                    onClick={() => item.productId?._id && navigate(`/product/${item.productId._id}`)}>
+                    {item.productId?.title || 'Untitled Product'}
+                  </h3>
+                  <p className="text-xs text-zinc-500 mb-3 line-clamp-2">{item.productId?.description}</p>
+
+                  <div className="flex flex-wrap gap-1 mb-3">
+                    <span className="text-[10px] border border-zinc-700 text-zinc-500 px-2 py-0.5 rounded-full">
+                      {item.productId?.category || 'Uncategorized'}
+                    </span>
+                  </div>
+
+                  {item.productId?._id && editingNotes[item.productId._id] !== undefined ? (
+                    <div className="space-y-2">
+                      <Textarea rows={2} value={editingNotes[item.productId._id] || ''}
+                        onChange={e => item.productId?._id && setEditingNotes(prev => ({ ...prev, [item.productId._id]: e.target.value }))}
+                        placeholder="Add notes..." className="text-xs bg-zinc-800 border-zinc-700 text-white resize-none" />
+                      <div className="flex gap-2">
+                        <button className="text-xs bg-white text-black px-3 py-1 rounded-lg"
+                          onClick={() => item.productId?._id && updateItemNotes(item.productId._id, editingNotes[item.productId._id] || '')}>Save</button>
+                        <button className="text-xs border border-zinc-700 text-zinc-400 px-3 py-1 rounded-lg"
+                          onClick={() => setEditingNotes(prev => { const n = {...prev}; if (item.productId?._id) delete n[item.productId._id]; return n; })}>Cancel</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      {item.notes ? (
+                        <p className="text-xs text-zinc-500 bg-zinc-800 p-2 rounded-lg">{item.notes}</p>
+                      ) : (
+                        <button className="text-xs text-zinc-600 hover:text-white flex items-center gap-1 transition-colors"
+                          onClick={() => item.productId?._id && setEditingNotes(prev => ({ ...prev, [item.productId._id]: item.notes || '' }))}>
+                          <Plus className="w-3 h-3" />Add notes
+                        </button>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between mt-3 text-[10px] text-zinc-600">
+                    <span>♥ {item.productId?.upvotes?.length || 0}</span>
+                    <span>Added {new Date(item.addedAt).toLocaleDateString()}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         ) : (
-          <div className="space-y-2">
-            {wishlist.description && (
-              <p className="text-gray-600">{wishlist.description}</p>
-            )}
-            <div className="flex items-center space-x-4 text-sm text-gray-500">
-              <span>{wishlist.items.length} items</span>
-              <span>•</span>
-              <span className="flex items-center">
-                {wishlist.isPublic ? <Eye className="w-4 h-4 mr-1" /> : <EyeOff className="w-4 h-4 mr-1" />}
-                {wishlist.isPublic ? 'Public' : 'Private'}
-              </span>
-            </div>
+          <div className="space-y-3">
+            {filtered.map(item => (
+              <div key={item._id}
+                className={`group bg-zinc-900 border rounded-xl p-4 flex items-start gap-4 transition-all ${selectedItems.includes(item._id) ? 'border-white' : 'border-zinc-800 hover:border-zinc-700'}`}>
+                {showBulkActions && (
+                  <input type="checkbox" checked={selectedItems.includes(item._id)}
+                    onChange={() => toggleItemSelection(item._id)}
+                    className="w-4 h-4 rounded border-zinc-600 bg-zinc-800 mt-1 shrink-0" />
+                )}
+                {item.productId?.media?.[0] && (
+                  <div className="w-16 h-16 rounded-lg overflow-hidden bg-zinc-800 shrink-0">
+                    <ImageWithFallback src={item.productId.media[0]} alt={item.productId.title}
+                      className="w-full h-full object-cover" />
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-sm mb-0.5 cursor-pointer hover:text-zinc-300 transition-colors"
+                    onClick={() => item.productId?._id && navigate(`/product/${item.productId._id}`)}>
+                    {item.productId?.title}
+                  </h3>
+                  <div className="flex items-center gap-3 text-xs text-zinc-500">
+                    <span className="border border-zinc-700 px-2 py-0.5 rounded-full">{item.productId?.category || 'Uncategorized'}</span>
+                    <span>♥ {item.productId?.upvotes?.length || 0}</span>
+                    <span>Added {new Date(item.addedAt).toLocaleDateString()}</span>
+                  </div>
+                </div>
+                <button className="shrink-0 text-zinc-700 hover:text-white transition-colors"
+                  onClick={() => item.productId?._id && removeFromWishlist(item.productId._id)}>
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
           </div>
         )}
       </div>
-
-      {/* Wishlist Items */}
-      {getFilteredAndSortedItems().length === 0 ? (
-        <div className="text-center py-12">
-          <Heart className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-          <h3 className="text-xl font-semibold mb-2">
-            {searchQuery || filterCategory !== 'all' ? 'No items found' : 'Your wishlist is empty'}
-          </h3>
-          <p className="text-gray-600 mb-4">
-            {searchQuery || filterCategory !== 'all' 
-              ? 'Try adjusting your search or filters'
-              : 'Start adding products you love!'
-            }
-          </p>
-          <Button onClick={() => navigate('/')}>
-            <Plus className="w-4 h-4 mr-2" />
-            Discover Products
-          </Button>
-        </div>
-      ) : (
-        viewMode === 'grid' ? (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {getFilteredAndSortedItems().map((item) => (
-              <Card key={item._id} className={`group hover:shadow-lg transition-shadow ${selectedItems.includes(item._id) ? 'ring-2 ring-blue-500' : ''}`}>
-                <CardHeader className="pb-3">
-                  <div className="relative">
-                    {/* Bulk Selection Checkbox */}
-                    {showBulkActions && (
-                      <div className="absolute top-2 left-2 z-10">
-                        <div className="bg-white/90 rounded-full p-1">
-                          <input
-                            type="checkbox"
-                            checked={selectedItems.includes(item._id)}
-                            onChange={() => toggleItemSelection(item._id)}
-                            className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                          />
-                        </div>
-                      </div>
-                    )}
-                    <div className="w-full h-48 bg-gray-100 rounded-lg overflow-hidden">
-                      <ImageWithFallback
-                        src={item.productId?.media?.[0] || ''}
-                        alt={item.productId?.title || 'Product image'}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                      />
-                    </div>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={() => item.productId?._id && removeFromWishlist(item.productId._id)}
-                    >
-                      <X className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div>
-                    <h3 
-                      className="font-semibold cursor-pointer hover:text-blue-600 transition-colors"
-                      onClick={() => item.productId?._id && navigate(`/product/${item.productId._id}`)}
-                    >
-                      {item.productId?.title || 'Untitled Product'}
-                    </h3>
-                    <p className="text-sm text-gray-600 line-clamp-2">
-                      {item.productId?.description || 'No description available'}
-                    </p>
-                  </div>
-                  
-                  <div className="flex flex-wrap gap-1">
-                    <Badge variant="secondary" className="text-xs">
-                      {item.productId?.category || 'Uncategorized'}
-                    </Badge>
-                    {item.productId?.tags?.slice(0, 2).map((tag, index) => (
-                      <Badge key={index} variant="outline" className="text-xs">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-
-                  <div className="space-y-2">
-                    {item.productId?._id && editingNotes[item.productId._id] !== undefined ? (
-                      <div className="space-y-2">
-                        <Textarea
-                          value={item.productId?._id ? editingNotes[item.productId._id] : ''}
-                          onChange={(e) => {
-                            if (item.productId?._id) {
-                              setEditingNotes(prev => ({
-                                ...prev,
-                                [item.productId._id]: e.target.value
-                              }));
-                            }
-                          }}
-                          placeholder="Add notes..."
-                          className="text-sm"
-                          rows={2}
-                        />
-                        <div className="flex space-x-2">
-                          <Button 
-                            size="sm" 
-                            onClick={() => item.productId?._id && updateItemNotes(item.productId._id, editingNotes[item.productId._id] || '')}
-                          >
-                            Save
-                          </Button>
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            onClick={() => setEditingNotes(prev => ({ 
-                              ...prev, 
-                              [item.productId._id]: undefined 
-                            }))}
-                          >
-                            Cancel
-                          </Button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div>
-                        {item.notes ? (
-                          <p className="text-sm text-gray-600 bg-gray-50 p-2 rounded">
-                            {item.notes}
-                          </p>
-                        ) : (
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => item.productId?._id && setEditingNotes(prev => ({ 
-                              ...prev, 
-                              [item.productId._id]: item.notes || '' 
-                            }))}
-                            className="text-xs"
-                          >
-                            <Plus className="w-3 h-3 mr-1" />
-                            Add notes
-                          </Button>
-                        )}
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex items-center justify-between text-xs text-gray-500">
-                    <span>
-                      ❤️ {item.productId?.upvotes?.length || 0} upvotes
-                    </span>
-                    <span>
-                      Added {new Date(item.addedAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-        ) : (
-          <div className="space-y-4">
-            {getFilteredAndSortedItems().map((item) => (
-              <Card key={item._id} className={`group hover:shadow-md transition-shadow ${selectedItems.includes(item._id) ? 'ring-2 ring-blue-500' : ''}`}>
-                <CardContent className="p-6">
-                  <div className="flex items-start space-x-4">
-                    {/* Bulk Selection Checkbox */}
-                    {showBulkActions && (
-                      <div className="mt-1">
-                        <input
-                          type="checkbox"
-                          checked={selectedItems.includes(item._id)}
-                          onChange={() => toggleItemSelection(item._id)}
-                          className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                        />
-                      </div>
-                    )}
-                    
-                    {item.productId ? (
-                      <>
-                        <div className="w-24 h-24 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
-                          <ImageWithFallback
-                            src={item.productId.media?.[0] || ''}
-                            alt={item.productId.title || 'Product image'}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        
-                        <div className="flex items-center space-x-4 text-sm">
-                          <Badge variant="outline">{item.productId?.category || 'Uncategorized'}</Badge>
-                          <span className="text-gray-500">
-                            ❤️ {item.productId.upvotes?.length || 0} upvotes
-                          </span>
-                          <span className="text-gray-500">
-                            Added {new Date(item.addedAt).toLocaleDateString()}
-                          </span>
-                        </div>
-                      </>
-                    ) : (
-                      <div className="text-gray-500">
-                        Product not found or has been removed
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )
-      )}
-    </div>
     </div>
   );
 }

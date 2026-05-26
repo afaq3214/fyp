@@ -16,6 +16,10 @@ import { DiscoveryHub } from '@/components/ui/DiscoveryHub2';
 import { PublicUserProfile } from '@/components/Pages/User';
 import NotificationsPage from '@/components/Pages/NotificationsPage';
 import { AdminRoute } from '@/components/ProtectedRoute';
+import SearchResults from '@/components/SearchResults';
+import InvestorConnect from '@/components/Pages/InvestorConnect';
+import ProblemDiscovery from '@/components/Pages/ProblemDiscovery';
+import CommunityNetworking from '@/components/Pages/CommunityNetworking';
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -65,8 +69,23 @@ export const router = createBrowserRouter([
       {
         path: '/notifications',
         element: <NotificationsPage />   // Notifications page
+      },
+      {
+        path: '/search',
+        element: <SearchResults />
+      },
+      {
+        path: '/investor-connect',
+        element: <InvestorConnect />
+      },
+      {
+        path: '/problem-discovery',
+        element: <ProblemDiscovery />
+      },
+      {
+        path: '/community',
+        element: <CommunityNetworking />
       }
-            
     ]
   }
 ]);

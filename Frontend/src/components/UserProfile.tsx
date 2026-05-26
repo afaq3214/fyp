@@ -251,31 +251,34 @@ export function UserProfile() {
     }
   };
 
-  if (isLoading) return <div>Loading...</div>;
-  if (!user) return <div>User not found</div>;
+  if (isLoading) return (
+    <div className="flex items-center justify-center min-h-screen bg-black">
+      <div className="w-8 h-8 border-2 border-zinc-700 border-t-white rounded-full animate-spin" />
+    </div>
+  );
+  if (!user) return (
+    <div className="flex items-center justify-center min-h-screen bg-black text-zinc-500">User not found</div>
+  );
 
   return (
-    <div className="min-h-screen  bg-gray-50">
-      {/* Cover Image */}
-      <div className="relative  h-64 " style={{backgroundColor:'black'}}>
-        <div className="absolute inset-0 bg-black/20"></div>
-        <div className="absolute top-6 left-6" style={{position: 'absolute', top: '1.5rem', left: '1.5rem'}}>
-          <Button
-            variant="secondary"
+    <div className="min-h-screen bg-black text-white">
+      {/* Cover / top bar */}
+      <div className="relative h-48 bg-zinc-950 border-b border-zinc-900">
+        <div className="absolute top-6 left-6">
+          <button
             onClick={() => window.history.back()}
-            className="bg-white/90 hover:bg-white"
-            style={{backgroundColor: 'rgba(255, 255, 255, 0.9)'}}
+            className="flex items-center gap-2 text-zinc-400 hover:text-white text-sm transition-colors"
           >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Discovery
-          </Button>
+            <ArrowLeft className="w-4 h-4" />
+            Back
+          </button>
         </div>
       </div>
 
-      <div className="container mx-auto mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Profile Header */}
-        <div className="relative  mb-8" style={{marginTop: '-80px'}}>
-          <div className="bg-white rounded-2xl shadow-lg p-8">
+        <div className="relative mb-8" style={{marginTop: '-80px'}}>
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8">
             <div className="flex flex-col md:flex-row gap-8">
               {/* Avatar and Basic Info */}
               <div className="flex flex-col items-center md:items-start">
@@ -299,7 +302,7 @@ export function UserProfile() {
                   <h1 className="text-3xl mb-2">{user.name}</h1>
                   <div className="flex flex-wrap gap-2 justify-center md:justify-start">
                     {user.badges.map((badgeItem) => (
-                      <Badge key={badgeItem._id || badgeItem.badge} className="bg-blue-100 text-blue-700 hover:bg-blue-200">
+                      <Badge key={badgeItem._id || badgeItem.badge} className="bg-zinc-800 text-zinc-300 hover:bg-zinc-700 border border-zinc-700">
                         <Award className="w-3 h-3 mr-1" />
                         {badgeItem.badge}
                       </Badge>
@@ -311,20 +314,20 @@ export function UserProfile() {
               {/* Profile Details */}
               <div className="flex-1">
                 <div className="flex justify-end mb-4">
-                  <Button    className="cursor-pointer"      onClick={handleEditProfile}> 
-                    <Edit3 className="w-4 h-4 mr-2 cursor-pointer" />
+                  <button className="flex items-center gap-2 bg-white text-black text-xs font-semibold px-4 py-2 rounded-lg hover:bg-zinc-200 transition-colors" onClick={handleEditProfile}>
+                    <Edit3 className="w-3.5 h-3.5" />
                     Edit Profile
-                  </Button>
+                  </button>
                 </div>
 
                 <div className="flex flex-wrap gap-4 mb-6">
-                  <div className="flex items-center text-gray-600">
+                  <div className="flex items-center text-zinc-400">
                     <Briefcase className="w-4 h-4 mr-2" />
                     <span className="capitalize">{user.role}</span>
                   </div>
-                  
-                  <div className="flex items-center text-gray-600">
-                    <Star className="w-4 h-4 mr-2 text-yellow-500" />
+
+                  <div className="flex items-center text-zinc-400">
+                    <Star className="w-4 h-4 mr-2 text-zinc-400" />
                     <span>{user.badges.length} Badges</span>
                   </div>
                 </div>
@@ -333,36 +336,28 @@ export function UserProfile() {
                 {(user.github || user.twitter || user.linkedin || user.website) && (
                   <div className="flex flex-wrap gap-2">
                     {user.github && (
-                      <Button variant="outline" size="sm" asChild>
-                        <a href={user.github} target="_blank" rel="noopener noreferrer">
-                          <Github className="w-4 h-4 mr-1" />
-                          GitHub
-                        </a>
-                      </Button>
+                      <a href={user.github} target="_blank" rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 text-xs border border-zinc-700 text-zinc-400 hover:text-white hover:border-white/30 px-3 py-1.5 rounded-lg transition-colors">
+                        <Github className="w-3.5 h-3.5" />GitHub
+                      </a>
                     )}
                     {user.twitter && (
-                      <Button variant="outline" size="sm" asChild>
-                        <a href={user.twitter} target="_blank" rel="noopener noreferrer">
-                          <Twitter className="w-4 h-4 mr-1" />
-                          Twitter
-                        </a>
-                      </Button>
+                      <a href={user.twitter} target="_blank" rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 text-xs border border-zinc-700 text-zinc-400 hover:text-white hover:border-white/30 px-3 py-1.5 rounded-lg transition-colors">
+                        <Twitter className="w-3.5 h-3.5" />Twitter
+                      </a>
                     )}
                     {user.linkedin && (
-                      <Button variant="outline" size="sm" asChild>
-                        <a href={user.linkedin} target="_blank" rel="noopener noreferrer">
-                          <Linkedin className="w-4 h-4 mr-1" />
-                          LinkedIn
-                        </a>
-                      </Button>
+                      <a href={user.linkedin} target="_blank" rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 text-xs border border-zinc-700 text-zinc-400 hover:text-white hover:border-white/30 px-3 py-1.5 rounded-lg transition-colors">
+                        <Linkedin className="w-3.5 h-3.5" />LinkedIn
+                      </a>
                     )}
                     {user.website && (
-                      <Button variant="outline" size="sm" asChild>
-                        <a href={user.website} target="_blank" rel="noopener noreferrer">
-                          <Globe className="w-4 h-4 mr-1" />
-                          Website
-                        </a>
-                      </Button>
+                      <a href={user.website} target="_blank" rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 text-xs border border-zinc-700 text-zinc-400 hover:text-white hover:border-white/30 px-3 py-1.5 rounded-lg transition-colors">
+                        <Globe className="w-3.5 h-3.5" />Website
+                      </a>
                     )}
                   </div>
                 )}
@@ -374,137 +369,119 @@ export function UserProfile() {
         {/* Profile Completion Banner */}
         {profileCompletion > 0 && profileCompletion < 100 && (
           <div className="mb-8">
-            <Card className="border-blue-200 bg-blue-50">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <Target className="w-5 h-5 text-blue-600" />
-                    <h3 className="text-blue-900">Complete Your Profile - {profileCompletion}%</h3>
-                  </div>
-                  <Button variant="link" onClick={handleEditProfile} className="text-blue-600 hover:text-blue-700">
-                    Complete Now →
-                  </Button>
+            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Target className="w-4 h-4 text-zinc-400" />
+                  <span className="text-sm font-medium">Complete Your Profile — {profileCompletion}%</span>
                 </div>
-                <Progress value={profileCompletion} className="h-2" />
-                <p className="text-sm text-blue-700 mt-3">
-                  Add more details to increase visibility and unlock premium features!
-                </p>
-              </CardContent>
-            </Card>
+                <button onClick={handleEditProfile} className="text-xs text-zinc-400 hover:text-white underline underline-offset-2 transition-colors">
+                  Complete Now →
+                </button>
+              </div>
+              <div className="h-1.5 bg-zinc-800 rounded-full">
+                <div className="h-full bg-white rounded-full transition-all" style={{ width: `${profileCompletion}%` }} />
+              </div>
+              <p className="text-xs text-zinc-600 mt-2">Add more details to increase visibility</p>
+            </div>
           </div>
         )}
 
         {/* Weekly digest (own profile only) */}
         {isOwnProfile && (
           <div className="mb-8">
-            <Card className="border-2 border-blue-100 bg-blue-50/30">
-              <CardHeader className="border-b border-blue-100">
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Mail className="w-5 h-5 text-blue-600" />
-                  AI Recommendations
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6">
+            <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+              <div className="border-b border-zinc-800 px-6 py-4 flex items-center gap-2">
+                <Mail className="w-4 h-4 text-zinc-400" />
+                <span className="text-sm font-semibold">AI Recommendations</span>
+              </div>
+              <div className="p-6">
                 <label className="flex items-center justify-between gap-4 cursor-pointer">
                   <div>
-                    <p className="font-medium text-gray-900">Weekly digest email</p>
-                    <p className="text-sm text-gray-600 mt-1">Get top products and feedback sentiment in your inbox every week.</p>
+                    <p className="text-sm font-medium text-white">Weekly digest email</p>
+                    <p className="text-xs text-zinc-500 mt-1">Get top products and feedback sentiment in your inbox every week.</p>
                   </div>
                   <input
                     type="checkbox"
                     checked={digestOptIn}
                     disabled={digestLoading}
                     onChange={handleDigestToggle}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="rounded border-zinc-600 bg-zinc-800 text-white focus:ring-zinc-500"
                   />
                 </label>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
         )}
 
         {/* About/Description Section */}
         <div className="mb-8">
-          <Card className="border-2 border-gray-200">
-            <CardHeader className="bg-gradient-to-r from-gray-50 to-slate-50 border-b border-gray-200">
-              <CardTitle className="flex items-center gap-2">
-                <Users className="w-5 h-5 text-blue-600" />
-                About
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-6">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+            <div className="border-b border-zinc-800 px-6 py-4 flex items-center gap-2">
+              <Users className="w-4 h-4 text-zinc-400" />
+              <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">About</span>
+            </div>
+            <div className="p-6">
               {user.bio ? (
-                <p className="text-gray-700 text-lg leading-relaxed whitespace-pre-wrap">
+                <p className="text-zinc-300 leading-relaxed whitespace-pre-wrap">
                   {user.bio}
                 </p>
               ) : (
                 <div className="text-center py-6">
-                  <p className="text-gray-500 mb-4">No bio added yet. Tell the community about yourself!</p>
-                  <Button variant="outline"  onClick={handleEditProfile} className="text-blue-600 border-blue-600 hover:bg-blue-50">
+                  <p className="text-zinc-600 text-sm mb-4">No bio added yet.</p>
+                  <Button variant="outline" onClick={handleEditProfile} className="border-zinc-700 text-zinc-400 hover:text-white hover:border-white/30">
                     <Edit3 className="w-4 h-4 mr-2" />
                     Add Bio
                   </Button>
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-2">
-                <Trophy className="w-8 h-8 text-blue-600" />
-               
-              </div>
-              <div className="text-3xl mb-1">{products.length}</div>
-              <div className="text-sm text-gray-600">Products</div>
-            </CardContent>
-          </Card>
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 hover:border-zinc-700 transition-colors">
+            <div className="flex items-center justify-between mb-2">
+              <Trophy className="w-6 h-6 text-zinc-400" />
+            </div>
+            <div className="text-3xl font-bold mb-1">{products.length}</div>
+            <div className="text-sm text-zinc-500">Products</div>
+          </div>
 
-          
-
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-2">
-                <Zap className="w-8 h-8 text-orange-600" />
-                
-              </div>
-              <div className="text-3xl mb-1">{user.totalUpvotes}</div>
-              <div className="text-sm text-gray-600">Total Upvotes</div>
-            </CardContent>
-          </Card>
-
-          
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 hover:border-zinc-700 transition-colors">
+            <div className="flex items-center justify-between mb-2">
+              <Zap className="w-6 h-6 text-zinc-400" />
+            </div>
+            <div className="text-3xl font-bold mb-1">{user.totalUpvotes}</div>
+            <div className="text-sm text-zinc-500">Total Upvotes</div>
+          </div>
         </div>
 
         {/* Maker Story */}
         {user.makerStory && (
-          <Card className="mb-8 border-2 border-orange-200 bg-gradient-to-br from-orange-50/50 to-amber-50/50">
-            <CardHeader className="bg-gradient-to-r from-orange-50 to-amber-50 border-b border-orange-200">
-              <CardTitle className="flex items-center gap-2">
-                <Star className="w-5 h-5 text-orange-500" />
-                My Maker Journey
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-6">
-              <p className="text-gray-700 text-lg leading-relaxed whitespace-pre-wrap">
+          <div className="mb-8 bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+            <div className="border-b border-zinc-800 px-6 py-4 flex items-center gap-2">
+              <Star className="w-4 h-4 text-zinc-400" />
+              <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">My Maker Journey</span>
+            </div>
+            <div className="p-6">
+              <p className="text-zinc-300 leading-relaxed whitespace-pre-wrap">
                 {user.makerStory}
               </p>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         )}
 
         {/* Tabs Section */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-12">
-          <TabsList className="grid w-full grid-cols-2 gap-4 mb-8 bg-transparent">
-            <TabsTrigger value="projects" className="flex items-center justify-center text-xl gap-2 py-6">
-              <Briefcase className="w-6 h-6" />
+          <TabsList className="flex w-full gap-1 mb-8 bg-zinc-900 border border-zinc-800 rounded-xl p-1">
+            <TabsTrigger value="projects" className="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:font-semibold rounded-lg">
+              <Briefcase className="w-4 h-4" />
               Products
             </TabsTrigger>
-            <TabsTrigger value="portfolio" className="flex items-center justify-center text-xl gap-2 py-6">
-              <Briefcase className="w-6 h-6" />
+            <TabsTrigger value="portfolio" className="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:font-semibold rounded-lg">
+              <Briefcase className="w-4 h-4" />
               Portfolio
             </TabsTrigger>
           </TabsList>
@@ -512,237 +489,128 @@ export function UserProfile() {
           {/* Projects Tab */}
           <TabsContent value="projects" className="space-y-6">
             {products.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {products.map(product => (
-                  <Card key={product._id} className="group overflow-hidden hover:shadow-xl transition-all duration-300 border-2 border-gray-100 hover:border-blue-200">
-                    <div className="relative h-48 bg-gradient-to-br from-blue-50 to-purple-50 overflow-hidden">
+                  <div key={product._id} className="group bg-zinc-900 border border-zinc-800 hover:border-zinc-700 rounded-xl overflow-hidden transition-all">
+                    <div className="relative h-44 bg-zinc-800 overflow-hidden">
                       {product.media[0] && (
                         <ImageWithFallback
                           src={product.media[0]}
                           alt={product.title}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                       )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                      <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
-                        <Button 
-                          size="sm" 
-                          className="bg-blue-600 hover:bg-blue-700 text-white cursor-pointer"
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all" />
+                      <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1.5">
+                        <button
+                          className="p-1.5 bg-white text-black rounded-lg hover:bg-zinc-200 transition-colors"
                           onClick={() => navigate(`/edit-product/${product._id}`)}
                           disabled={Boolean(deletingProductId)}
                         >
-                          <Edit3 className="w-4 h-4" />
-                        </Button>
-
-                        <Button 
-                          size="sm" 
-                          className="bg-red-100 hover:bg-red-200 text-gray-900 cursor-pointer"
+                          <Edit3 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          className="p-1.5 bg-zinc-900 text-white rounded-lg hover:bg-zinc-800 transition-colors"
                           onClick={() => handleDeleteProduct(product)}
                           disabled={Boolean(deletingProductId)}
-                          title="Delete product"
                         >
-                          {deletingProductId === product._id ? (
-                            // simple loading indicator
-                            <span className="w-4 h-4 inline-block animate-pulse">...</span>
-                          ) : (
-                            <Trash className="w-4 h-4 text-black cursor-pointer bg-white rounded-b-full" style={{width:"30px",height:"30px",borderRadius:"5px"}} />
-                          )}
-                        </Button>
-
-                        <Button size="sm" className="bg-white hover:bg-gray-100 text-gray-900" asChild>
-                          <a href={product.demoUrl} target="_blank" rel="noopener noreferrer">
-                            <ExternalLink className="w-4 h-4" />
+                          {deletingProductId === product._id
+                            ? <span className="text-xs px-1">...</span>
+                            : <Trash className="w-3.5 h-3.5" />}
+                        </button>
+                        {product.demoUrl && (
+                          <a href={product.demoUrl} target="_blank" rel="noopener noreferrer"
+                            className="p-1.5 bg-zinc-900 text-white rounded-lg hover:bg-zinc-800 transition-colors">
+                            <ExternalLink className="w-3.5 h-3.5" />
                           </a>
-                        </Button>
+                        )}
                       </div>
                       {product.category && (
                         <div className="absolute top-3 left-3">
-                          <Badge className="bg-white/90 text-gray-900 hover:bg-white">
+                          <span className="text-[10px] bg-black/80 text-zinc-300 border border-zinc-700 px-2 py-0.5 rounded-full">
                             {product.category}
-                          </Badge>
+                          </span>
                         </div>
                       )}
                     </div>
-                    <CardContent className="p-5" style={{padding:'15px'}}>
-                      <h3 className="text-lg mb-2 group-hover:text-blue-600 transition-colors">
+                    <div className="p-4">
+                      <h3 className="text-sm font-semibold mb-1.5 group-hover:text-zinc-300 transition-colors">
                         {product.title}
                       </h3>
-                      <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                        {product.pitch}
-                      </p>
-                      <div className="flex items-center gap-4 text-sm text-gray-600">
-                        <span className="flex items-center gap-1">
-                          <Heart className="w-4 h-4" />
-                          {product.upvotes.length}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <MessageCircle className="w-4 h-4" />
-                          {product.reviews.length}
-                        </span>
+                      <p className="text-xs text-zinc-500 mb-3 line-clamp-2">{product.pitch}</p>
+                      <div className="flex items-center gap-3 text-xs text-zinc-600">
+                        <span className="flex items-center gap-1"><Heart className="w-3.5 h-3.5" />{product.upvotes.length}</span>
+                        <span className="flex items-center gap-1"><MessageCircle className="w-3.5 h-3.5" />{product.reviews.length}</span>
                       </div>
                       {product.autoTags.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-3">
+                        <div className="flex flex-wrap gap-1 mt-2">
                           {product.autoTags.slice(0, 3).map((tag, index) => (
-                            <Badge key={index} variant="secondary" className="text-xs">
-                              {tag}
-                            </Badge>
+                            <span key={index} className="text-[10px] bg-zinc-800 text-zinc-400 px-1.5 py-0.5 rounded-full">#{tag}</span>
                           ))}
                         </div>
                       )}
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
                 ))}
               </div>
             ) : (
-              <Card className="p-12 text-center">
-                <div className="w-24 h-24  bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 " style={{marginTop:"10px"}}>
-                  <Briefcase className="w-8 h-8 text-gray-400" />
-                </div>
-                <h3 className="text-xl mb-2 text-gray-900">No Products Yet</h3>
-                <p className="text-gray-600 mb-6">Start building and showcase your amazing products!</p>
-                <Button className="mx-auto  text-md p-10" style={{backgroundColor:"black",width:'300px',marginBottom:"10px"}} onClick={() => navigate('/submit-product')}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Submit Your First Product
-                </Button>
-              </Card>
+              <div className="border border-dashed border-zinc-800 rounded-xl p-16 text-center">
+                <Briefcase className="w-10 h-10 mx-auto mb-3 text-zinc-700" />
+                <h3 className="text-sm font-semibold mb-1">No Products Yet</h3>
+                <p className="text-zinc-600 text-xs mb-6">Start building and showcase your amazing products!</p>
+                <button className="bg-white text-black text-xs font-semibold px-5 py-2 rounded-lg hover:bg-zinc-200 transition-colors" onClick={() => navigate('/submit-product')}>
+                  <Plus className="w-3.5 h-3.5 inline mr-1.5" />Submit Your First Product
+                </button>
+              </div>
             )}
           </TabsContent>
 
           {/* Portfolio Tab */}
           <TabsContent value="portfolio" className="space-y-6">
             {user.portfolio && user.portfolio.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {user.portfolio.map((item, index) => (
-                  <Card key={item._id || index} className="group overflow-hidden hover:shadow-xl transition-all duration-300 border-2 border-gray-100 hover:border-blue-200">
-                    <div className="relative h-48 bg-gradient-to-br from-blue-50 to-purple-50 overflow-hidden">
+                  <div key={item._id || index} className="group bg-zinc-900 border border-zinc-800 hover:border-zinc-700 rounded-xl overflow-hidden transition-all">
+                    <div className="relative h-44 bg-zinc-800 overflow-hidden">
                       {item.media && item.media[0] ? (
-                        <img
-                          src={item.media[0]}
-                          alt={item.title}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                        />
+                        <img src={item.media[0]} alt={item.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                          <Briefcase className="w-12 h-12 text-gray-400" />
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Briefcase className="w-10 h-10 text-zinc-600" />
                         </div>
                       )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                       {item.demoUrl && (
                         <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Button size="sm" className="bg-white hover:bg-gray-100 text-gray-900" asChild>
-                            <a href={item.demoUrl} target="_blank" rel="noopener noreferrer">
-                              <ExternalLink className="w-4 h-4" />
-                            </a>
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                    <CardContent className="p-5">
-                      <h3 className="text-lg mb-2 group-hover:text-blue-600 transition-colors">
-                        {item.title}
-                      </h3>
-                      {item.demoUrl && (
-                        <div className="mt-3">
-                          <a 
-                            href={item.demoUrl} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="text-sm text-blue-600 hover:underline flex items-center gap-1"
-                          >
-                            View Project <ExternalLink className="w-3 h-3" />
+                          <a href={item.demoUrl} target="_blank" rel="noopener noreferrer"
+                            className="p-1.5 bg-white text-black rounded-lg flex items-center">
+                            <ExternalLink className="w-3.5 h-3.5" />
                           </a>
                         </div>
                       )}
-                    </CardContent>
-                  </Card>
+                    </div>
+                    <div className="p-4">
+                      <h3 className="text-sm font-semibold mb-2">{item.title}</h3>
+                      {item.demoUrl && (
+                        <a href={item.demoUrl} target="_blank" rel="noopener noreferrer"
+                          className="text-xs text-zinc-500 hover:text-white flex items-center gap-1 transition-colors">
+                          View Project <ExternalLink className="w-3 h-3" />
+                        </a>
+                      )}
+                    </div>
+                  </div>
                 ))}
               </div>
             ) : (
-              <Card className="p-12 text-center">
-                <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Briefcase className="w-8 h-8 text-gray-400" />
-                </div>
-                <h3 className="text-xl mb-2 text-gray-900">No Portfolio Items Yet</h3>
-                <p className="text-gray-600 mb-6">Add your portfolio items to showcase your work!</p>
-                <Button 
-                  className="mx-auto text-md p-6" 
-                  style={{backgroundColor: "black", width: '300px', marginBottom: "10px"}} 
-                  onClick={() => navigate('/edit-profile')}
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Portfolio Item
-                </Button>
-              </Card>
+              <div className="border border-dashed border-zinc-800 rounded-xl p-16 text-center">
+                <Briefcase className="w-10 h-10 mx-auto mb-3 text-zinc-700" />
+                <h3 className="text-sm font-semibold mb-1">No Portfolio Items Yet</h3>
+                <p className="text-zinc-600 text-xs mb-6">Add portfolio items to showcase your work!</p>
+                <button className="bg-white text-black text-xs font-semibold px-5 py-2 rounded-lg hover:bg-zinc-200 transition-colors" onClick={() => navigate('/edit-profile')}>
+                  <Plus className="w-3.5 h-3.5 inline mr-1.5" />Add Portfolio Item
+                </button>
+              </div>
             )}
-          </TabsContent>
-
-          {/* Achievements Tab */}
-          <TabsContent value="achievements" className="space-y-6">
-            <Card className="bg-gradient-to-br from-blue-50 to-purple-50 border-2 border-blue-200">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-3">
-                  <div>
-                    <h3 className="mb-1">Next Achievement</h3>
-                    <p className="text-sm text-gray-600">Collaboration Master - 7/10 completed</p>
-                  </div>
-                  <Trophy className="w-10 h-10 text-blue-600" />
-                </div>
-                <Progress value={70} className="h-3 mb-2" />
-                <p className="text-sm text-gray-700">
-                  Complete 3 more collaborations to unlock this prestigious badge! 🎯
-                </p>
-              </CardContent>
-            </Card>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {mockAchievements.map((achievement, index) => (
-                <Card key={index} className="group overflow-hidden hover:shadow-xl transition-all duration-300 border-2 border-gray-100">
-                  <div className={`h-2 bg-gradient-to-r ${achievement.color}`}></div>
-                  <CardContent className="p-6 text-center">
-                    <div className="w-16 h-16 bg-gradient-to-br from-gray-50 to-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl group-hover:scale-110 transition-transform">
-                      {achievement.icon}
-                    </div>
-                    <h3 className="mb-2">{achievement.name}</h3>
-                    <p className="text-sm text-gray-600">
-                      {achievement.description}
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
-
-          {/* Activity Tab */}
-          <TabsContent value="activity" className="space-y-4">
-            {[
-              { action: 'Received upvote on', target: 'AI Writing Assistant', time: '2 hours ago', icon: '👍', color: 'bg-blue-100 text-blue-600' },
-              { action: 'Left review on', target: 'TaskFlow Pro', time: '1 day ago', icon: '💬', color: 'bg-purple-100 text-purple-600' },
-              { action: 'Connected with', target: 'Sarah Chen', time: '2 days ago', icon: '🤝', color: 'bg-green-100 text-green-600' },
-              { action: 'Updated project', target: 'CodeSnap', time: '3 days ago', icon: '✏️', color: 'bg-orange-100 text-orange-600' },
-              { action: 'Earned badge', target: 'Top Reviewer', time: '1 week ago', icon: '🏆', color: 'bg-yellow-100 text-yellow-600' }
-            ].map((activity, index) => (
-              <Card key={index} className="hover:shadow-md transition-shadow border-l-4 border-l-blue-500">
-                <CardContent className="p-5">
-                  <div className="flex items-center gap-4">
-                    <div className={`w-12 h-12 ${activity.color} rounded-full flex items-center justify-center text-xl flex-shrink-0`}>
-                      {activity.icon}
-                    </div>
-                    <div className="flex-1">
-                      <p className="mb-1">
-                        <span className="text-gray-700">{activity.action}</span>
-                        {' '}
-                        <span className="text-blue-600 hover:underline cursor-pointer">
-                          {activity.target}
-                        </span>
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        {activity.time}
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
           </TabsContent>
         </Tabs>
       </div>
@@ -750,17 +618,19 @@ export function UserProfile() {
       {/* Delete confirmation modal */}
       {showDeleteModal && productToDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setShowDeleteModal(false)} />
-          <div className="relative bg-white rounded-lg shadow-lg w-full max-w-md p-6 z-10">
-            <h3 className="text-lg font-semibold mb-4">Delete product</h3>
-            <p className="text-sm text-gray-600 mb-6">Are you sure you want to delete <strong>{productToDelete.title}</strong>? This action cannot be undone.</p>
+          <div className="absolute inset-0 bg-black/70" onClick={() => setShowDeleteModal(false)} />
+          <div className="relative bg-zinc-900 border border-zinc-800 rounded-xl w-full max-w-md p-6 z-10">
+            <h3 className="text-sm font-semibold mb-3">Delete product</h3>
+            <p className="text-xs text-zinc-400 mb-6">Are you sure you want to delete <strong className="text-white">{productToDelete.title}</strong>? This action cannot be undone.</p>
             <div className="flex justify-end gap-3">
-              <Button variant="outline" className="cursor-pointer" onClick={() => { setShowDeleteModal(false); setProductToDelete(null); }}>
+              <button className="border border-zinc-700 text-zinc-400 hover:text-white text-xs px-4 py-2 rounded-lg transition-colors"
+                onClick={() => { setShowDeleteModal(false); setProductToDelete(null); }}>
                 Cancel
-              </Button>
-              <Button className="cursor-pointer bg-red-600 hover:bg-red-700 text-white" style={{backgroundColor:'red'}} onClick={confirmDelete} disabled={Boolean(deletingProductId)}>
+              </button>
+              <button className="bg-white text-black text-xs font-semibold px-4 py-2 rounded-lg hover:bg-zinc-200 transition-colors disabled:opacity-50"
+                onClick={confirmDelete} disabled={Boolean(deletingProductId)}>
                 {deletingProductId === productToDelete._id ? 'Deleting...' : 'Delete'}
-              </Button>
+              </button>
             </div>
           </div>
         </div>

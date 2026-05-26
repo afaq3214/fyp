@@ -387,6 +387,48 @@ router.get("/user/my-products", auth, async (req, res) => {
 });
 
 /**
+ * 📌 Search products
+ * GET /api/products/search?q=query&limit=20
+ * Searches products by title, description, tags, and category
+ */
+router.get("/search", async (req, res) => {
+  try {
+    const query = req.query.q;
+    const limit = Math.min(parseInt(req.query.limit, 10) || 20, 50);
+    
+    if (!query || query.trim().length === 0) {
+      return res.json([]);
+    }
+
+    const searchRegex = new RegExp(query.trim(), 'i'); // case-insensitive search
+    
+    const products = await Product.find({
+      $or: [
+        { title: { $regex: searchRegex } },
+        { description: { $regex: searchRegex } },
+        { pitch: { $regex: searchRegex } },
+        { category: { $regex: searchRegex } },
+        { autoTags: { $regex: searchRegex } },
+        { author_name: { $regex: searchRegex } }
+      ]
+    })
+    .limit(limit)
+    .lean();
+
+    // Add engagement metrics
+    const withCounts = products.map(p => ({
+      ...p,
+      upvotesCount: Array.isArray(p.upvotes) ? p.upvotes.length : 0,
+      reviewsCount: p.totalcomments || (Array.isArray(p.reviews) ? p.reviews.length : 0)
+    }));
+
+    res.json(withCounts);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
  * 📌 Get single product by slug (SEO)
  */
 router.get("/:slug", async (req, res) => {
@@ -558,7 +600,5 @@ router.delete("/:id", auth, async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
-
 
 export default router;

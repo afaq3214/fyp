@@ -308,15 +308,15 @@ const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md bg-zinc-900 border border-zinc-800 text-white">
         <DialogHeader>
-          <DialogTitle className="text-center">
+          <DialogTitle className="text-center text-white">
             <div className="flex items-center justify-center mb-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
+              <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center">
                 {mode === 'forgot-password' ? (
-                  <Key className="w-6 h-6 text-white" />
+                  <Key className="w-5 h-5 text-black" />
                 ) : (
-                  <Sparkles className="w-6 h-6 text-white" />
+                  <Sparkles className="w-5 h-5 text-black" />
                 )}
               </div>
             </div>
@@ -333,10 +333,10 @@ const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
 
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
-                  <Separator className="w-full" />
+                  <Separator className="w-full bg-zinc-800" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">
+                  <span className="bg-zinc-900 px-2 text-zinc-500">
                     Or continue with email
                   </span>
                 </div>
@@ -363,7 +363,7 @@ const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
                     </div>
                     <Button
                       type="submit"
-                      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                      className="w-full bg-white text-black hover:bg-zinc-200 font-semibold"
                       disabled={isLoading}
                     >
                       {isLoading ? 'Please wait...' : 'Send OTP'}
@@ -388,9 +388,9 @@ const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
                         <Label htmlFor="newPassword">New Password</Label>
                         {newPassword && (
                           <div className="flex items-center space-x-1">
-                            <div className={`w-2 h-2 rounded-full ${newPassword.length >= 8 ? 'bg-green-500' : 'bg-gray-300'}`}></div>
-                            <div className={`w-2 h-2 rounded-full ${/[A-Z]/.test(newPassword) ? 'bg-green-500' : 'bg-gray-300'}`}></div>
-                            <div className={`w-2 h-2 rounded-full ${/\d/.test(newPassword) ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                            <div className={`w-2 h-2 rounded-full ${newPassword.length >= 8 ? 'bg-white' : 'bg-zinc-700'}`}></div>
+                            <div className={`w-2 h-2 rounded-full ${/[A-Z]/.test(newPassword) ? 'bg-white' : 'bg-zinc-700'}`}></div>
+                            <div className={`w-2 h-2 rounded-full ${/\d/.test(newPassword) ? 'bg-white' : 'bg-zinc-700'}`}></div>
                           </div>
                         )}
                       </div>
@@ -411,10 +411,10 @@ const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
                         {passwordError && (
                           <p className="text-xs text-red-500 mt-1">{passwordError}</p>
                         )}
-                        <div className="text-xs text-gray-500 space-y-1 mt-1">
-                          <p className={newPassword.length >= 8 ? 'text-green-500' : ''}>• At least 8 characters</p>
-                          <p className={/[A-Z]/.test(newPassword) ? 'text-green-500' : ''}>• At least one uppercase letter</p>
-                          <p className={/\d/.test(newPassword) ? 'text-green-500' : ''}>• At least one number</p>
+                        <div className="text-xs text-zinc-600 space-y-1 mt-1">
+                          <p className={newPassword.length >= 8 ? 'text-white' : ''}>• At least 8 characters</p>
+                          <p className={/[A-Z]/.test(newPassword) ? 'text-white' : ''}>• At least one uppercase letter</p>
+                          <p className={/\d/.test(newPassword) ? 'text-white' : ''}>• At least one number</p>
                         </div>
                         <Button
                           type="button"
@@ -430,7 +430,7 @@ const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
                     </div>
                     <Button
                       type="submit"
-                      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                      className="w-full bg-white text-black hover:bg-zinc-200 font-semibold"
                       disabled={isLoading}
                     >
                       {isLoading ? 'Please wait...' : 'Reset Password'}
@@ -471,9 +471,9 @@ const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
                       <Label htmlFor="password">Password</Label>
                       {password && mode === 'signup' && (
                         <div className="flex items-center space-x-1">
-                          <div className={`w-2 h-2 rounded-full ${password.length >= 8 ? 'bg-green-500' : 'bg-gray-300'}`}></div>
-                          <div className={`w-2 h-2 rounded-full ${/[A-Z]/.test(password) ? 'bg-green-500' : 'bg-gray-300'}`}></div>
-                          <div className={`w-2 h-2 rounded-full ${/\d/.test(password) ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                          <div className={`w-2 h-2 rounded-full ${password.length >= 8 ? 'bg-white' : 'bg-zinc-700'}`}></div>
+                          <div className={`w-2 h-2 rounded-full ${/[A-Z]/.test(password) ? 'bg-white' : 'bg-zinc-700'}`}></div>
+                          <div className={`w-2 h-2 rounded-full ${/\d/.test(password) ? 'bg-white' : 'bg-zinc-700'}`}></div>
                         </div>
                       )}
                     </div>
@@ -495,7 +495,7 @@ const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
                       />
                       <button
                         type="button"
-                        className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white"
                         onClick={() => setShowPassword(!showPassword)}
                       >
                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -505,10 +505,10 @@ const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
                       <p className="text-xs text-red-500">{passwordError}</p>
                     )}
                     {mode === 'signup' && (
-                      <div className="text-xs text-gray-500 space-y-1">
-                        <p className={password.length >= 8 ? 'text-green-500' : ''}>• At least 8 characters</p>
-                        <p className={/[A-Z]/.test(password) ? 'text-green-500' : ''}>• At least one uppercase letter</p>
-                        <p className={/\d/.test(password) ? 'text-green-500' : ''}>• At least one number</p>
+                      <div className="text-xs text-zinc-600 space-y-1">
+                        <p className={password.length >= 8 ? 'text-white' : ''}>• At least 8 characters</p>
+                        <p className={/[A-Z]/.test(password) ? 'text-white' : ''}>• At least one uppercase letter</p>
+                        <p className={/\d/.test(password) ? 'text-white' : ''}>• At least one number</p>
                       </div>
                     )}
                   </div>
@@ -523,11 +523,11 @@ const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
                       />
                       <Label htmlFor="terms" className="text-sm">
                         I agree to the{' '}
-                        <a href="#" className="text-blue-600 hover:underline">
+                        <a href="#" className="text-white underline hover:text-zinc-300">
                           Terms of Service
                         </a>{' '}
                         and{' '}
-                        <a href="#" className="text-blue-600 hover:underline">
+                        <a href="#" className="text-white underline hover:text-zinc-300">
                           Privacy Policy
                         </a>
                       </Label>
@@ -536,7 +536,7 @@ const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
 
                   <Button
                     type="submit"
-                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                    className="w-full bg-white text-black hover:bg-zinc-200 font-semibold"
                     disabled={isLoading || (mode === 'signup' && !agreeToTerms)}
                   >
                     {isLoading ? 'Please wait...' : mode === 'login' ? 'Sign In' : 'Create Account'}
@@ -561,7 +561,7 @@ const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
               </div>
               <Button
                 type="submit"
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                className="w-full bg-white text-black hover:bg-zinc-200 font-semibold"
                 disabled={isLoading}
               >
                 {isLoading ? 'Verifying...' : 'Verify Email'}
@@ -573,19 +573,19 @@ const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
             {mode === 'forgot-password' ? (
               <button
                 onClick={() => onToggleMode('login')}
-                className="text-blue-600 hover:underline font-medium"
+                className="text-white underline hover:text-zinc-300 font-medium"
                 disabled={isLoading}
               >
                 Back to Sign In
               </button>
             ) : (
               <>
-                <span className="text-muted-foreground">
+                <span className="text-zinc-500">
                   {mode === 'login' ? "Don't have an account?" : 'Already have an account?'}
                 </span>{' '}
                 <button
                   onClick={() => onToggleMode(mode === 'login' ? 'signup' : 'login')}
-                  className="text-blue-600 hover:underline font-medium"
+                  className="text-white underline hover:text-zinc-300 font-medium"
                   disabled={isLoading}
                 >
                   {mode === 'login' ? 'Sign up' : 'Sign in'}
@@ -597,7 +597,7 @@ const url = import.meta.env.VITE_API_URL || "https://fyp-1ejm.vercel.app";
           {mode === 'login' && (
             <div className="text-center">
               <button
-                className="text-sm text-blue-600 hover:underline"
+                className="text-sm text-zinc-400 hover:text-white underline"
                 onClick={() => onToggleMode('forgot-password')}
                 disabled={isLoading}
               >

@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { ArrowLeft, Plus } from 'lucide-react';
 
 interface APIUser {
@@ -263,178 +261,119 @@ export function EditProfile() {
   // if (isLoading) return <div>Loading...</div>;
   // if (error) return <div>Error: {error}</div>;
 
+  const labelClass = "block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5";
+  const inputClass = "bg-zinc-900 border-zinc-800 text-white placeholder-zinc-600 focus:border-white/30";
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Button 
-          variant="ghost" 
-          onClick={handleCancel}
-          className="mb-6"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Profile
-        </Button>
+    <div className="min-h-screen bg-black text-white">
+      <div className="border-b border-zinc-900 bg-zinc-950 px-6 py-8">
+        <div className="max-w-2xl mx-auto">
+          <button onClick={handleCancel} className="flex items-center gap-2 text-zinc-400 hover:text-white text-sm mb-6 transition-colors">
+            <ArrowLeft className="w-4 h-4" />
+            Back to Profile
+          </button>
+          <h1 className="text-2xl font-bold tracking-tight">Edit Profile</h1>
+        </div>
+      </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Edit Profile</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-           <div>
-  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Profile Picture</label>
-  <div className="mt-1 flex items-center space-x-4">
-    {imagePreview && (
-      <img 
-        src={imagePreview} 
-        alt="Profile Preview" 
-        className="w-24 h-24 rounded-full object-cover border-2 border-gray-200 dark:border-gray-700"
-        onError={() => console.error("Failed to load preview image:", imagePreview)}
-      />
-    )}
-    <div className="flex flex-col">
-      <Input
-        type="file"
-        accept="image/*"
-        onChange={handleImageChange}
-        className="mt-1"
-      />
-      {error && error.includes('File is too large') && (
-        <p className="mt-1 text-sm text-red-600 dark:text-red-400">{error}</p>
-      )}
-    </div>
-  </div>
-</div>
+      <div className="max-w-2xl mx-auto px-6 py-8">
+        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label className={labelClass}>Profile Picture</label>
+              <div className="flex items-center gap-4">
+                {imagePreview && (
+                  <img src={imagePreview} alt="Profile Preview"
+                    className="w-20 h-20 rounded-full object-cover border-2 border-zinc-700"
+                    onError={() => console.error("Failed to load preview image:", imagePreview)}
+                  />
+                )}
+                <Input type="file" accept="image/*" onChange={handleImageChange} className={inputClass} />
+              </div>
+              {error && error.includes('File is too large') && (
+                <p className="mt-1.5 text-xs text-red-400">{error}</p>
+              )}
+            </div>
 
+            <div>
+              <label className={labelClass}>Bio</label>
+              <Textarea name="bio" value={formData.bio || ''} onChange={handleInputChange}
+                placeholder="Tell us about yourself" rows={4} className={inputClass} />
+            </div>
+
+            <div>
+              <label className={labelClass}>Maker Story</label>
+              <Textarea name="makerStory" value={formData.makerStory || ''} onChange={handleInputChange}
+                placeholder="Share your maker journey" rows={4} className={inputClass} />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Bio</label>
-                <Textarea
-                  name="bio"
-                  value={formData.bio || ''}
-                  onChange={handleInputChange}
-                  placeholder="Tell us about yourself"
-                  className="mt-1"
-                  rows={4}
-                />
+                <label className={labelClass}>GitHub URL</label>
+                <Input name="github" value={formData.github || ''} onChange={handleInputChange}
+                  placeholder="https://github.com/username" className={inputClass} />
               </div>
-
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Maker Story</label>
-                <Textarea
-                  name="makerStory"
-                  value={formData.makerStory || ''}
-                  onChange={handleInputChange}
-                  placeholder="Share your maker journey"
-                  className="mt-1"
-                  rows={4}
-                />
+                <label className={labelClass}>Twitter URL</label>
+                <Input name="twitter" value={formData.twitter || ''} onChange={handleInputChange}
+                  placeholder="https://twitter.com/username" className={inputClass} />
               </div>
-
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">GitHub URL</label>
-                <Input
-                  name="github"
-                  value={formData.github || ''}
-                  onChange={handleInputChange}
-                  placeholder="https://github.com/username"
-                  className="mt-1"
-                />
+                <label className={labelClass}>LinkedIn URL</label>
+                <Input name="linkedin" value={formData.linkedin || ''} onChange={handleInputChange}
+                  placeholder="https://linkedin.com/in/username" className={inputClass} />
               </div>
-
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Twitter URL</label>
-                <Input
-                  name="twitter"
-                  value={formData.twitter || ''}
-                  onChange={handleInputChange}
-                  placeholder="https://twitter.com/username"
-                  className="mt-1"
-                />
+                <label className={labelClass}>Website URL</label>
+                <Input name="website" value={formData.website || ''} onChange={handleInputChange}
+                  placeholder="https://username.dev" className={inputClass} />
               </div>
+            </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">LinkedIn URL</label>
-                <Input
-                  name="linkedin"
-                  value={formData.linkedin || ''}
-                  onChange={handleInputChange}
-                  placeholder="https://linkedin.com/in/username"
-                  className="mt-1"
-                />
-              </div>
+            <div>
+              <label className={labelClass}>Portfolio</label>
+              {formData.portfolio?.map((project, index) => (
+                <div key={index} className="border border-zinc-800 bg-zinc-950 p-4 rounded-xl mt-3 space-y-3">
+                  <Input placeholder="Project Title" value={project.title}
+                    onChange={(e) => handlePortfolioChange(index, 'title', e.target.value)}
+                    className={inputClass} />
+                  <Input placeholder="Demo URL" value={project.demoUrl}
+                    onChange={(e) => handlePortfolioChange(index, 'demoUrl', e.target.value)}
+                    className={inputClass} />
+                  {project.media.map((_, mediaIndex) => (
+                    <div key={mediaIndex} className="flex items-center gap-3">
+                      <Input type="file" accept="image/*" className={inputClass}
+                        onChange={e => {
+                          const file = e.target.files?.[0];
+                          if (file) handlePortfolioMediaFileChange(index, mediaIndex, file);
+                        }} />
+                      {portfolioMediaFiles[index]?.[mediaIndex] && (
+                        <img src={URL.createObjectURL(portfolioMediaFiles[index][mediaIndex])}
+                          alt="Preview" className="w-14 h-14 rounded-lg object-cover shrink-0" />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ))}
+              <button type="button" onClick={addPortfolioItem}
+                className="mt-3 flex items-center gap-2 text-sm text-zinc-400 hover:text-white border border-zinc-800 hover:border-zinc-700 px-4 py-2 rounded-lg transition-colors">
+                <Plus className="w-4 h-4" />
+                Add Portfolio Item
+              </button>
+            </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Website URL</label>
-                <Input
-                  name="website"
-                  value={formData.website || ''}
-                  onChange={handleInputChange}
-                  placeholder="https://username.dev"
-                  className="mt-1"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Portfolio</label>
-                {formData.portfolio?.map((project, index) => (
-                  <div key={index} className="border p-4 rounded-lg mt-2 space-y-2">
-                    <Input
-                      placeholder="Project Title"
-                      value={project.title}
-                      onChange={(e) => handlePortfolioChange(index, 'title', e.target.value)}
-                    />
-                    <Input
-                      placeholder="Demo URL"
-                      value={project.demoUrl}
-                      onChange={(e) => handlePortfolioChange(index, 'demoUrl', e.target.value)}
-                    />
-                    {project.media.map((media, mediaIndex) => (
-                      <div key={mediaIndex} className="mt-1 flex items-center space-x-2">
-                        <Input
-                          type="file"
-                          accept="image/*"
-                          onChange={e => {
-                            const file = e.target.files?.[0];
-                            if (file) handlePortfolioMediaFileChange(index, mediaIndex, file);
-                          }}
-                          className="mt-1"
-                        />
-                        {/* Optional: Show preview if file selected */}
-                        {portfolioMediaFiles[index]?.[mediaIndex] && (
-                          <img
-                            src={URL.createObjectURL(portfolioMediaFiles[index][mediaIndex])}
-                            alt="Preview"
-                            className="w-16 h-16 rounded object-cover"
-                          />
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                ))}
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  className="mt-2"
-                  onClick={addPortfolioItem}
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Portfolio Item
-                </Button>
-              </div>
-
-              <div className="flex justify-end space-x-4">
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={handleCancel}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit">Save Changes</Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+            <div className="flex justify-end gap-3 pt-2 border-t border-zinc-800">
+              <button type="button" onClick={handleCancel}
+                className="px-5 py-2 text-sm text-zinc-400 hover:text-white border border-zinc-700 hover:border-zinc-600 rounded-lg transition-colors">
+                Cancel
+              </button>
+              <button type="submit"
+                className="px-5 py-2 text-sm font-semibold bg-white text-black hover:bg-zinc-200 rounded-lg transition-colors">
+                Save Changes
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );

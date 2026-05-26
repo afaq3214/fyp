@@ -11,19 +11,16 @@ import {
   X
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
-import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
-import { Badge } from './ui/badge';
-import { 
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from './ui/select';
-import { Card, CardContent } from './ui/card';
 import { toast } from 'sonner';
 import { User } from '../App';
 
@@ -159,10 +156,10 @@ export function ProductSubmissionModal({ isOpen, onClose, currentUser }: Product
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto bg-zinc-900 border border-zinc-800 text-white">
         <DialogHeader>
-          <DialogTitle className="flex items-center">
-            <Sparkles className="w-5 h-5 mr-2 text-purple-600" />
+          <DialogTitle className="flex items-center text-white">
+            <Sparkles className="w-5 h-5 mr-2 text-zinc-400" />
             Submit Your Product
           </DialogTitle>
         </DialogHeader>
@@ -184,17 +181,15 @@ export function ProductSubmissionModal({ isOpen, onClose, currentUser }: Product
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label htmlFor="pitch">Micro-Pitch (280 characters) *</Label>
-              <Button
+              <button
                 type="button"
-                variant="outline"
-                size="sm"
                 onClick={generateAIPitch}
                 disabled={isGeneratingPitch || !formData.title}
-                className="flex items-center"
+                className="flex items-center gap-1 text-xs border border-zinc-700 text-zinc-400 hover:text-white px-3 py-1.5 rounded-lg transition-colors disabled:opacity-40"
               >
-                <Wand2 className="w-4 h-4 mr-1" />
+                <Wand2 className="w-3.5 h-3.5" />
                 {isGeneratingPitch ? 'Generating...' : 'AI Suggest'}
-              </Button>
+              </button>
             </div>
             <Textarea
               id="pitch"
@@ -206,10 +201,10 @@ export function ProductSubmissionModal({ isOpen, onClose, currentUser }: Product
               required
             />
             <div className="flex justify-between text-xs">
-              <span className="text-muted-foreground">
+              <span className="text-zinc-500">
                 This will be your product's main tagline
               </span>
-              <span className={pitchLimitExceeded ? 'text-red-500' : 'text-muted-foreground'}>
+              <span className={pitchLimitExceeded ? 'text-red-500' : 'text-zinc-500'}>
                 {pitchCharacterCount}/280
               </span>
             </div>
@@ -246,34 +241,32 @@ export function ProductSubmissionModal({ isOpen, onClose, currentUser }: Product
 
           {/* Tags */}
           <div className="space-y-3">
-            <Label>Tags (max 5)</Label>
+            <Label className="text-zinc-300">Tags (max 5)</Label>
             <div className="flex flex-wrap gap-2">
               {suggestedTags.map(tag => (
-                <Button
+                <button
                   key={tag}
                   type="button"
-                  variant={formData.tags.includes(tag) ? "default" : "outline"}
-                  size="sm"
                   onClick={() => formData.tags.includes(tag) ? handleTagRemove(tag) : handleTagAdd(tag)}
                   disabled={!formData.tags.includes(tag) && formData.tags.length >= 5}
-                  className="h-7 text-xs"
+                  className={`flex items-center gap-1 text-xs px-3 py-1 rounded-full transition-colors disabled:opacity-40 ${
+                    formData.tags.includes(tag)
+                      ? 'bg-white text-black'
+                      : 'border border-zinc-700 text-zinc-400 hover:text-white'
+                  }`}
                 >
-                  <Tags className="w-3 h-3 mr-1" />
-                  {tag}
-                </Button>
+                  <Tags className="w-3 h-3" />{tag}
+                </button>
               ))}
             </div>
             {formData.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-2">
-                <span className="text-sm text-muted-foreground">Selected:</span>
+              <div className="flex flex-wrap gap-2 mt-2 items-center">
+                <span className="text-xs text-zinc-500">Selected:</span>
                 {formData.tags.map(tag => (
-                  <Badge key={tag} variant="secondary" className="flex items-center gap-1">
+                  <span key={tag} className="flex items-center gap-1 text-xs bg-zinc-800 text-zinc-300 px-2 py-0.5 rounded-full">
                     {tag}
-                    <X 
-                      className="w-3 h-3 cursor-pointer hover:text-destructive" 
-                      onClick={() => handleTagRemove(tag)}
-                    />
-                  </Badge>
+                    <X className="w-3 h-3 cursor-pointer hover:text-white" onClick={() => handleTagRemove(tag)} />
+                  </span>
                 ))}
               </div>
             )}
@@ -281,40 +274,22 @@ export function ProductSubmissionModal({ isOpen, onClose, currentUser }: Product
 
           {/* Media Upload */}
           <div className="space-y-3">
-            <Label>Product Image/Demo</Label>
-            <Card className="border-dashed border-2 border-gray-300 dark:border-gray-600">
-              <CardContent className="p-6">
-                <div className="text-center">
-                  <div className="flex justify-center space-x-4 mb-4">
-                    <ImageIcon className="w-8 h-8 text-gray-400" />
-                    <Video className="w-8 h-8 text-gray-400" />
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Upload images, GIFs, or short demo videos (max 5MB)
-                  </p>
-                  <input
-                    type="file"
-                    accept="image/*,video/*"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                    id="media-upload"
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => document.getElementById('media-upload')?.click()}
-                  >
-                    <Upload className="w-4 h-4 mr-2" />
-                    Choose File
-                  </Button>
-                  {formData.imageFile && (
-                    <p className="text-sm text-green-600 mt-2">
-                      ✓ {formData.imageFile.name} uploaded
-                    </p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+            <Label className="text-zinc-300">Product Image/Demo</Label>
+            <div className="border border-dashed border-zinc-700 rounded-xl p-6 text-center">
+              <div className="flex justify-center gap-4 mb-4">
+                <ImageIcon className="w-7 h-7 text-zinc-600" />
+                <Video className="w-7 h-7 text-zinc-600" />
+              </div>
+              <p className="text-sm text-zinc-500 mb-4">Upload images, GIFs, or short demo videos (max 5MB)</p>
+              <input type="file" accept="image/*,video/*" onChange={handleImageUpload} className="hidden" id="media-upload" />
+              <button type="button" onClick={() => document.getElementById('media-upload')?.click()}
+                className="flex items-center gap-2 mx-auto text-sm border border-zinc-700 text-zinc-400 hover:text-white px-4 py-2 rounded-lg transition-colors">
+                <Upload className="w-4 h-4" />Choose File
+              </button>
+              {formData.imageFile && (
+                <p className="text-sm text-white mt-3">✓ {formData.imageFile.name} uploaded</p>
+              )}
+            </div>
           </div>
 
           {/* Links */}
@@ -322,7 +297,7 @@ export function ProductSubmissionModal({ isOpen, onClose, currentUser }: Product
             <div className="space-y-2">
               <Label htmlFor="demoUrl">Demo URL</Label>
               <div className="relative">
-                <ExternalLink className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <ExternalLink className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-zinc-500" />
                 <Input
                   id="demoUrl"
                   placeholder="https://your-demo.com"
@@ -335,7 +310,7 @@ export function ProductSubmissionModal({ isOpen, onClose, currentUser }: Product
             <div className="space-y-2">
               <Label htmlFor="githubUrl">GitHub URL</Label>
               <div className="relative">
-                <Github className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Github className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-zinc-500" />
                 <Input
                   id="githubUrl"
                   placeholder="https://github.com/username/repo"
@@ -348,41 +323,27 @@ export function ProductSubmissionModal({ isOpen, onClose, currentUser }: Product
           </div>
 
           {/* Boost Tokens Info */}
-          <Card className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border-purple-200 dark:border-purple-700">
-            <CardContent className="p-4">
-              <div className="flex items-start space-x-3">
-                <Sparkles className="w-5 h-5 text-purple-600 mt-0.5" />
-                <div>
-                  <h4 className="font-medium text-purple-900 dark:text-purple-100">
-                    Want instant visibility?
-                  </h4>
-                  <p className="text-sm text-purple-700 dark:text-purple-300 mt-1">
-                    Use Boost Tokens to feature your product on the trending page for 24 hours. 
-                    Earn tokens by reviewing other products!
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-4 flex items-start gap-3">
+            <Sparkles className="w-4 h-4 text-zinc-500 mt-0.5 shrink-0" />
+            <div>
+              <h4 className="font-medium text-sm text-white">Want instant visibility?</h4>
+              <p className="text-xs text-zinc-500 mt-1">
+                Use Boost Tokens to feature your product on the trending page for 24 hours.
+                Earn tokens by reviewing other products!
+              </p>
+            </div>
+          </div>
 
           {/* Submit Button */}
-          <div className="flex space-x-3">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              className="flex-1"
-              disabled={isSubmitting}
-            >
+          <div className="flex gap-3">
+            <button type="button" onClick={onClose} disabled={isSubmitting}
+              className="flex-1 border border-zinc-700 text-zinc-400 hover:text-white text-sm font-medium py-2.5 rounded-lg transition-colors">
               Cancel
-            </Button>
-            <Button
-              type="submit"
-              className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-              disabled={isSubmitting || pitchLimitExceeded}
-            >
+            </button>
+            <button type="submit" disabled={isSubmitting || pitchLimitExceeded}
+              className="flex-1 bg-white text-black text-sm font-semibold py-2.5 rounded-lg hover:bg-zinc-200 transition-colors disabled:opacity-50">
               {isSubmitting ? 'Submitting...' : 'Submit Product'}
-            </Button>
+            </button>
           </div>
         </form>
       </DialogContent>

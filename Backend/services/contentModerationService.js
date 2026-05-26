@@ -7,6 +7,7 @@ class ContentModerationService {
         
         // Harsh words and inappropriate content patterns
         this.harshWords = new Set([
+            'dog','terrorist','attack',
             // Profanity
             'fuck', 'fucking', 'shit', 'bullshit', 'crap', 'damn', 'hell',
             'ass', 'asshole', 'bitch', 'bastard', 'dick', 'pussy', 'cunt',
